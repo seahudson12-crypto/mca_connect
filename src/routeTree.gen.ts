@@ -9,38 +9,193 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
+import { Route as AppTemplesRouteImport } from './routes/_app/temples'
+import { Route as AppParametresRouteImport } from './routes/_app/parametres'
+import { Route as AppMembresRouteImport } from './routes/_app/membres'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppCultesRouteImport } from './routes/_app/cultes'
+import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
+import { Route as AppPresencesCulteIdRouteImport } from './routes/_app/presences.$culteId'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWhatsappRoute = AppWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTemplesRoute = AppTemplesRouteImport.update({
+  id: '/temples',
+  path: '/temples',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppParametresRoute = AppParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMembresRoute = AppMembresRouteImport.update({
+  id: '/membres',
+  path: '/membres',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCultesRoute = AppCultesRouteImport.update({
+  id: '/cultes',
+  path: '/cultes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPresencesIndexRoute = AppPresencesIndexRouteImport.update({
+  id: '/presences/',
+  path: '/presences/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPresencesCulteIdRoute = AppPresencesCulteIdRouteImport.update({
+  id: '/presences/$culteId',
+  path: '/presences/$culteId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/cultes': typeof AppCultesRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/membres': typeof AppMembresRoute
+  '/parametres': typeof AppParametresRoute
+  '/temples': typeof AppTemplesRoute
+  '/whatsapp': typeof AppWhatsappRoute
+  '/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/presences/': typeof AppPresencesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/cultes': typeof AppCultesRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/membres': typeof AppMembresRoute
+  '/parametres': typeof AppParametresRoute
+  '/temples': typeof AppTemplesRoute
+  '/whatsapp': typeof AppWhatsappRoute
+  '/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/presences': typeof AppPresencesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/_app/cultes': typeof AppCultesRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/membres': typeof AppMembresRoute
+  '/_app/parametres': typeof AppParametresRoute
+  '/_app/temples': typeof AppTemplesRoute
+  '/_app/whatsapp': typeof AppWhatsappRoute
+  '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/_app/presences/': typeof AppPresencesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/cultes'
+    | '/dashboard'
+    | '/membres'
+    | '/parametres'
+    | '/temples'
+    | '/whatsapp'
+    | '/presences/$culteId'
+    | '/presences/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/cultes'
+    | '/dashboard'
+    | '/membres'
+    | '/parametres'
+    | '/temples'
+    | '/whatsapp'
+    | '/presences/$culteId'
+    | '/presences'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/signup'
+    | '/_app/cultes'
+    | '/_app/dashboard'
+    | '/_app/membres'
+    | '/_app/parametres'
+    | '/_app/temples'
+    | '/_app/whatsapp'
+    | '/_app/presences/$culteId'
+    | '/_app/presences/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +203,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/whatsapp': {
+      id: '/_app/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof AppWhatsappRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/temples': {
+      id: '/_app/temples'
+      path: '/temples'
+      fullPath: '/temples'
+      preLoaderRoute: typeof AppTemplesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/parametres': {
+      id: '/_app/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof AppParametresRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/membres': {
+      id: '/_app/membres'
+      path: '/membres'
+      fullPath: '/membres'
+      preLoaderRoute: typeof AppMembresRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cultes': {
+      id: '/_app/cultes'
+      path: '/cultes'
+      fullPath: '/cultes'
+      preLoaderRoute: typeof AppCultesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/presences/': {
+      id: '/_app/presences/'
+      path: '/presences'
+      fullPath: '/presences/'
+      preLoaderRoute: typeof AppPresencesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/presences/$culteId': {
+      id: '/_app/presences/$culteId'
+      path: '/presences/$culteId'
+      fullPath: '/presences/$culteId'
+      preLoaderRoute: typeof AppPresencesCulteIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCultesRoute: typeof AppCultesRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppMembresRoute: typeof AppMembresRoute
+  AppParametresRoute: typeof AppParametresRoute
+  AppTemplesRoute: typeof AppTemplesRoute
+  AppWhatsappRoute: typeof AppWhatsappRoute
+  AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
+  AppPresencesIndexRoute: typeof AppPresencesIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCultesRoute: AppCultesRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppMembresRoute: AppMembresRoute,
+  AppParametresRoute: AppParametresRoute,
+  AppTemplesRoute: AppTemplesRoute,
+  AppWhatsappRoute: AppWhatsappRoute,
+  AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
+  AppPresencesIndexRoute: AppPresencesIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
