@@ -42,7 +42,7 @@ function CultesPage() {
   const handleSave = async (form: FormData) => {
     const payload = {
       date: form.get("date") as string,
-      type_culte: form.get("type_culte") as string,
+      type_culte: form.get("type_culte") as never,
       heure_debut: (form.get("heure_debut") as string) || null,
       heure_fin: (form.get("heure_fin") as string) || null,
       president: (form.get("president") as string) || null,

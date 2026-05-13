@@ -63,7 +63,7 @@ function MembresPage() {
       sexe: (form.get("sexe") as "M" | "F") || null,
       telephone: String(form.get("telephone") || "").trim() || null,
       whatsapp: String(form.get("whatsapp") || "").trim() || null,
-      categorie: form.get("categorie") as string,
+      categorie: form.get("categorie") as never,
       temple_id: profile?.temple_id ?? "",
     };
     if (!payload.nom || !payload.prenoms || !payload.categorie || !payload.temple_id) {
