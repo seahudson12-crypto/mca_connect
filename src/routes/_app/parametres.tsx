@@ -25,9 +25,10 @@ function ParametresPage() {
   const { data: profiles = [] } = useQuery({
     queryKey: ["all-profiles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("*, user_roles(role)").order("created_at", { ascending: false });
+      const { data: profs, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+      return (profs ?? []).map((p) => ({ ...p, user_roles: (roles ?? []).filter((r) => r.user_id === p.id) }));
     },
   });
 
