@@ -14,16 +14,305 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cultes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          heure_debut: string | null
+          heure_fin: string | null
+          id: string
+          orateur: string | null
+          president: string | null
+          responsable_priere: string | null
+          temple_id: string
+          theme_presidence: string | null
+          theme_principal: string | null
+          type_culte: Database["public"]["Enums"]["culte_type"]
+          updated_at: string
+          versets: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          heure_debut?: string | null
+          heure_fin?: string | null
+          id?: string
+          orateur?: string | null
+          president?: string | null
+          responsable_priere?: string | null
+          temple_id: string
+          theme_presidence?: string | null
+          theme_principal?: string | null
+          type_culte: Database["public"]["Enums"]["culte_type"]
+          updated_at?: string
+          versets?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          heure_debut?: string | null
+          heure_fin?: string | null
+          id?: string
+          orateur?: string | null
+          president?: string | null
+          responsable_priere?: string | null
+          temple_id?: string
+          theme_presidence?: string | null
+          theme_principal?: string | null
+          type_culte?: Database["public"]["Enums"]["culte_type"]
+          updated_at?: string
+          versets?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cultes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membres: {
+        Row: {
+          actif: boolean
+          categorie: Database["public"]["Enums"]["membre_categorie"]
+          created_at: string
+          date_ajout: string
+          id: string
+          nom: string
+          prenoms: string
+          sexe: Database["public"]["Enums"]["sexe"] | null
+          telephone: string | null
+          temple_id: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          actif?: boolean
+          categorie: Database["public"]["Enums"]["membre_categorie"]
+          created_at?: string
+          date_ajout?: string
+          id?: string
+          nom: string
+          prenoms: string
+          sexe?: Database["public"]["Enums"]["sexe"] | null
+          telephone?: string | null
+          temple_id: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          actif?: boolean
+          categorie?: Database["public"]["Enums"]["membre_categorie"]
+          created_at?: string
+          date_ajout?: string
+          id?: string
+          nom?: string
+          prenoms?: string
+          sexe?: Database["public"]["Enums"]["sexe"] | null
+          telephone?: string | null
+          temple_id?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membres_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      presences: {
+        Row: {
+          created_at: string
+          culte_id: string
+          id: string
+          membre_id: string
+          statut: Database["public"]["Enums"]["presence_statut"]
+        }
+        Insert: {
+          created_at?: string
+          culte_id: string
+          id?: string
+          membre_id: string
+          statut?: Database["public"]["Enums"]["presence_statut"]
+        }
+        Update: {
+          created_at?: string
+          culte_id?: string
+          id?: string
+          membre_id?: string
+          statut?: Database["public"]["Enums"]["presence_statut"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presences_culte_id_fkey"
+            columns: ["culte_id"]
+            isOneToOne: false
+            referencedRelation: "cultes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presences_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          nom: string | null
+          temple_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          nom?: string | null
+          temple_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom?: string | null
+          temple_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      temples: {
+        Row: {
+          commune: string | null
+          created_at: string
+          email: string | null
+          id: string
+          logo: string | null
+          nom_temple: string
+          pasteur_responsable: string | null
+          pays: string | null
+          telephone: string | null
+          updated_at: string
+          ville: string | null
+        }
+        Insert: {
+          commune?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo?: string | null
+          nom_temple: string
+          pasteur_responsable?: string | null
+          pays?: string | null
+          telephone?: string | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Update: {
+          commune?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo?: string | null
+          nom_temple?: string
+          pasteur_responsable?: string | null
+          pays?: string | null
+          telephone?: string | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          temple_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          temple_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          temple_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin_temple" | "utilisateur"
+      culte_type:
+        | "dimanche"
+        | "semaine"
+        | "veillee"
+        | "reunion_speciale"
+        | "jeune_priere"
+      membre_categorie:
+        | "hommes_adultes"
+        | "femmes_adultes"
+        | "jeunes_hommes"
+        | "jeunes_filles"
+        | "groupe_musical"
+        | "ecodim"
+        | "moniteurs"
+        | "appeles"
+        | "serviteurs_de_dieu"
+        | "nouvelles_ames"
+        | "pasteurs"
+      presence_statut: "present" | "absent" | "excuse"
+      sexe: "M" | "F"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +439,30 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin_temple", "utilisateur"],
+      culte_type: [
+        "dimanche",
+        "semaine",
+        "veillee",
+        "reunion_speciale",
+        "jeune_priere",
+      ],
+      membre_categorie: [
+        "hommes_adultes",
+        "femmes_adultes",
+        "jeunes_hommes",
+        "jeunes_filles",
+        "groupe_musical",
+        "ecodim",
+        "moniteurs",
+        "appeles",
+        "serviteurs_de_dieu",
+        "nouvelles_ames",
+        "pasteurs",
+      ],
+      presence_statut: ["present", "absent", "excuse"],
+      sexe: ["M", "F"],
+    },
   },
 } as const
