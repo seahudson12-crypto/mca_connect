@@ -115,6 +115,18 @@ function CultesPage() {
               <div className="space-y-1.5"><Label>Responsable prière intense</Label><Input name="responsable_priere" /></div>
               <div className="space-y-1.5"><Label>Orateur</Label><Input name="orateur" /></div>
               <div className="space-y-1.5"><Label>Thème principal</Label><Textarea name="theme_principal" rows={2} /></div>
+              {isSuperAdmin && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
+                  <div className="text-sm font-semibold text-primary">Finances du culte (Super Admin)</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5"><Label>Offrandes (FCFA)</Label><Input type="number" step="1" name="offrandes" placeholder="0" /></div>
+                    <div className="space-y-1.5"><Label>Dîmes (FCFA)</Label><Input type="number" step="1" name="dimes" placeholder="0" /></div>
+                    <div className="space-y-1.5"><Label>Dépenses (FCFA)</Label><Input type="number" step="1" name="depenses" placeholder="0" /></div>
+                    <div className="space-y-1.5"><Label>Solde en caisse (FCFA)</Label><Input type="number" step="1" name="solde_caisse" placeholder="0" /></div>
+                  </div>
+                  <div className="space-y-1.5"><Label>Notes / détails financiers</Label><Textarea name="notes_finances" rows={2} placeholder="Détail des dépenses, mouvements particuliers..." /></div>
+                </div>
+              )}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
                 <Button type="submit" className="gradient-brand text-primary-foreground border-0">Créer</Button>
