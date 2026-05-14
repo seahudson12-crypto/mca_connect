@@ -202,7 +202,7 @@ function UtilisateursPage() {
                         currentRole={current}
                         currentTempleId={currentTempleId}
                         temples={temples}
-                        onApply={(role, templeId) => setRole(p.id, role, templeId)}
+                        onApply={(role, templeId) => setRole(p.id, role, templeId, current)}
                       />
                     </TableCell>
                   </TableRow>
