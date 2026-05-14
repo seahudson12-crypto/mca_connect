@@ -7,15 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShieldCheck, ShieldOff, UserCog } from "lucide-react";
+import { Search, ShieldCheck, ShieldOff, UserCog, History, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 type Role = "super_admin" | "admin_temple" | "utilisateur";
 type Profile = { id: string; nom: string | null; email: string | null; temple_id: string | null };
 type RoleRow = { user_id: string; role: Role; temple_id: string | null };
 type Temple = { id: string; nom_temple: string };
+type RoleChange = {
+  id: string;
+  target_user_id: string;
+  changed_by: string | null;
+  previous_role: Role | null;
+  new_role: Role;
+  temple_id: string | null;
+  created_at: string;
+};
+
+const roleLabel = (r: Role | null) =>
+  r === "super_admin" ? "Super Admin" : r === "admin_temple" ? "Admin Temple" : r === "utilisateur" ? "Utilisateur" : "—";
 
 export const Route = createFileRoute("/_app/utilisateurs")({ component: UtilisateursPage });
 
