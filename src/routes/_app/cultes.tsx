@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_app/cultes")({ component: CultesPage });
 
 function CultesPage() {
   const qc = useQueryClient();
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, isSuperAdmin } = useAuth();
   const [open, setOpen] = useState(false);
 
   const { data: cultes = [], isLoading } = useQuery({
