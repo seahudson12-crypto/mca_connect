@@ -23,6 +23,8 @@ type Membre = {
   sexe: "M" | "F" | null;
   telephone: string | null;
   whatsapp: string | null;
+  email: string | null;
+  date_entree: string | null;
   categorie: string;
   date_ajout: string;
   temple_id: string;
@@ -63,6 +65,8 @@ function MembresPage() {
       sexe: (form.get("sexe") as "M" | "F") || null,
       telephone: String(form.get("telephone") || "").trim() || null,
       whatsapp: String(form.get("whatsapp") || "").trim() || null,
+      email: String(form.get("email") || "").trim() || null,
+      date_entree: String(form.get("date_entree") || "").trim() || null,
       categorie: form.get("categorie") as never,
       temple_id: profile?.temple_id ?? "",
     };
@@ -95,7 +99,8 @@ function MembresPage() {
   const exportExcel = () => {
     const rows = filtered.map((m) => ({
       Nom: m.nom, Prénoms: m.prenoms, Sexe: m.sexe ?? "", Téléphone: m.telephone ?? "",
-      WhatsApp: m.whatsapp ?? "", Catégorie: categoryLabel(m.categorie), "Date d'ajout": m.date_ajout,
+      WhatsApp: m.whatsapp ?? "", Email: m.email ?? "", Catégorie: categoryLabel(m.categorie),
+      "Date d'entrée": m.date_entree ?? "", "Date d'ajout": m.date_ajout,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -142,6 +147,10 @@ function MembresPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5"><Label>Téléphone</Label><Input name="telephone" defaultValue={editing?.telephone ?? ""} /></div>
                   <div className="space-y-1.5"><Label>WhatsApp</Label><Input name="whatsapp" defaultValue={editing?.whatsapp ?? ""} /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label>Email</Label><Input type="email" name="email" defaultValue={editing?.email ?? ""} /></div>
+                  <div className="space-y-1.5"><Label>Date d'entrée</Label><Input type="date" name="date_entree" defaultValue={editing?.date_entree ?? ""} /></div>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>

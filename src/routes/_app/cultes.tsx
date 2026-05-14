@@ -21,13 +21,15 @@ type Culte = {
   id: string; date: string; type_culte: string; heure_debut: string | null; heure_fin: string | null;
   president: string | null; theme_presidence: string | null; versets: string | null;
   responsable_priere: string | null; orateur: string | null; theme_principal: string | null;
+  offrandes: number | null; dimes: number | null; depenses: number | null;
+  solde_caisse: number | null; notes_finances: string | null;
 };
 
 export const Route = createFileRoute("/_app/cultes")({ component: CultesPage });
 
 function CultesPage() {
   const qc = useQueryClient();
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, isSuperAdmin } = useAuth();
   const [open, setOpen] = useState(false);
 
   const { data: cultes = [], isLoading } = useQuery({
@@ -40,6 +42,10 @@ function CultesPage() {
   });
 
   const handleSave = async (form: FormData) => {
+    const num = (k: string) => {
+      const v = String(form.get(k) || "").trim();
+      return v ? Number(v) : null;
+    };
     const payload = {
       date: form.get("date") as string,
       type_culte: form.get("type_culte") as never,
@@ -51,6 +57,11 @@ function CultesPage() {
       responsable_priere: (form.get("responsable_priere") as string) || null,
       orateur: (form.get("orateur") as string) || null,
       theme_principal: (form.get("theme_principal") as string) || null,
+      offrandes: isSuperAdmin ? num("offrandes") : null,
+      dimes: isSuperAdmin ? num("dimes") : null,
+      depenses: isSuperAdmin ? num("depenses") : null,
+      solde_caisse: isSuperAdmin ? num("solde_caisse") : null,
+      notes_finances: isSuperAdmin ? ((form.get("notes_finances") as string) || null) : null,
       temple_id: profile?.temple_id ?? "",
     };
     if (!payload.date || !payload.type_culte || !payload.temple_id) {
@@ -104,6 +115,18 @@ function CultesPage() {
               <div className="space-y-1.5"><Label>Responsable prière intense</Label><Input name="responsable_priere" /></div>
               <div className="space-y-1.5"><Label>Orateur</Label><Input name="orateur" /></div>
               <div className="space-y-1.5"><Label>Thème principal</Label><Textarea name="theme_principal" rows={2} /></div>
+              {isSuperAdmin && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
+                  <div className="text-sm font-semibold text-primary">Finances du culte (Super Admin)</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5"><Label>Offrandes (FCFA)</Label><Input type="number" step="1" name="offrandes" placeholder="0" /></div>
+                    <div className="space-y-1.5"><Label>Dîmes (FCFA)</Label><Input type="number" step="1" name="dimes" placeholder="0" /></div>
+                    <div className="space-y-1.5"><Label>Dépenses (FCFA)</Label><Input type="number" step="1" name="depenses" placeholder="0" /></div>
+                    <div className="space-y-1.5"><Label>Solde en caisse (FCFA)</Label><Input type="number" step="1" name="solde_caisse" placeholder="0" /></div>
+                  </div>
+                  <div className="space-y-1.5"><Label>Notes / détails financiers</Label><Textarea name="notes_finances" rows={2} placeholder="Détail des dépenses, mouvements particuliers..." /></div>
+                </div>
+              )}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
                 <Button type="submit" className="gradient-brand text-primary-foreground border-0">Créer</Button>

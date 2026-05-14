@@ -135,6 +135,37 @@ function PointagePage() {
       headStyles: { fillColor: [42, 80, 180] },
       styles: { fontSize: 9 },
     });
+
+    // Finances section (if any value present)
+    const c = culte as typeof culte & {
+      offrandes: number | null; dimes: number | null; depenses: number | null;
+      solde_caisse: number | null; notes_finances: string | null;
+    };
+    const hasFinances = c.offrandes != null || c.dimes != null || c.depenses != null || c.solde_caisse != null || c.notes_finances;
+    if (hasFinances) {
+      const fmt = (n: number | null) => (n == null ? "—" : `${Number(n).toLocaleString("fr-FR")} FCFA`);
+      const lastY = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 66;
+      autoTable(doc, {
+        startY: lastY + 8,
+        head: [["Rapport financier", "Montant"]],
+        body: [
+          ["Offrandes", fmt(c.offrandes)],
+          ["Dîmes", fmt(c.dimes)],
+          ["Dépenses", fmt(c.depenses)],
+          ["Solde en caisse", fmt(c.solde_caisse)],
+        ],
+        headStyles: { fillColor: [180, 140, 40] },
+        styles: { fontSize: 10 },
+      });
+      if (c.notes_finances) {
+        const y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? lastY + 30;
+        doc.setFontSize(10);
+        doc.text("Notes :", 14, y + 8);
+        doc.setFontSize(9);
+        const split = doc.splitTextToSize(c.notes_finances, 180);
+        doc.text(split, 14, y + 14);
+      }
+    }
     doc.save(`presences-${culte.date}.pdf`);
   };
 

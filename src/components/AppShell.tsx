@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2 } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ const ADMIN_NAV = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const { profile, roles, signOut, isAdmin } = useAuth();
+  const { profile, roles, signOut, isAdmin, isSuperAdmin } = useAuth();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   const NavLinks = () => (
@@ -69,6 +69,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          {isSuperAdmin && (
+            <Link
+              to="/utilisateurs"
+              onClick={() => setOpen(false)}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                path === "/utilisateurs"
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
+              }`}
+            >
+              <UserCog className="h-4 w-4" />
+              Utilisateurs
+            </Link>
+          )}
         </>
       )}
     </nav>
