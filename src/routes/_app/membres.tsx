@@ -23,6 +23,8 @@ type Membre = {
   sexe: "M" | "F" | null;
   telephone: string | null;
   whatsapp: string | null;
+  email: string | null;
+  date_entree: string | null;
   categorie: string;
   date_ajout: string;
   temple_id: string;
