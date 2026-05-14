@@ -69,6 +69,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          {isSuperAdmin && (
+            <Link
+              to="/utilisateurs"
+              onClick={() => setOpen(false)}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                path === "/utilisateurs"
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
+              }`}
+            >
+              <UserCog className="h-4 w-4" />
+              Utilisateurs
+            </Link>
+          )}
         </>
       )}
     </nav>
