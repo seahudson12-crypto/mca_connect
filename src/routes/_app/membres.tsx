@@ -99,7 +99,8 @@ function MembresPage() {
   const exportExcel = () => {
     const rows = filtered.map((m) => ({
       Nom: m.nom, Prénoms: m.prenoms, Sexe: m.sexe ?? "", Téléphone: m.telephone ?? "",
-      WhatsApp: m.whatsapp ?? "", Catégorie: categoryLabel(m.categorie), "Date d'ajout": m.date_ajout,
+      WhatsApp: m.whatsapp ?? "", Email: m.email ?? "", Catégorie: categoryLabel(m.categorie),
+      "Date d'entrée": m.date_entree ?? "", "Date d'ajout": m.date_ajout,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
