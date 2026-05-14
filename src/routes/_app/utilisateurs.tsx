@@ -1,0 +1,211 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Search, ShieldCheck, ShieldOff, UserCog } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
+
+type Role = "super_admin" | "admin_temple" | "utilisateur";
+type Profile = { id: string; nom: string | null; email: string | null; temple_id: string | null };
+type RoleRow = { user_id: string; role: Role; temple_id: string | null };
+type Temple = { id: string; nom_temple: string };
+
+export const Route = createFileRoute("/_app/utilisateurs")({ component: UtilisateursPage });
+
+function UtilisateursPage() {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { isSuperAdmin, loading } = useAuth();
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (!loading && !isSuperAdmin) {
+      toast.error("Accès réservé au super administrateur");
+      navigate({ to: "/dashboard" });
+    }
+  }, [loading, isSuperAdmin, navigate]);
+
+  const { data: profiles = [] } = useQuery({
+    queryKey: ["all-profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id,nom,email,temple_id").order("nom");
+      if (error) throw error;
+      return data as Profile[];
+    },
+    enabled: isSuperAdmin,
+  });
+
+  const { data: roleRows = [] } = useQuery({
+    queryKey: ["all-roles"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_roles").select("user_id,role,temple_id");
+      if (error) throw error;
+      return data as RoleRow[];
+    },
+    enabled: isSuperAdmin,
+  });
+
+  const { data: temples = [] } = useQuery({
+    queryKey: ["temples-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("temples").select("id,nom_temple").order("nom_temple");
+      if (error) throw error;
+      return data as Temple[];
+    },
+    enabled: isSuperAdmin,
+  });
+
+  const rolesByUser = new Map<string, RoleRow[]>();
+  roleRows.forEach((r) => {
+    const arr = rolesByUser.get(r.user_id) ?? [];
+    arr.push(r);
+    rolesByUser.set(r.user_id, arr);
+  });
+
+  const filtered = profiles.filter((p) =>
+    !search || `${p.nom ?? ""} ${p.email ?? ""}`.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const setRole = async (userId: string, role: Role, templeId: string | null) => {
+    // Remove all existing roles for the user, then insert the new one
+    const del = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (del.error) return toast.error(del.error.message);
+    const ins = await supabase.from("user_roles").insert({ user_id: userId, role, temple_id: templeId });
+    if (ins.error) return toast.error(ins.error.message);
+    toast.success("Rôle mis à jour");
+    qc.invalidateQueries({ queryKey: ["all-roles"] });
+  };
+
+  if (!isSuperAdmin) return null;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-bold flex items-center gap-2">
+          <UserCog className="h-7 w-7 text-primary" /> Utilisateurs & rôles
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Promouvoir un utilisateur en super administrateur ou administrateur de temple.
+        </p>
+      </div>
+
+      <Card className="p-4 border-0 shadow-elegant">
+        <div className="relative mb-4 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un utilisateur..."
+            className="pl-9"
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nom</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Rôle actuel</TableHead>
+                <TableHead>Temple</TableHead>
+                <TableHead className="w-[260px]">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.length === 0 && (
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Aucun utilisateur</TableCell></TableRow>
+              )}
+              {filtered.map((p) => {
+                const userRoles = rolesByUser.get(p.id) ?? [];
+                const current: Role = userRoles.find((r) => r.role === "super_admin")?.role
+                  ?? userRoles.find((r) => r.role === "admin_temple")?.role
+                  ?? "utilisateur";
+                const currentTempleId = userRoles[0]?.temple_id ?? p.temple_id ?? null;
+                const templeName = temples.find((t) => t.id === currentTempleId)?.nom_temple ?? "—";
+
+                return (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">{p.nom ?? "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{p.email ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          current === "super_admin"
+                            ? "bg-primary text-primary-foreground"
+                            : current === "admin_temple"
+                              ? "bg-accent text-accent-foreground"
+                              : ""
+                        }
+                        variant={current === "utilisateur" ? "secondary" : undefined}
+                      >
+                        {current === "super_admin" ? "Super Admin" : current === "admin_temple" ? "Admin Temple" : "Utilisateur"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">{templeName}</TableCell>
+                    <TableCell>
+                      <RoleEditor
+                        currentRole={current}
+                        currentTempleId={currentTempleId}
+                        temples={temples}
+                        onApply={(role, templeId) => setRole(p.id, role, templeId)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function RoleEditor({
+  currentRole, currentTempleId, temples, onApply,
+}: {
+  currentRole: Role;
+  currentTempleId: string | null;
+  temples: Temple[];
+  onApply: (role: Role, templeId: string | null) => void;
+}) {
+  const [role, setRole] = useState<Role>(currentRole);
+  const [templeId, setTempleId] = useState<string | null>(currentTempleId);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+        <SelectTrigger className="w-[150px] h-9"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="utilisateur">Utilisateur</SelectItem>
+          <SelectItem value="admin_temple">Admin Temple</SelectItem>
+          <SelectItem value="super_admin">Super Admin</SelectItem>
+        </SelectContent>
+      </Select>
+      {role === "admin_temple" && (
+        <Select value={templeId ?? ""} onValueChange={(v) => setTempleId(v || null)}>
+          <SelectTrigger className="w-[160px] h-9"><SelectValue placeholder="Temple" /></SelectTrigger>
+          <SelectContent>
+            {temples.map((t) => <SelectItem key={t.id} value={t.id}>{t.nom_temple}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+      <Button
+        size="sm"
+        className="gradient-brand text-primary-foreground border-0"
+        onClick={() => onApply(role, role === "admin_temple" ? templeId : null)}
+        disabled={role === currentRole && (role !== "admin_temple" || templeId === currentTempleId)}
+      >
+        {role === "utilisateur" ? <ShieldOff className="mr-1.5 h-3.5 w-3.5" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}
+        Appliquer
+      </Button>
+    </div>
+  );
+}

@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
+import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppParametresRouteImport } from './routes/_app/parametres'
 import { Route as AppMembresRouteImport } from './routes/_app/membres'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppWhatsappRoute = AppWhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
+  id: '/utilisateurs',
+  path: '/utilisateurs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTemplesRoute = AppTemplesRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/membres': typeof AppMembresRoute
   '/parametres': typeof AppParametresRoute
   '/temples': typeof AppTemplesRoute
+  '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/presences/': typeof AppPresencesIndexRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/membres': typeof AppMembresRoute
   '/parametres': typeof AppParametresRoute
   '/temples': typeof AppTemplesRoute
+  '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/presences': typeof AppPresencesIndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/_app/membres': typeof AppMembresRoute
   '/_app/parametres': typeof AppParametresRoute
   '/_app/temples': typeof AppTemplesRoute
+  '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/_app/presences/': typeof AppPresencesIndexRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/membres'
     | '/parametres'
     | '/temples'
+    | '/utilisateurs'
     | '/whatsapp'
     | '/presences/$culteId'
     | '/presences/'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/membres'
     | '/parametres'
     | '/temples'
+    | '/utilisateurs'
     | '/whatsapp'
     | '/presences/$culteId'
     | '/presences'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/_app/membres'
     | '/_app/parametres'
     | '/_app/temples'
+    | '/_app/utilisateurs'
     | '/_app/whatsapp'
     | '/_app/presences/$culteId'
     | '/_app/presences/'
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/whatsapp'
       fullPath: '/whatsapp'
       preLoaderRoute: typeof AppWhatsappRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/utilisateurs': {
+      id: '/_app/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/utilisateurs'
+      preLoaderRoute: typeof AppUtilisateursRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/temples': {
@@ -268,6 +287,7 @@ interface AppRouteChildren {
   AppMembresRoute: typeof AppMembresRoute
   AppParametresRoute: typeof AppParametresRoute
   AppTemplesRoute: typeof AppTemplesRoute
+  AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
   AppPresencesIndexRoute: typeof AppPresencesIndexRoute
@@ -279,6 +299,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMembresRoute: AppMembresRoute,
   AppParametresRoute: AppParametresRoute,
   AppTemplesRoute: AppTemplesRoute,
+  AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
   AppPresencesIndexRoute: AppPresencesIndexRoute,
@@ -295,3 +316,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
