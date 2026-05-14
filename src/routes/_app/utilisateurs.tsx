@@ -76,6 +76,20 @@ function UtilisateursPage() {
     enabled: isSuperAdmin,
   });
 
+  const { data: history = [] } = useQuery({
+    queryKey: ["role-changes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("role_changes")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data as RoleChange[];
+    },
+    enabled: isSuperAdmin,
+  });
+
   const rolesByUser = new Map<string, RoleRow[]>();
   roleRows.forEach((r) => {
     const arr = rolesByUser.get(r.user_id) ?? [];
@@ -83,18 +97,38 @@ function UtilisateursPage() {
     rolesByUser.set(r.user_id, arr);
   });
 
+  const profileById = new Map(profiles.map((p) => [p.id, p]));
+  const nameOf = (id: string | null) => {
+    if (!id) return "—";
+    const p = profileById.get(id);
+    return p?.nom || p?.email || id.slice(0, 8);
+  };
+
   const filtered = profiles.filter((p) =>
     !search || `${p.nom ?? ""} ${p.email ?? ""}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const setRole = async (userId: string, role: Role, templeId: string | null) => {
+  const setRole = async (userId: string, role: Role, templeId: string | null, previousRole: Role) => {
+    const { data: auth } = await supabase.auth.getUser();
+    const actorId = auth.user?.id ?? null;
     // Remove all existing roles for the user, then insert the new one
     const del = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (del.error) return toast.error(del.error.message);
     const ins = await supabase.from("user_roles").insert({ user_id: userId, role, temple_id: templeId });
     if (ins.error) return toast.error(ins.error.message);
+    if (previousRole !== role || (role === "admin_temple")) {
+      const log = await supabase.from("role_changes").insert({
+        target_user_id: userId,
+        changed_by: actorId,
+        previous_role: previousRole,
+        new_role: role,
+        temple_id: templeId,
+      });
+      if (log.error) console.warn("history log failed", log.error.message);
+    }
     toast.success("Rôle mis à jour");
     qc.invalidateQueries({ queryKey: ["all-roles"] });
+    qc.invalidateQueries({ queryKey: ["role-changes"] });
   };
 
   if (!isSuperAdmin) return null;
