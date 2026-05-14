@@ -7,15 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShieldCheck, ShieldOff, UserCog } from "lucide-react";
+import { Search, ShieldCheck, ShieldOff, UserCog, History, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 type Role = "super_admin" | "admin_temple" | "utilisateur";
 type Profile = { id: string; nom: string | null; email: string | null; temple_id: string | null };
 type RoleRow = { user_id: string; role: Role; temple_id: string | null };
 type Temple = { id: string; nom_temple: string };
+type RoleChange = {
+  id: string;
+  target_user_id: string;
+  changed_by: string | null;
+  previous_role: Role | null;
+  new_role: Role;
+  temple_id: string | null;
+  created_at: string;
+};
+
+const roleLabel = (r: Role | null) =>
+  r === "super_admin" ? "Super Admin" : r === "admin_temple" ? "Admin Temple" : r === "utilisateur" ? "Utilisateur" : "—";
 
 export const Route = createFileRoute("/_app/utilisateurs")({ component: UtilisateursPage });
 
@@ -62,6 +76,20 @@ function UtilisateursPage() {
     enabled: isSuperAdmin,
   });
 
+  const { data: history = [] } = useQuery({
+    queryKey: ["role-changes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("role_changes")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data as RoleChange[];
+    },
+    enabled: isSuperAdmin,
+  });
+
   const rolesByUser = new Map<string, RoleRow[]>();
   roleRows.forEach((r) => {
     const arr = rolesByUser.get(r.user_id) ?? [];
@@ -69,18 +97,38 @@ function UtilisateursPage() {
     rolesByUser.set(r.user_id, arr);
   });
 
+  const profileById = new Map(profiles.map((p) => [p.id, p]));
+  const nameOf = (id: string | null) => {
+    if (!id) return "—";
+    const p = profileById.get(id);
+    return p?.nom || p?.email || id.slice(0, 8);
+  };
+
   const filtered = profiles.filter((p) =>
     !search || `${p.nom ?? ""} ${p.email ?? ""}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const setRole = async (userId: string, role: Role, templeId: string | null) => {
+  const setRole = async (userId: string, role: Role, templeId: string | null, previousRole: Role) => {
+    const { data: auth } = await supabase.auth.getUser();
+    const actorId = auth.user?.id ?? null;
     // Remove all existing roles for the user, then insert the new one
     const del = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (del.error) return toast.error(del.error.message);
     const ins = await supabase.from("user_roles").insert({ user_id: userId, role, temple_id: templeId });
     if (ins.error) return toast.error(ins.error.message);
+    if (previousRole !== role || (role === "admin_temple")) {
+      const log = await supabase.from("role_changes").insert({
+        target_user_id: userId,
+        changed_by: actorId,
+        previous_role: previousRole,
+        new_role: role,
+        temple_id: templeId,
+      });
+      if (log.error) console.warn("history log failed", log.error.message);
+    }
     toast.success("Rôle mis à jour");
     qc.invalidateQueries({ queryKey: ["all-roles"] });
+    qc.invalidateQueries({ queryKey: ["role-changes"] });
   };
 
   if (!isSuperAdmin) return null;
@@ -154,9 +202,70 @@ function UtilisateursPage() {
                         currentRole={current}
                         currentTempleId={currentTempleId}
                         temples={temples}
-                        onApply={(role, templeId) => setRole(p.id, role, templeId)}
+                        onApply={(role, templeId) => setRole(p.id, role, templeId, current)}
                       />
                     </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+
+      <Card className="p-4 border-0 shadow-elegant">
+        <div className="mb-3 flex items-center gap-2">
+          <History className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Historique des changements de rôles</h2>
+          <Badge variant="secondary" className="ml-auto">{history.length}</Badge>
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Utilisateur</TableHead>
+                <TableHead>Changement</TableHead>
+                <TableHead>Promu par</TableHead>
+                <TableHead>Temple</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {history.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    Aucun changement enregistré pour le moment
+                  </TableCell>
+                </TableRow>
+              )}
+              {history.map((h) => {
+                const templeName = h.temple_id ? (temples.find((t) => t.id === h.temple_id)?.nom_temple ?? "—") : "—";
+                return (
+                  <TableRow key={h.id}>
+                    <TableCell className="text-sm whitespace-nowrap">
+                      {format(new Date(h.created_at), "d MMM yyyy 'à' HH:mm", { locale: fr })}
+                    </TableCell>
+                    <TableCell className="font-medium">{nameOf(h.target_user_id)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <Badge variant="secondary">{roleLabel(h.previous_role)}</Badge>
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Badge
+                          className={
+                            h.new_role === "super_admin"
+                              ? "bg-primary text-primary-foreground"
+                              : h.new_role === "admin_temple"
+                                ? "bg-accent text-accent-foreground"
+                                : ""
+                          }
+                          variant={h.new_role === "utilisateur" ? "secondary" : undefined}
+                        >
+                          {roleLabel(h.new_role)}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">{nameOf(h.changed_by)}</TableCell>
+                    <TableCell className="text-sm">{templeName}</TableCell>
                   </TableRow>
                 );
               })}
