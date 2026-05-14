@@ -224,6 +224,36 @@ export type Database = {
           },
         ]
       }
+      role_changes: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_role: Database["public"]["Enums"]["app_role"]
+          previous_role: Database["public"]["Enums"]["app_role"] | null
+          target_user_id: string
+          temple_id: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_role: Database["public"]["Enums"]["app_role"]
+          previous_role?: Database["public"]["Enums"]["app_role"] | null
+          target_user_id: string
+          temple_id?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_role?: Database["public"]["Enums"]["app_role"]
+          previous_role?: Database["public"]["Enums"]["app_role"] | null
+          target_user_id?: string
+          temple_id?: string | null
+        }
+        Relationships: []
+      }
       temples: {
         Row: {
           commune: string | null
