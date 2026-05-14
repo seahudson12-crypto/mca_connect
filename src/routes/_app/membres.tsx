@@ -148,6 +148,10 @@ function MembresPage() {
                   <div className="space-y-1.5"><Label>Téléphone</Label><Input name="telephone" defaultValue={editing?.telephone ?? ""} /></div>
                   <div className="space-y-1.5"><Label>WhatsApp</Label><Input name="whatsapp" defaultValue={editing?.whatsapp ?? ""} /></div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label>Email</Label><Input type="email" name="email" defaultValue={editing?.email ?? ""} /></div>
+                  <div className="space-y-1.5"><Label>Date d'entrée</Label><Input type="date" name="date_entree" defaultValue={editing?.date_entree ?? ""} /></div>
+                </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
                   <Button type="submit" className="gradient-brand text-primary-foreground border-0">Enregistrer</Button>
