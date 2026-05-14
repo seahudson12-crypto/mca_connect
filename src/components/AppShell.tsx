@@ -21,7 +21,7 @@ const ADMIN_NAV = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const { profile, roles, signOut, isAdmin } = useAuth();
+  const { profile, roles, signOut, isAdmin, isSuperAdmin } = useAuth();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   const NavLinks = () => (
