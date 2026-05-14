@@ -21,6 +21,8 @@ type Culte = {
   id: string; date: string; type_culte: string; heure_debut: string | null; heure_fin: string | null;
   president: string | null; theme_presidence: string | null; versets: string | null;
   responsable_priere: string | null; orateur: string | null; theme_principal: string | null;
+  offrandes: number | null; dimes: number | null; depenses: number | null;
+  solde_caisse: number | null; notes_finances: string | null;
 };
 
 export const Route = createFileRoute("/_app/cultes")({ component: CultesPage });
