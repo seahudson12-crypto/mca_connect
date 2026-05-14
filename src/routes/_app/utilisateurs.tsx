@@ -212,6 +212,67 @@ function UtilisateursPage() {
           </Table>
         </div>
       </Card>
+
+      <Card className="p-4 border-0 shadow-elegant">
+        <div className="mb-3 flex items-center gap-2">
+          <History className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Historique des changements de rôles</h2>
+          <Badge variant="secondary" className="ml-auto">{history.length}</Badge>
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Utilisateur</TableHead>
+                <TableHead>Changement</TableHead>
+                <TableHead>Promu par</TableHead>
+                <TableHead>Temple</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {history.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    Aucun changement enregistré pour le moment
+                  </TableCell>
+                </TableRow>
+              )}
+              {history.map((h) => {
+                const templeName = h.temple_id ? (temples.find((t) => t.id === h.temple_id)?.nom_temple ?? "—") : "—";
+                return (
+                  <TableRow key={h.id}>
+                    <TableCell className="text-sm whitespace-nowrap">
+                      {format(new Date(h.created_at), "d MMM yyyy 'à' HH:mm", { locale: fr })}
+                    </TableCell>
+                    <TableCell className="font-medium">{nameOf(h.target_user_id)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <Badge variant="secondary">{roleLabel(h.previous_role)}</Badge>
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Badge
+                          className={
+                            h.new_role === "super_admin"
+                              ? "bg-primary text-primary-foreground"
+                              : h.new_role === "admin_temple"
+                                ? "bg-accent text-accent-foreground"
+                                : ""
+                          }
+                          variant={h.new_role === "utilisateur" ? "secondary" : undefined}
+                        >
+                          {roleLabel(h.new_role)}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">{nameOf(h.changed_by)}</TableCell>
+                    <TableCell className="text-sm">{templeName}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
     </div>
   );
 }
