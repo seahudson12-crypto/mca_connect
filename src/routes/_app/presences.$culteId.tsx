@@ -19,6 +19,8 @@ import { useAuth } from "@/hooks/use-auth";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { StatCard } from "@/components/StatCard";
+import { Lock } from "lucide-react";
+import { formatXof } from "@/lib/audit";
 
 export const Route = createFileRoute("/_app/presences/$culteId")({ component: PointagePage });
 
@@ -28,10 +30,12 @@ function PointagePage() {
   const { culteId } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { profile } = useAuth();
+  const { profile, isAdmin, isSuperAdmin } = useAuth();
   const [statuts, setStatuts] = useState<Record<string, "present" | "absent">>({});
   const [openAdd, setOpenAdd] = useState(false);
   const [activeCat, setActiveCat] = useState<string>("all");
+
+  const locked = (statut: string | undefined) => statut !== "brouillon" && !isSuperAdmin;
 
   const { data: culte } = useQuery({
     queryKey: ["culte", culteId],
@@ -56,6 +60,15 @@ function PointagePage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("presences").select("*").eq("culte_id", culteId);
       if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: finance } = useQuery({
+    queryKey: ["finance-culte", culteId],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const { data } = await supabase.from("finances_culte").select("*").eq("culte_id", culteId).maybeSingle();
       return data;
     },
   });
@@ -86,6 +99,7 @@ function PointagePage() {
   };
 
   const handleSaveAll = async () => {
+    if (locked(culte?.statut)) return toast.error("Rapport verrouillé : seul un Super Admin peut le modifier");
     const rows = Object.entries(statuts).map(([membre_id, statut]) => ({ membre_id, culte_id: culteId, statut }));
     if (rows.length === 0) return toast.error("Aucune présence à enregistrer");
     const { error } = await supabase.from("presences").upsert(rows, { onConflict: "membre_id,culte_id" });
@@ -136,33 +150,36 @@ function PointagePage() {
       styles: { fontSize: 9 },
     });
 
-    // Finances section (if any value present)
-    const c = culte as typeof culte & {
-      offrandes: number | null; dimes: number | null; depenses: number | null;
-      solde_caisse: number | null; notes_finances: string | null;
-    };
-    const hasFinances = c.offrandes != null || c.dimes != null || c.depenses != null || c.solde_caisse != null || c.notes_finances;
-    if (hasFinances) {
-      const fmt = (n: number | null) => (n == null ? "—" : `${Number(n).toLocaleString("fr-FR")} FCFA`);
+    // Finances section (admin only)
+    if (isAdmin && finance) {
+      const f = finance as {
+        offrande: number; dime: number; action_grace: number; semence: number;
+        contribution_speciale: number; depense: number; solde: number; observation: string | null;
+      };
+      const recettes = Number(f.offrande) + Number(f.dime) + Number(f.action_grace) + Number(f.semence) + Number(f.contribution_speciale);
       const lastY = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 66;
       autoTable(doc, {
         startY: lastY + 8,
         head: [["Rapport financier", "Montant"]],
         body: [
-          ["Offrandes", fmt(c.offrandes)],
-          ["Dîmes", fmt(c.dimes)],
-          ["Dépenses", fmt(c.depenses)],
-          ["Solde en caisse", fmt(c.solde_caisse)],
+          ["Offrandes", formatXof(Number(f.offrande))],
+          ["Dîmes", formatXof(Number(f.dime))],
+          ["Actions de grâce", formatXof(Number(f.action_grace))],
+          ["Semences", formatXof(Number(f.semence))],
+          ["Contributions spéciales", formatXof(Number(f.contribution_speciale))],
+          ["Total recettes", formatXof(recettes)],
+          ["Dépenses", formatXof(Number(f.depense))],
+          ["Solde final", formatXof(Number(f.solde))],
         ],
         headStyles: { fillColor: [180, 140, 40] },
         styles: { fontSize: 10 },
       });
-      if (c.notes_finances) {
+      if (f.observation) {
         const y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? lastY + 30;
         doc.setFontSize(10);
-        doc.text("Notes :", 14, y + 8);
+        doc.text("Observations :", 14, y + 8);
         doc.setFontSize(9);
-        const split = doc.splitTextToSize(c.notes_finances, 180);
+        const split = doc.splitTextToSize(f.observation, 180);
         doc.text(split, 14, y + 14);
       }
     }
@@ -184,6 +201,13 @@ function PointagePage() {
           )}
         </div>
       </div>
+
+      {culte && locked(culte.statut) && (
+        <div className="flex items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
+          <Lock className="h-4 w-4 text-gold" />
+          <span>Ce rapport est <strong>verrouillé</strong>. Seul un Super Administrateur peut le modifier.</span>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total membres" value={stats.total} icon={UserCheck} />

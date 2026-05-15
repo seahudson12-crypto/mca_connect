@@ -30,11 +30,14 @@ export type Database = {
           president: string | null
           responsable_priere: string | null
           solde_caisse: number | null
+          statut: Database["public"]["Enums"]["culte_statut"]
           temple_id: string
           theme_presidence: string | null
           theme_principal: string | null
           type_culte: Database["public"]["Enums"]["culte_type"]
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
           versets: string | null
         }
         Insert: {
@@ -52,11 +55,14 @@ export type Database = {
           president?: string | null
           responsable_priere?: string | null
           solde_caisse?: number | null
+          statut?: Database["public"]["Enums"]["culte_statut"]
           temple_id: string
           theme_presidence?: string | null
           theme_principal?: string | null
           type_culte: Database["public"]["Enums"]["culte_type"]
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
           versets?: string | null
         }
         Update: {
@@ -74,11 +80,14 @@ export type Database = {
           president?: string | null
           responsable_priere?: string | null
           solde_caisse?: number | null
+          statut?: Database["public"]["Enums"]["culte_statut"]
           temple_id?: string
           theme_presidence?: string | null
           theme_principal?: string | null
           type_culte?: Database["public"]["Enums"]["culte_type"]
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
           versets?: string | null
         }
         Relationships: [
@@ -90,6 +99,98 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      finances_culte: {
+        Row: {
+          action_grace: number
+          contribution_speciale: number
+          created_at: string
+          created_by: string | null
+          culte_id: string
+          depense: number
+          dime: number
+          id: string
+          observation: string | null
+          offrande: number
+          semence: number
+          solde: number
+          updated_at: string
+        }
+        Insert: {
+          action_grace?: number
+          contribution_speciale?: number
+          created_at?: string
+          created_by?: string | null
+          culte_id: string
+          depense?: number
+          dime?: number
+          id?: string
+          observation?: string | null
+          offrande?: number
+          semence?: number
+          solde?: number
+          updated_at?: string
+        }
+        Update: {
+          action_grace?: number
+          contribution_speciale?: number
+          created_at?: string
+          created_by?: string | null
+          culte_id?: string
+          depense?: number
+          dime?: number
+          id?: string
+          observation?: string | null
+          offrande?: number
+          semence?: number
+          solde?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finances_culte_culte_id_fkey"
+            columns: ["culte_id"]
+            isOneToOne: true
+            referencedRelation: "cultes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      historique_modifications: {
+        Row: {
+          action: string
+          ancienne_valeur: string | null
+          champ: string | null
+          date_modification: string
+          enregistrement_id: string | null
+          id: string
+          nouvelle_valeur: string | null
+          table_modifiee: string
+          utilisateur_id: string | null
+        }
+        Insert: {
+          action?: string
+          ancienne_valeur?: string | null
+          champ?: string | null
+          date_modification?: string
+          enregistrement_id?: string | null
+          id?: string
+          nouvelle_valeur?: string | null
+          table_modifiee: string
+          utilisateur_id?: string | null
+        }
+        Update: {
+          action?: string
+          ancienne_valeur?: string | null
+          champ?: string | null
+          date_modification?: string
+          enregistrement_id?: string | null
+          id?: string
+          nouvelle_valeur?: string | null
+          table_modifiee?: string
+          utilisateur_id?: string | null
+        }
+        Relationships: []
       }
       membres: {
         Row: {
@@ -344,6 +445,7 @@ export type Database = {
     }
     Enums: {
       app_role: "super_admin" | "admin_temple" | "utilisateur"
+      culte_statut: "brouillon" | "valide" | "corrige_admin"
       culte_type:
         | "dimanche"
         | "semaine"
@@ -492,6 +594,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["super_admin", "admin_temple", "utilisateur"],
+      culte_statut: ["brouillon", "valide", "corrige_admin"],
       culte_type: [
         "dimanche",
         "semaine",

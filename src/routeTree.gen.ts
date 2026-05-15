@@ -18,6 +18,8 @@ import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppParametresRouteImport } from './routes/_app/parametres'
 import { Route as AppMembresRouteImport } from './routes/_app/membres'
+import { Route as AppHistoriqueRouteImport } from './routes/_app/historique'
+import { Route as AppFinancesRouteImport } from './routes/_app/finances'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
@@ -67,6 +69,16 @@ const AppMembresRoute = AppMembresRouteImport.update({
   path: '/membres',
   getParentRoute: () => AppRoute,
 } as any)
+const AppHistoriqueRoute = AppHistoriqueRouteImport.update({
+  id: '/historique',
+  path: '/historique',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesRoute = AppFinancesRouteImport.update({
+  id: '/finances',
+  path: '/finances',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -94,6 +106,8 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
+  '/finances': typeof AppFinancesRoute
+  '/historique': typeof AppHistoriqueRoute
   '/membres': typeof AppMembresRoute
   '/parametres': typeof AppParametresRoute
   '/temples': typeof AppTemplesRoute
@@ -108,6 +122,8 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
+  '/finances': typeof AppFinancesRoute
+  '/historique': typeof AppHistoriqueRoute
   '/membres': typeof AppMembresRoute
   '/parametres': typeof AppParametresRoute
   '/temples': typeof AppTemplesRoute
@@ -124,6 +140,8 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_app/cultes': typeof AppCultesRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/finances': typeof AppFinancesRoute
+  '/_app/historique': typeof AppHistoriqueRoute
   '/_app/membres': typeof AppMembresRoute
   '/_app/parametres': typeof AppParametresRoute
   '/_app/temples': typeof AppTemplesRoute
@@ -140,6 +158,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/cultes'
     | '/dashboard'
+    | '/finances'
+    | '/historique'
     | '/membres'
     | '/parametres'
     | '/temples'
@@ -154,6 +174,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/cultes'
     | '/dashboard'
+    | '/finances'
+    | '/historique'
     | '/membres'
     | '/parametres'
     | '/temples'
@@ -169,6 +191,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_app/cultes'
     | '/_app/dashboard'
+    | '/_app/finances'
+    | '/_app/historique'
     | '/_app/membres'
     | '/_app/parametres'
     | '/_app/temples'
@@ -250,6 +274,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMembresRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/historique': {
+      id: '/_app/historique'
+      path: '/historique'
+      fullPath: '/historique'
+      preLoaderRoute: typeof AppHistoriqueRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances': {
+      id: '/_app/finances'
+      path: '/finances'
+      fullPath: '/finances'
+      preLoaderRoute: typeof AppFinancesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -284,6 +322,8 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppCultesRoute: typeof AppCultesRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppFinancesRoute: typeof AppFinancesRoute
+  AppHistoriqueRoute: typeof AppHistoriqueRoute
   AppMembresRoute: typeof AppMembresRoute
   AppParametresRoute: typeof AppParametresRoute
   AppTemplesRoute: typeof AppTemplesRoute
@@ -296,6 +336,8 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCultesRoute: AppCultesRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppFinancesRoute: AppFinancesRoute,
+  AppHistoriqueRoute: AppHistoriqueRoute,
   AppMembresRoute: AppMembresRoute,
   AppParametresRoute: AppParametresRoute,
   AppTemplesRoute: AppTemplesRoute,
