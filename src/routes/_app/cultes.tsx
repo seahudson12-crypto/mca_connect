@@ -335,7 +335,7 @@ function CultesPage() {
 function CulteForm({
   onSubmit, isAdmin, defaults, finance, onCancel, submitLabel,
 }: {
-  onSubmit: (f: FormData) => void | Promise<void>;
+  onSubmit: (f: FormData) => unknown;
   isAdmin: boolean;
   defaults: Culte | null;
   finance: Finance | null;
