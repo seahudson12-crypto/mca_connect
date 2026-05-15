@@ -202,6 +202,13 @@ function PointagePage() {
         </div>
       </div>
 
+      {culte && locked(culte.statut) && (
+        <div className="flex items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
+          <Lock className="h-4 w-4 text-gold" />
+          <span>Ce rapport est <strong>verrouillé</strong>. Seul un Super Administrateur peut le modifier.</span>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total membres" value={stats.total} icon={UserCheck} />
         <StatCard label="Présents" value={stats.present} icon={UserCheck} variant="success" />
