@@ -19,6 +19,8 @@ import { useAuth } from "@/hooks/use-auth";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { StatCard } from "@/components/StatCard";
+import { Lock } from "lucide-react";
+import { formatXof } from "@/lib/audit";
 
 export const Route = createFileRoute("/_app/presences/$culteId")({ component: PointagePage });
 
@@ -28,10 +30,12 @@ function PointagePage() {
   const { culteId } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { profile } = useAuth();
+  const { profile, isAdmin, isSuperAdmin } = useAuth();
   const [statuts, setStatuts] = useState<Record<string, "present" | "absent">>({});
   const [openAdd, setOpenAdd] = useState(false);
   const [activeCat, setActiveCat] = useState<string>("all");
+
+  const locked = (statut: string | undefined) => statut !== "brouillon" && !isSuperAdmin;
 
   const { data: culte } = useQuery({
     queryKey: ["culte", culteId],
@@ -56,6 +60,15 @@ function PointagePage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("presences").select("*").eq("culte_id", culteId);
       if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: finance } = useQuery({
+    queryKey: ["finance-culte", culteId],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const { data } = await supabase.from("finances_culte").select("*").eq("culte_id", culteId).maybeSingle();
       return data;
     },
   });
