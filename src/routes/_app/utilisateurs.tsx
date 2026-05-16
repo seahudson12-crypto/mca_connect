@@ -299,11 +299,12 @@ function RoleEditor({
   return (
     <div className="flex flex-wrap gap-2">
       <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-        <SelectTrigger className="w-[150px] h-9"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="w-[170px] h-9"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="utilisateur">Utilisateur</SelectItem>
           <SelectItem value="admin_temple">Admin Temple</SelectItem>
           <SelectItem value="super_admin">Super Admin</SelectItem>
+          <SelectItem value="super_admin_principal">Super Admin Principal</SelectItem>
         </SelectContent>
       </Select>
       {role === "admin_temple" && (
