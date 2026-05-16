@@ -2,13 +2,14 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 
-type Role = "super_admin" | "admin_temple" | "utilisateur";
+export type Role = "super_admin_principal" | "super_admin" | "admin_temple" | "utilisateur";
 
 interface Profile {
   id: string;
   nom: string | null;
   email: string | null;
   temple_id: string | null;
+  actif?: boolean | null;
 }
 
 interface AuthCtx {
@@ -16,9 +17,14 @@ interface AuthCtx {
   session: Session | null;
   profile: Profile | null;
   roles: Role[];
+  role: Role;
+  templeId: string | null;
   loading: boolean;
   isAdmin: boolean;
+  isAdminTemple: boolean;
   isSuperAdmin: boolean;
+  isPrincipal: boolean;
+  canSeeFinances: boolean;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -34,19 +40,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUserData = async (userId: string) => {
     const [{ data: prof }, { data: r }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("id,nom,email,temple_id,actif").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
     setProfile(prof as Profile | null);
-    setRoles((r ?? []).map((x: { role: Role }) => x.role));
+    setRoles(((r ?? []) as Array<{ role: string }>).map((x) => x.role as Role));
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
-        setTimeout(() => loadUserData(sess.user.id), 0);
+        setTimeout(() => {
+          loadUserData(sess.user.id);
+          if (event === "SIGNED_IN") {
+            supabase.from("profiles").update({ derniere_connexion: new Date().toISOString() }).eq("id", sess.user.id).then(() => {});
+            supabase.from("activites_utilisateurs").insert({
+              utilisateur_id: sess.user.id,
+              type_action: "login",
+              description: "Connexion à l'application",
+            }).then(() => {});
+          }
+        }, 0);
       } else {
         setProfile(null);
         setRoles([]);
@@ -64,12 +80,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = async () => {
+    if (user) {
+      await supabase.from("activites_utilisateurs").insert({
+        utilisateur_id: user.id,
+        type_action: "logout",
+        description: "Déconnexion",
+      });
+    }
     await supabase.auth.signOut();
   };
 
   const refresh = async () => {
     if (user) await loadUserData(user.id);
   };
+
+  const isPrincipal = roles.includes("super_admin_principal");
+  const isSuperAdmin = isPrincipal || roles.includes("super_admin");
+  const isAdminTemple = roles.includes("admin_temple");
+  const isAdmin = isSuperAdmin || isAdminTemple;
+  const role: Role =
+    isPrincipal ? "super_admin_principal"
+    : roles.includes("super_admin") ? "super_admin"
+    : isAdminTemple ? "admin_temple"
+    : "utilisateur";
 
   return (
     <Ctx.Provider
@@ -78,9 +111,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         roles,
+        role,
+        templeId: profile?.temple_id ?? null,
         loading,
-        isAdmin: roles.includes("admin_temple") || roles.includes("super_admin"),
-        isSuperAdmin: roles.includes("super_admin"),
+        isAdmin,
+        isAdminTemple,
+        isSuperAdmin,
+        isPrincipal,
+        canSeeFinances: isAdmin,
         signOut,
         refresh,
       }}

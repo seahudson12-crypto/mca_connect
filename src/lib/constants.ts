@@ -25,6 +25,7 @@ export const CULTE_TYPES = [
 ] as const;
 
 export const ROLES = [
+  { value: "super_admin_principal", label: "Super Admin Principal" },
   { value: "super_admin", label: "Super Administrateur" },
   { value: "admin_temple", label: "Administrateur Temple" },
   { value: "utilisateur", label: "Utilisateur" },
