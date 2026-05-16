@@ -14,8 +14,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-type Role = "super_admin" | "admin_temple" | "utilisateur";
-type Profile = { id: string; nom: string | null; email: string | null; temple_id: string | null };
+type Role = "super_admin_principal" | "super_admin" | "admin_temple" | "utilisateur";
+type Profile = { id: string; nom: string | null; email: string | null; temple_id: string | null; actif?: boolean | null; derniere_connexion?: string | null };
 type RoleRow = { user_id: string; role: Role; temple_id: string | null };
 type Temple = { id: string; nom_temple: string };
 type RoleChange = {
@@ -29,7 +29,10 @@ type RoleChange = {
 };
 
 const roleLabel = (r: Role | null) =>
-  r === "super_admin" ? "Super Admin" : r === "admin_temple" ? "Admin Temple" : r === "utilisateur" ? "Utilisateur" : "—";
+  r === "super_admin_principal" ? "Super Admin Principal"
+  : r === "super_admin" ? "Super Admin"
+  : r === "admin_temple" ? "Admin Temple"
+  : r === "utilisateur" ? "Utilisateur" : "—";
 
 export const Route = createFileRoute("/_app/utilisateurs")({ component: UtilisateursPage });
 
@@ -49,7 +52,7 @@ function UtilisateursPage() {
   const { data: profiles = [] } = useQuery({
     queryKey: ["all-profiles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id,nom,email,temple_id").order("nom");
+      const { data, error } = await supabase.from("profiles").select("id,nom,email,temple_id,actif,derniere_connexion").order("nom");
       if (error) throw error;
       return data as Profile[];
     },
@@ -172,7 +175,8 @@ function UtilisateursPage() {
               )}
               {filtered.map((p) => {
                 const userRoles = rolesByUser.get(p.id) ?? [];
-                const current: Role = userRoles.find((r) => r.role === "super_admin")?.role
+                const current: Role = userRoles.find((r) => r.role === "super_admin_principal")?.role
+                  ?? userRoles.find((r) => r.role === "super_admin")?.role
                   ?? userRoles.find((r) => r.role === "admin_temple")?.role
                   ?? "utilisateur";
                 const currentTempleId = userRoles[0]?.temple_id ?? p.temple_id ?? null;
@@ -180,20 +184,24 @@ function UtilisateursPage() {
 
                 return (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.nom ?? "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      {p.nom ?? "—"}
+                      {p.derniere_connexion && (
+                        <div className="text-xs text-muted-foreground">Vu le {format(new Date(p.derniere_connexion), "d MMM HH:mm", { locale: fr })}</div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.email ?? "—"}</TableCell>
                     <TableCell>
                       <Badge
                         className={
-                          current === "super_admin"
-                            ? "bg-primary text-primary-foreground"
-                            : current === "admin_temple"
-                              ? "bg-accent text-accent-foreground"
-                              : ""
+                          current === "super_admin_principal" ? "bg-gold text-foreground"
+                          : current === "super_admin" ? "bg-primary text-primary-foreground"
+                          : current === "admin_temple" ? "bg-accent text-accent-foreground"
+                          : ""
                         }
                         variant={current === "utilisateur" ? "secondary" : undefined}
                       >
-                        {current === "super_admin" ? "Super Admin" : current === "admin_temple" ? "Admin Temple" : "Utilisateur"}
+                        {roleLabel(current)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{templeName}</TableCell>
@@ -291,11 +299,12 @@ function RoleEditor({
   return (
     <div className="flex flex-wrap gap-2">
       <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-        <SelectTrigger className="w-[150px] h-9"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="w-[170px] h-9"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="utilisateur">Utilisateur</SelectItem>
           <SelectItem value="admin_temple">Admin Temple</SelectItem>
           <SelectItem value="super_admin">Super Admin</SelectItem>
+          <SelectItem value="super_admin_principal">Super Admin Principal</SelectItem>
         </SelectContent>
       </Select>
       {role === "admin_temple" && (

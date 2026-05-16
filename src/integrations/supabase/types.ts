@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activites_utilisateurs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          temple_id: string | null
+          type_action: string
+          utilisateur_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          temple_id?: string | null
+          type_action: string
+          utilisateur_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          temple_id?: string | null
+          type_action?: string
+          utilisateur_id?: string | null
+        }
+        Relationships: []
+      }
       cultes: {
         Row: {
           created_at: string
@@ -292,7 +322,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          actif: boolean
           created_at: string
+          derniere_connexion: string | null
           email: string | null
           id: string
           nom: string | null
@@ -300,7 +332,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          actif?: boolean
           created_at?: string
+          derniere_connexion?: string | null
           email?: string | null
           id: string
           nom?: string | null
@@ -308,7 +342,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          actif?: boolean
           created_at?: string
+          derniere_connexion?: string | null
           email?: string | null
           id?: string
           nom?: string | null
@@ -357,7 +393,9 @@ export type Database = {
       }
       temples: {
         Row: {
+          actif: boolean
           commune: string | null
+          couleur_primaire: string | null
           created_at: string
           email: string | null
           id: string
@@ -370,7 +408,9 @@ export type Database = {
           ville: string | null
         }
         Insert: {
+          actif?: boolean
           commune?: string | null
+          couleur_primaire?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -383,7 +423,9 @@ export type Database = {
           ville?: string | null
         }
         Update: {
+          actif?: boolean
           commune?: string | null
+          couleur_primaire?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -434,6 +476,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_temple: {
+        Args: { _temple_id: string; _user_id: string }
+        Returns: boolean
+      }
+      current_user_temple_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -442,9 +489,15 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_principal: { Args: { _user_id: string }; Returns: boolean }
+      is_super: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "super_admin" | "admin_temple" | "utilisateur"
+      app_role:
+        | "super_admin"
+        | "admin_temple"
+        | "utilisateur"
+        | "super_admin_principal"
       culte_statut: "brouillon" | "valide" | "corrige_admin"
       culte_type:
         | "dimanche"
@@ -593,7 +646,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "admin_temple", "utilisateur"],
+      app_role: [
+        "super_admin",
+        "admin_temple",
+        "utilisateur",
+        "super_admin_principal",
+      ],
       culte_statut: ["brouillon", "valide", "corrige_admin"],
       culte_type: [
         "dimanche",
