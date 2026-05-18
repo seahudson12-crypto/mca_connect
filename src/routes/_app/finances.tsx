@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
+import { useActiveTemple } from "@/hooks/use-active-temple";
 import { CULTE_TYPES, culteTypeLabel } from "@/lib/constants";
 import { formatXof } from "@/lib/audit";
 import * as XLSX from "xlsx";
@@ -35,18 +36,20 @@ type FinanceRow = {
 
 function FinancesPage() {
   const { isAdmin, loading } = useAuth();
+  const { activeTempleId } = useActiveTemple();
   const today = new Date();
   const [from, setFrom] = useState(format(startOfMonth(subMonths(today, 2)), "yyyy-MM-dd"));
   const [to, setTo] = useState(format(endOfMonth(today), "yyyy-MM-dd"));
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["finances", from, to, typeFilter],
-    enabled: isAdmin,
+    queryKey: ["finances", from, to, typeFilter, activeTempleId],
+    enabled: isAdmin && !!activeTempleId,
     queryFn: async () => {
       let q = supabase
         .from("finances_culte")
-        .select("*, culte:cultes!inner(date,type_culte,theme_principal)")
+        .select("*, culte:cultes!inner(date,type_culte,theme_principal,temple_id)")
+        .eq("culte.temple_id", activeTempleId!)
         .gte("culte.date", from)
         .lte("culte.date", to);
       if (typeFilter !== "all") q = q.eq("culte.type_culte", typeFilter as never);
