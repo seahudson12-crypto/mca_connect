@@ -8,26 +8,29 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { categoryLabel, culteTypeLabel } from "@/lib/constants";
+import { useActiveTemple } from "@/hooks/use-active-temple";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
 });
 
 function Dashboard() {
+  const { activeTempleId } = useActiveTemple();
   const { data, isLoading } = useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["dashboard", activeTempleId],
+    enabled: !!activeTempleId,
     queryFn: async () => {
       const today = format(new Date(), "yyyy-MM-dd");
       const sevenDaysAgo = format(subDays(startOfDay(new Date()), 30), "yyyy-MM-dd");
 
       const [{ count: totalMembres }, { data: nouvellesAmes }, { data: cultesRecents }, { data: presencesRecentes }] = await Promise.all([
-        supabase.from("membres").select("*", { count: "exact", head: true }).eq("actif", true),
-        supabase.from("membres").select("*", { count: "exact", head: true }).eq("categorie", "nouvelles_ames"),
-        supabase.from("cultes").select("*").gte("date", sevenDaysAgo).order("date", { ascending: false }).limit(10),
-        supabase.from("presences").select("statut, culte:cultes!inner(date, type_culte)").gte("cultes.date", sevenDaysAgo),
+        supabase.from("membres").select("*", { count: "exact", head: true }).eq("actif", true).eq("temple_id", activeTempleId!),
+        supabase.from("membres").select("*", { count: "exact", head: true }).eq("categorie", "nouvelles_ames").eq("temple_id", activeTempleId!),
+        supabase.from("cultes").select("*").eq("temple_id", activeTempleId!).gte("date", sevenDaysAgo).order("date", { ascending: false }).limit(10),
+        supabase.from("presences").select("statut, culte:cultes!inner(date, type_culte, temple_id)").eq("cultes.temple_id", activeTempleId!).gte("cultes.date", sevenDaysAgo),
       ]);
 
-      const culteAujourdhui = await supabase.from("cultes").select("id").eq("date", today).maybeSingle();
+      const culteAujourdhui = await supabase.from("cultes").select("id").eq("temple_id", activeTempleId!).eq("date", today).maybeSingle();
       let presentToday = 0, absentToday = 0;
       if (culteAujourdhui.data?.id) {
         const { data: pToday } = await supabase.from("presences").select("statut").eq("culte_id", culteAujourdhui.data.id);
