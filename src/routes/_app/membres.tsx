@@ -14,6 +14,7 @@ import { useState } from "react";
 import { CATEGORIES, categoryLabel } from "@/lib/constants";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useActiveTemple } from "@/hooks/use-active-temple";
 import * as XLSX from "xlsx";
 
 type Membre = {
@@ -38,15 +39,22 @@ export const Route = createFileRoute("/_app/membres")({
 function MembresPage() {
   const qc = useQueryClient();
   const { profile, isAdmin } = useAuth();
+  const { activeTempleId } = useActiveTemple();
+  const scopedTempleId = activeTempleId ?? profile?.temple_id ?? null;
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Membre | null>(null);
 
   const { data: membres = [], isLoading } = useQuery({
-    queryKey: ["membres"],
+    queryKey: ["membres", scopedTempleId],
+    enabled: !!scopedTempleId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("membres").select("*").order("nom");
+      const { data, error } = await supabase
+        .from("membres")
+        .select("*")
+        .eq("temple_id", scopedTempleId!)
+        .order("nom");
       if (error) throw error;
       return data as Membre[];
     },
@@ -68,7 +76,7 @@ function MembresPage() {
       email: String(form.get("email") || "").trim() || null,
       date_entree: String(form.get("date_entree") || "").trim() || null,
       categorie: form.get("categorie") as never,
-      temple_id: profile?.temple_id ?? "",
+      temple_id: scopedTempleId ?? "",
     };
     if (!payload.nom || !payload.prenoms || !payload.categorie || !payload.temple_id) {
       toast.error("Remplissez les champs obligatoires");
