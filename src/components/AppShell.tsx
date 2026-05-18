@@ -1,11 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
-import { TEMPLE_FULL_NAME, APP_TAGLINE, roleLabel } from "@/lib/constants";
+import { useActiveTemple } from "@/hooks/use-active-temple";
+import { APP_TAGLINE, roleLabel } from "@/lib/constants";
 
 const NAV = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -18,7 +20,9 @@ const NAV = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const { profile, role, signOut, isAdmin, isSuperAdmin, isPrincipal, canSeeFinances } = useAuth();
+  const { activeTemple, allTemples, setActiveTempleId, canSwitch } = useActiveTemple();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const templeDisplay = activeTemple?.nom_temple ?? "MCA Connect";
 
   const linkCls = (active: boolean) =>
     `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
@@ -134,9 +138,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button onClick={() => setOpen(true)} className="lg:hidden text-foreground"><Menu className="h-5 w-5" /></button>
           <Logo size={36} className="lg:hidden" />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-foreground lg:text-base">{TEMPLE_FULL_NAME}</div>
+            <div className="flex items-center gap-2 min-w-0">
+              <Building2 className="h-4 w-4 shrink-0 text-primary" />
+              <div className="truncate text-sm font-semibold text-foreground lg:text-base">{templeDisplay}</div>
+            </div>
             <div className="hidden text-xs text-muted-foreground lg:block">{APP_TAGLINE}</div>
           </div>
+          {canSwitch && allTemples.length > 1 && (
+            <div className="flex items-center gap-2">
+              <ArrowLeftRight className="hidden sm:block h-4 w-4 text-muted-foreground" />
+              <Select value={activeTemple?.id ?? ""} onValueChange={setActiveTempleId}>
+                <SelectTrigger className="w-[180px] sm:w-[240px] h-9 text-xs">
+                  <SelectValue placeholder="Switch temple" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allTemples.map((t) => (
+                    <SelectItem key={t.id} value={t.id} className="text-xs">
+                      {t.nom_temple}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </header>
         <main className="p-4 lg:p-8">{children}</main>
       </div>
