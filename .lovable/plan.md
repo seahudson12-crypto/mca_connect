@@ -1,78 +1,116 @@
-## MCA CONNECT — Mise à jour globale V2 (Multi-temples strict + Super Admin Principal + Sécurité finances)
 
-Cette mise à jour est très large. Je propose de la livrer en **4 lots cohérents** pour garder un code propre, testable, et éviter de tout casser. Chaque lot est complet et utilisable.
+# MCA CONNECT — Plateforme multi-temples complète
 
----
-
-### LOT 1 — Fondations base de données & sécurité (le plus critique)
-
-**Migration SQL :**
-- Nouveau rôle `super_admin_principal` ajouté à l'enum `app_role`.
-- Fonction `is_principal(uuid)` + fonction `current_user_temple_id()` (security definer).
-- Fonction `can_access_temple(uuid, uuid)` pour l'isolation.
-- Table `activites_utilisateurs` (login, logout, promotion, suppression, validation, correction, modification) avec `temple_id`.
-- Ajout `actif boolean` sur `profiles` (désactivation comptes).
-- Ajout `derniere_connexion timestamptz` sur `profiles`.
-- Ajout colonnes `couleur_primaire`, `actif` sur `temples`.
-- **Renforcement RLS isolation multi-temples STRICTE** :
-  - `membres`, `cultes`, `presences`, `finances_culte` → SELECT/INSERT/UPDATE/DELETE filtrés par `temple_id = current_user_temple_id()` OU `is_principal/super_admin`.
-  - `finances_culte` → **bloqué pour rôle `utilisateur`** (RLS + UI).
-  - `profiles` → admin_temple voit uniquement les profils de son temple.
-- Trigger `log_activity()` sur insertions/updates sensibles.
-- Trigger anti-suppression du Super Admin Principal.
-- Seed des 2 nouveaux temples : **MCA Casablanca – Philadelphie** et **MCA Bénin – Résurrection**.
+Cette mise à jour est très large. Je propose de la livrer en **5 phases** pour garder un produit utilisable à chaque étape et te permettre de tester / valider au fur et à mesure. Confirme ou demande des ajustements avant que je commence.
 
 ---
 
-### LOT 2 — Authentification multi-temples & écrans modernes
+## Phase 1 — Fondations multi-temples (base technique indispensable)
 
-- **Écran d'accueil "Choisissez votre espace"** : 3 cartes (Super Admin / Admin Temple / Utilisateur), logo MCA, design premium bleu/blanc/or, animations Motion.
-- **Login en 2 étapes** : choix espace → sélection temple obligatoire (sauf Super Admin) → email/password.
-- **Signup** : sélection temple obligatoire, assignation auto `temple_id`.
-- Mot de passe oublié + page `/reset-password`.
-- Toggle afficher/masquer mot de passe.
-- Mise à jour `derniere_connexion` à chaque login.
-- `useAuth` enrichi : `isPrincipal`, `isSuperAdmin`, `isAdminTemple`, `templeId`, `role`.
-- Garde-fou frontend : redirect si utilisateur essaie d'accéder à `/finances` ou `/temples`.
+**Données / Backend**
+- Création des temples :
+  - MCA Casablanca – Temple Philadelphie (Maroc, Casablanca)
+  - MCA Bénin – Temple Résurrection (Bénin)
+  - MCA Treichville – Temple Puissance et Gloire (existant, conservé)
+- Champ `temple_id` obligatoire sur tous les modules métier (déjà en place sur cultes/membres/présences/finances — vérification + corrections).
+- Vérification stricte RLS : isolation totale entre temples (un utilisateur ne voit JAMAIS un autre temple), super_admin/principal voient tout.
+- Triggers d'audit (historique) sur finances et changements de rôle.
+- Helper `current_active_temple_id()` pour super admins (lit un cookie/préférence pour le "Switch Temple").
 
----
-
-### LOT 3 — Équipe de gestion, promotions sécurisées & dashboard amélioré
-
-- Renommage `Utilisateurs` → **`Équipe de gestion`** avec :
-  - Recherche, filtres (rôle, temple, statut), badges colorés par rôle.
-  - Boutons "Promouvoir en Admin", "Promouvoir en Super Admin" (Principal uniquement), "Retirer les droits", "Désactiver compte", "Réinitialiser mot de passe".
-  - **Modal de confirmation avec mot de passe Super Admin** avant toute promotion.
-  - Affichage dernière connexion.
-- Protection : seul `super_admin_principal` peut créer/supprimer un `super_admin`. Le Principal n'est jamais supprimable (trigger DB).
-- **Dashboard Super Admin enrichi** : Total membres, présences, absences, nouvelles âmes, total temples, total utilisateurs, finances globales, graphiques mensuels (Recharts).
-- **Dashboard Utilisateur épuré** : Membres, Cultes, Présences, Rapports, WhatsApp, Historique personnel — **finances retirées de la sidebar et des stats**.
-- Comparaison inter-temples (Super Admin) sur la page Temples.
+**Frontend**
+- Inscription / Signup : sélecteur **obligatoire** "Choisissez votre temple" (liste des temples actifs).
+- Badge temple connecté (nom + logo) dans le header de l'AppShell.
+- Sélecteur **Switch Temple** visible uniquement pour super_admin / super_admin_principal.
 
 ---
 
-### LOT 4 — Module Temples avancé & finitions
+## Phase 2 — Rôles, permissions et validation hiérarchique
 
-- Page `/temples` (Super Admin Principal) : création dynamique d'un temple avec tous les champs (nom, ville, commune, pays, pasteur, email, téléphone, logo, couleur). Désactivation/réactivation.
-- Stats par temple sur la fiche temple.
-- Page `/activites` (Super Admin) : journal complet (connexions, promotions, validations, corrections).
-- Mode sombre déjà géré → vérification.
-- Polish design : badges rôles, animations légères Motion, responsive mobile vérifié.
-- Vérification du build après chaque lot.
+**Permissions par rôle (UI + RLS)**
+- `utilisateur` : présences (cocher), ajout membres, soumission rapport. **Aucun accès finances** (rubrique masquée + RLS bloquante).
+- `admin_temple` : tout du temple + finances du culte + validation des rapports.
+- `super_admin` / `super_admin_principal` : accès global multi-temples.
+
+**Workflow de validation des rapports de culte**
+- États : `brouillon` → `en_attente_validation` → `valide` → `verrouille`.
+- Utilisateur soumet (`en_attente_validation`).
+- Admin temple voit la file d'attente, peut corriger, ajoute finances, valide.
+- Après validation : rapport verrouillé (non modifiable par l'utilisateur), envoyé automatiquement (notification) au super admin.
+
+**Module Finances (admin temple uniquement)**
+- Champs : offrandes, dîmes, actions de grâce, semences, contributions spéciales, dépenses, observations.
+- Calcul auto : total recettes, total dépenses, solde.
+- Lié obligatoirement à un culte (contrainte DB déjà présente).
+- Historique complet des modifications (qui, quand, ancienne → nouvelle valeur).
 
 ---
 
-### Notes techniques
+## Phase 3 — Dashboards & rapports
 
-- **Stack** : TanStack Start + Supabase (Lovable Cloud), serverFn pour les opérations sensibles (promotions, désactivations).
-- **Sécurité** : double couche systématique → UI cache + RLS bloque. Le module finances est invisible ET inaccessible aux utilisateurs (même via URL directe).
-- **Compatibilité** : tout le code existant (cultes, membres, présences, finances, historique) reste fonctionnel — on ajoute, on ne casse pas.
-- **WhatsApp Cloud API**, **OTP/2FA**, **fusion de temples** : marqués comme "prévu V3" — non implémentés dans cette mise à jour mais l'architecture les permet.
+**Dashboard utilisateur / admin temple**
+- Scopé à son temple uniquement.
+- Stats : membres, présences, nouvelles âmes, cultes du mois.
+
+**Dashboard super admin — vue globale**
+- Totaux globaux + ventilation par temple.
+- Graphiques comparatifs (présences, finances, nouvelles âmes, croissance).
+- Section **"Rapports des temples"** : liste filtrable par temple/date, détail complet d'un rapport validé (infos culte, présences par catégorie avec %, nouvelles âmes, finances, observations), export PDF.
+
+**Rapport détaillé automatique** (généré à la validation)
+- Infos culte, stats globales, ventilation par catégorie (Hommes adultes, Femmes adultes, Jeunes hommes, Jeunes filles, Groupe musical, Ecodim, Moniteurs, Appelés, Serviteurs de Dieu, Pasteurs, Nouvelles âmes) avec présents/absents/%.
+- Bloc financier complet.
 
 ---
 
-### Question avant de démarrer
+## Phase 4 — Nouvelles âmes, fiches membres, notifications
 
-Je dois savoir **qui est le Super Admin Principal** pour le marquer dans la DB. Donnez-moi l'email du compte qui doit recevoir ce rôle ultime (ou je peux promouvoir le premier compte `super_admin` existant automatiquement).
+**Module Nouvelles âmes**
+- Rubrique dédiée dans Membres.
+- Suivi : date d'arrivée, présences, absences, dernière présence, fréquence.
+- Statut de progression : Nouveau / En suivi / Régulier / Intégré (calcul auto basé sur présences).
+- Transfert vers autre catégorie (admin temple / super admin) avec historique conservé.
 
-Une fois validé, je démarre par le **LOT 1 (migration)** puis enchaîne les lots 2, 3, 4.
+**Fiche détaillée membre**
+- Bouton "Voir la fiche" sur chaque membre.
+- Page complète : infos perso, photo, stats présences (total, taux, dernière), historique cultes, suivi spirituel (observations), historique catégories.
+- Actions : modifier, changer catégorie, imprimer, envoyer WhatsApp.
+
+**Centre de notifications**
+- Icône cloche dans le header.
+- Notifications auto : anniversaires, absences répétées (≥3-4 cultes), nouvelles âmes inactives, rapports non validés, finances manquantes, nouvelles inscriptions, promotions de rôle.
+
+---
+
+## Phase 5 — Assistant IA MCA
+
+- Rubrique "Assistant IA MCA" dans dashboards admin/super admin.
+- Powered by Lovable AI Gateway (Gemini 3 Flash par défaut).
+- Tools (function calling) connectés à la DB pour répondre à :
+  - "Quel temple a le plus de présences ce mois ?"
+  - "Combien de nouvelles âmes ce trimestre ?"
+  - "Quels membres sont absents depuis longtemps ?"
+  - Résumés automatiques, comparatifs, alertes suggérées.
+- Streaming chat (AI SDK + `useChat`).
+- Respect du scope : admin temple → données de son temple uniquement ; super admin → tous les temples.
+
+---
+
+## Détails techniques
+
+- **Stack** : TanStack Start + Supabase (Lovable Cloud) déjà en place.
+- **Sécurité** : RLS strict + `requireSupabaseAuth` sur tous les server functions sensibles. Tentative de modif d'URL = refus côté serveur.
+- **Historique financier** : trigger Postgres qui log dans `historique_modifications`.
+- **PDF** : génération côté client (jsPDF / react-pdf) pour rapports.
+- **IA** : `createServerFn` + `streamText` AI SDK + tools (`get_temple_stats`, `compare_temples`, `find_inactive_members`, etc.).
+
+---
+
+## Question avant de démarrer
+
+Cette mise à jour représente environ **5 phases** de travail substantiel. Souhaites-tu :
+
+**A.** Que je lance **tout d'un coup** (livraison complète, plus longue, un seul gros lot).
+**B.** Que je commence par la **Phase 1** (création des temples + isolation + signup avec choix temple + switch temple) et que tu valides avant que je continue. ← **recommandé**
+**C.** Une autre priorité (par ex. : "commence d'abord par l'Assistant IA" ou "fais d'abord les finances et la validation").
+
+Dis-moi A, B ou C et j'attaque immédiatement.
