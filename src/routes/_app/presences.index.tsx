@@ -8,13 +8,22 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { culteTypeLabel } from "@/lib/constants";
 
+import { useActiveTemple } from "@/hooks/use-active-temple";
+
 export const Route = createFileRoute("/_app/presences/")({ component: PresencesIndex });
 
 function PresencesIndex() {
+  const { activeTempleId } = useActiveTemple();
   const { data: cultes = [], isLoading } = useQuery({
-    queryKey: ["cultes-presences"],
+    queryKey: ["cultes-presences", activeTempleId],
+    enabled: !!activeTempleId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("cultes").select("*").order("date", { ascending: false }).limit(50);
+      const { data, error } = await supabase
+        .from("cultes")
+        .select("*")
+        .eq("temple_id", activeTempleId!)
+        .order("date", { ascending: false })
+        .limit(50);
       if (error) throw error;
       return data;
     },

@@ -12,15 +12,12 @@ export interface Temple {
 }
 
 interface ActiveTempleCtx {
-  /** Le temple actuellement affiché (peut différer du temple de l'utilisateur si super admin a switché). */
   activeTemple: Temple | null;
-  /** Le temple de rattachement de l'utilisateur. */
+  /** ID du temple actif — à utiliser pour filtrer toutes les requêtes scoppées au temple. */
+  activeTempleId: string | null;
   userTemple: Temple | null;
-  /** Tous les temples (uniquement chargés pour les super admins). */
   allTemples: Temple[];
-  /** Change le temple actif (super admin uniquement). */
   setActiveTempleId: (id: string) => void;
-  /** True si l'utilisateur peut switcher entre temples. */
   canSwitch: boolean;
   loading: boolean;
 }
@@ -80,6 +77,7 @@ export function ActiveTempleProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider
       value={{
         activeTemple,
+        activeTempleId: activeTemple?.id ?? activeTempleId ?? null,
         userTemple,
         allTemples,
         setActiveTempleId,
