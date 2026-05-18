@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useActiveTemple } from "@/hooks/use-active-temple";
 import { logChange, formatXof } from "@/lib/audit";
 
 type CulteStatut = "brouillon" | "valide" | "corrige_admin";
@@ -46,25 +47,35 @@ const STATUT_BADGE: Record<CulteStatut, { label: string; cls: string; Icon: type
 function CultesPage() {
   const qc = useQueryClient();
   const { profile, user, isAdmin, isSuperAdmin } = useAuth();
+  const { activeTempleId } = useActiveTemple();
+  const scopedTempleId = activeTempleId ?? profile?.temple_id ?? null;
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<Culte | null>(null);
 
   const { data: cultes = [], isLoading } = useQuery({
-    queryKey: ["cultes"],
+    queryKey: ["cultes", scopedTempleId],
+    enabled: !!scopedTempleId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("cultes").select("*").order("date", { ascending: false });
+      const { data, error } = await supabase
+        .from("cultes")
+        .select("*")
+        .eq("temple_id", scopedTempleId!)
+        .order("date", { ascending: false });
       if (error) throw error;
       return data as Culte[];
     },
   });
 
   const { data: finances = [] } = useQuery({
-    queryKey: ["finances-all"],
-    enabled: isAdmin,
+    queryKey: ["finances-all", scopedTempleId],
+    enabled: isAdmin && !!scopedTempleId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("finances_culte").select("*");
+      const { data, error } = await supabase
+        .from("finances_culte")
+        .select("*, culte:cultes!inner(temple_id)")
+        .eq("culte.temple_id", scopedTempleId!);
       if (error) throw error;
-      return data as Finance[];
+      return (data ?? []) as unknown as Finance[];
     },
   });
 
@@ -80,7 +91,7 @@ function CultesPage() {
   };
 
   const handleCreate = async (form: FormData) => {
-    if (!profile?.temple_id || !user) return toast.error("Profil incomplet");
+    if (!scopedTempleId || !user) return toast.error("Profil incomplet");
     const payload = {
       date: form.get("date") as string,
       type_culte: form.get("type_culte") as never,
@@ -92,7 +103,7 @@ function CultesPage() {
       responsable_priere: (form.get("responsable_priere") as string) || null,
       orateur: (form.get("orateur") as string) || null,
       theme_principal: (form.get("theme_principal") as string) || null,
-      temple_id: profile.temple_id,
+      temple_id: scopedTempleId,
       created_by: user.id,
       statut: "brouillon" as CulteStatut,
     };
