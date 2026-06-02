@@ -173,6 +173,18 @@ function MembresPage() {
                   <div className="space-y-1.5"><Label>Email</Label><Input type="email" name="email" defaultValue={editing?.email ?? ""} /></div>
                   <div className="space-y-1.5"><Label>Date d'entrée</Label><Input type="date" name="date_entree" defaultValue={editing?.date_entree ?? ""} /></div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label>Date de naissance</Label><Input type="date" name="date_naissance" defaultValue={editing?.date_naissance ?? ""} /></div>
+                  <div className="space-y-1.5"><Label>Adresse</Label><Input name="adresse" defaultValue={editing?.adresse ?? ""} /></div>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Informations professionnelles</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5"><Label>Profession</Label><Input name="profession" placeholder="ex: Enseignant, Pasteur…" defaultValue={editing?.profession ?? ""} /></div>
+                    <div className="space-y-1.5"><Label>Secteur d'activité</Label><Input name="secteur_activite" placeholder="ex: Éducation, Santé…" defaultValue={editing?.secteur_activite ?? ""} /></div>
+                  </div>
+                  <div className="space-y-1.5 mt-3"><Label>Entreprise (optionnel)</Label><Input name="entreprise" defaultValue={editing?.entreprise ?? ""} /></div>
+                </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
                   <Button type="submit" className="gradient-brand text-primary-foreground border-0">Enregistrer</Button>
