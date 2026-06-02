@@ -26,6 +26,11 @@ type Membre = {
   whatsapp: string | null;
   email: string | null;
   date_entree: string | null;
+  date_naissance: string | null;
+  adresse: string | null;
+  profession: string | null;
+  secteur_activite: string | null;
+  entreprise: string | null;
   categorie: string;
   date_ajout: string;
   temple_id: string;
@@ -75,6 +80,11 @@ function MembresPage() {
       whatsapp: String(form.get("whatsapp") || "").trim() || null,
       email: String(form.get("email") || "").trim() || null,
       date_entree: String(form.get("date_entree") || "").trim() || null,
+      date_naissance: String(form.get("date_naissance") || "").trim() || null,
+      adresse: String(form.get("adresse") || "").trim() || null,
+      profession: String(form.get("profession") || "").trim() || null,
+      secteur_activite: String(form.get("secteur_activite") || "").trim() || null,
+      entreprise: String(form.get("entreprise") || "").trim() || null,
       categorie: form.get("categorie") as never,
       temple_id: scopedTempleId ?? "",
     };
@@ -108,7 +118,10 @@ function MembresPage() {
     const rows = filtered.map((m) => ({
       Nom: m.nom, Prénoms: m.prenoms, Sexe: m.sexe ?? "", Téléphone: m.telephone ?? "",
       WhatsApp: m.whatsapp ?? "", Email: m.email ?? "", Catégorie: categoryLabel(m.categorie),
-      "Date d'entrée": m.date_entree ?? "", "Date d'ajout": m.date_ajout,
+      "Date d'entrée": m.date_entree ?? "", "Date de naissance": m.date_naissance ?? "",
+      Adresse: m.adresse ?? "", Profession: m.profession ?? "",
+      "Secteur d'activité": m.secteur_activite ?? "", Entreprise: m.entreprise ?? "",
+      "Date d'ajout": m.date_ajout,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -159,6 +172,18 @@ function MembresPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5"><Label>Email</Label><Input type="email" name="email" defaultValue={editing?.email ?? ""} /></div>
                   <div className="space-y-1.5"><Label>Date d'entrée</Label><Input type="date" name="date_entree" defaultValue={editing?.date_entree ?? ""} /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label>Date de naissance</Label><Input type="date" name="date_naissance" defaultValue={editing?.date_naissance ?? ""} /></div>
+                  <div className="space-y-1.5"><Label>Adresse</Label><Input name="adresse" defaultValue={editing?.adresse ?? ""} /></div>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Informations professionnelles</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5"><Label>Profession</Label><Input name="profession" placeholder="ex: Enseignant, Pasteur…" defaultValue={editing?.profession ?? ""} /></div>
+                    <div className="space-y-1.5"><Label>Secteur d'activité</Label><Input name="secteur_activite" placeholder="ex: Éducation, Santé…" defaultValue={editing?.secteur_activite ?? ""} /></div>
+                  </div>
+                  <div className="space-y-1.5 mt-3"><Label>Entreprise (optionnel)</Label><Input name="entreprise" defaultValue={editing?.entreprise ?? ""} /></div>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
