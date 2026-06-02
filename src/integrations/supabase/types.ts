@@ -225,14 +225,19 @@ export type Database = {
       membres: {
         Row: {
           actif: boolean
+          adresse: string | null
           categorie: Database["public"]["Enums"]["membre_categorie"]
           created_at: string
           date_ajout: string
           date_entree: string | null
+          date_naissance: string | null
           email: string | null
+          entreprise: string | null
           id: string
           nom: string
           prenoms: string
+          profession: string | null
+          secteur_activite: string | null
           sexe: Database["public"]["Enums"]["sexe"] | null
           telephone: string | null
           temple_id: string
@@ -241,14 +246,19 @@ export type Database = {
         }
         Insert: {
           actif?: boolean
+          adresse?: string | null
           categorie: Database["public"]["Enums"]["membre_categorie"]
           created_at?: string
           date_ajout?: string
           date_entree?: string | null
+          date_naissance?: string | null
           email?: string | null
+          entreprise?: string | null
           id?: string
           nom: string
           prenoms: string
+          profession?: string | null
+          secteur_activite?: string | null
           sexe?: Database["public"]["Enums"]["sexe"] | null
           telephone?: string | null
           temple_id: string
@@ -257,14 +267,19 @@ export type Database = {
         }
         Update: {
           actif?: boolean
+          adresse?: string | null
           categorie?: Database["public"]["Enums"]["membre_categorie"]
           created_at?: string
           date_ajout?: string
           date_entree?: string | null
+          date_naissance?: string | null
           email?: string | null
+          entreprise?: string | null
           id?: string
           nom?: string
           prenoms?: string
+          profession?: string | null
+          secteur_activite?: string | null
           sexe?: Database["public"]["Enums"]["sexe"] | null
           telephone?: string | null
           temple_id?: string
