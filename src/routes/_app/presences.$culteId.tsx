@@ -47,9 +47,15 @@ function PointagePage() {
   });
 
   const { data: membres = [] } = useQuery({
-    queryKey: ["membres-actifs"],
+    queryKey: ["membres-actifs", culte?.temple_id],
+    enabled: !!culte?.temple_id,
     queryFn: async () => {
-      const { data, error } = await supabase.from("membres").select("id,nom,prenoms,categorie,whatsapp,telephone").eq("actif", true).order("nom");
+      const { data, error } = await supabase
+        .from("membres")
+        .select("id,nom,prenoms,categorie,whatsapp,telephone")
+        .eq("actif", true)
+        .eq("temple_id", culte!.temple_id)
+        .order("nom");
       if (error) throw error;
       return data as Membre[];
     },
@@ -117,7 +123,7 @@ function PointagePage() {
       telephone: (form.get("telephone") as string) || null,
       whatsapp: (form.get("whatsapp") as string) || null,
       sexe: (form.get("sexe") as "M" | "F") || null,
-      temple_id: profile?.temple_id ?? "",
+      temple_id: culte?.temple_id ?? profile?.temple_id ?? "",
     };
     if (!payload.nom || !payload.prenoms || !payload.categorie || !payload.temple_id) return toast.error("Champs obligatoires manquants");
     const { data, error } = await supabase.from("membres").insert(payload).select().maybeSingle();
