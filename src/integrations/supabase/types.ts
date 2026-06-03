@@ -222,6 +222,53 @@ export type Database = {
         }
         Relationships: []
       }
+      inscriptions_formation: {
+        Row: {
+          created_at: string
+          date_completion: string | null
+          date_inscription: string
+          id: string
+          membre_id: string
+          notes: string | null
+          programme_id: string
+          progression: number
+          statut: Database["public"]["Enums"]["formation_statut"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_completion?: string | null
+          date_inscription?: string
+          id?: string
+          membre_id: string
+          notes?: string | null
+          programme_id: string
+          progression?: number
+          statut?: Database["public"]["Enums"]["formation_statut"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_completion?: string | null
+          date_inscription?: string
+          id?: string
+          membre_id?: string
+          notes?: string | null
+          programme_id?: string
+          progression?: number
+          statut?: Database["public"]["Enums"]["formation_statut"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inscriptions_formation_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes_formation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       membres: {
         Row: {
           actif: boolean
@@ -415,6 +462,60 @@ export type Database = {
           },
         ]
       }
+      programmes_formation: {
+        Row: {
+          actif: boolean
+          annee: number
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          description: string | null
+          id: string
+          nom: string
+          objectif_participants: number
+          responsable: string | null
+          temple_id: string
+          trimestre: Database["public"]["Enums"]["trimestre_type"]
+          type_formation: Database["public"]["Enums"]["formation_type"]
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          annee: number
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          description?: string | null
+          id?: string
+          nom: string
+          objectif_participants?: number
+          responsable?: string | null
+          temple_id: string
+          trimestre?: Database["public"]["Enums"]["trimestre_type"]
+          type_formation?: Database["public"]["Enums"]["formation_type"]
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          annee?: number
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          description?: string | null
+          id?: string
+          nom?: string
+          objectif_participants?: number
+          responsable?: string | null
+          temple_id?: string
+          trimestre?: Database["public"]["Enums"]["trimestre_type"]
+          type_formation?: Database["public"]["Enums"]["formation_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       role_changes: {
         Row: {
           changed_by: string | null
@@ -559,6 +660,14 @@ export type Database = {
         | "veillee"
         | "reunion_speciale"
         | "jeune_priere"
+      formation_statut: "inscrit" | "en_cours" | "complete" | "abandonne"
+      formation_type:
+        | "discipulat"
+        | "formation_biblique"
+        | "formation_ministerielle"
+        | "seminaire"
+        | "ecole_dimanche"
+        | "autre"
       membre_categorie:
         | "hommes_adultes"
         | "femmes_adultes"
@@ -582,6 +691,7 @@ export type Database = {
         | "autre"
       presence_statut: "present" | "absent" | "excuse"
       sexe: "M" | "F"
+      trimestre_type: "T1" | "T2" | "T3" | "T4" | "annuel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -723,6 +833,15 @@ export const Constants = {
         "reunion_speciale",
         "jeune_priere",
       ],
+      formation_statut: ["inscrit", "en_cours", "complete", "abandonne"],
+      formation_type: [
+        "discipulat",
+        "formation_biblique",
+        "formation_ministerielle",
+        "seminaire",
+        "ecole_dimanche",
+        "autre",
+      ],
       membre_categorie: [
         "hommes_adultes",
         "femmes_adultes",
@@ -748,6 +867,7 @@ export const Constants = {
       ],
       presence_statut: ["present", "absent", "excuse"],
       sexe: ["M", "F"],
+      trimestre_type: ["T1", "T2", "T3", "T4", "annuel"],
     },
   },
 } as const
