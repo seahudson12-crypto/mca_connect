@@ -342,7 +342,7 @@ async function computeActuals(templeId: string, year: number) {
     supabase.from("membres").select("id", { count: "exact", head: true })
       .eq("temple_id", templeId).eq("actif", true),
     supabase.from("membres").select("id", { count: "exact", head: true })
-      .eq("temple_id", templeId).eq("categorie", "nouvelle_ame")
+      .eq("temple_id", templeId).eq("categorie", "nouvelles_ames")
       .gte("date_ajout", start).lte("date_ajout", end),
     supabase.from("cultes").select("id").eq("temple_id", templeId)
       .gte("date", start).lte("date", end),
