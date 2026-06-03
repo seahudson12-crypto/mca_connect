@@ -21,8 +21,10 @@ import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppRapportsRouteImport } from './routes/_app/rapports'
 import { Route as AppParametresRouteImport } from './routes/_app/parametres'
 import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
+import { Route as AppFormationsRouteImport } from './routes/_app/formations'
 import { Route as AppMembresRouteImport } from './routes/_app/membres'
 import { Route as AppHistoriqueRouteImport } from './routes/_app/historique'
+import { Route as AppFormationsRouteImport } from './routes/_app/formations'
 import { Route as AppFinancesRouteImport } from './routes/_app/finances'
 import { Route as AppExportsRouteImport } from './routes/_app/exports'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -90,6 +92,11 @@ const AppObjectifsRoute = AppObjectifsRouteImport.update({
   path: '/objectifs',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFormationsRoute = AppFormationsRouteImport.update({
+  id: '/formations',
+  path: '/formations',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMembresRoute = AppMembresRouteImport.update({
   id: '/membres',
   path: '/membres',
@@ -98,6 +105,11 @@ const AppMembresRoute = AppMembresRouteImport.update({
 const AppHistoriqueRoute = AppHistoriqueRouteImport.update({
   id: '/historique',
   path: '/historique',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFormationsRoute = AppFormationsRouteImport.update({
+  id: '/formations',
+  path: '/formations',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFinancesRoute = AppFinancesRouteImport.update({
@@ -147,9 +159,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
   '/finances': typeof AppFinancesRoute
+  '/formations': typeof AppFormationsRoute
   '/historique': typeof AppHistoriqueRoute
   '/membres': typeof AppMembresRoute
   '/objectifs': typeof AppObjectifsRoute
+  '/formations': typeof AppFormationsRoute
   '/parametres': typeof AppParametresRoute
   '/rapports': typeof AppRapportsRoute
   '/temples': typeof AppTemplesRoute
@@ -169,9 +183,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
   '/finances': typeof AppFinancesRoute
+  '/formations': typeof AppFormationsRoute
   '/historique': typeof AppHistoriqueRoute
   '/membres': typeof AppMembresRoute
   '/objectifs': typeof AppObjectifsRoute
+  '/formations': typeof AppFormationsRoute
   '/parametres': typeof AppParametresRoute
   '/rapports': typeof AppRapportsRoute
   '/temples': typeof AppTemplesRoute
@@ -193,9 +209,11 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/exports': typeof AppExportsRoute
   '/_app/finances': typeof AppFinancesRoute
+  '/_app/formations': typeof AppFormationsRoute
   '/_app/historique': typeof AppHistoriqueRoute
   '/_app/membres': typeof AppMembresRoute
   '/_app/objectifs': typeof AppObjectifsRoute
+  '/_app/formations': typeof AppFormationsRoute
   '/_app/parametres': typeof AppParametresRoute
   '/_app/rapports': typeof AppRapportsRoute
   '/_app/temples': typeof AppTemplesRoute
@@ -217,9 +235,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exports'
     | '/finances'
+    | '/formations'
     | '/historique'
     | '/membres'
     | '/objectifs'
+    | '/formations'
     | '/parametres'
     | '/rapports'
     | '/temples'
@@ -239,9 +259,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exports'
     | '/finances'
+    | '/formations'
     | '/historique'
     | '/membres'
     | '/objectifs'
+    | '/formations'
     | '/parametres'
     | '/rapports'
     | '/temples'
@@ -262,9 +284,11 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/exports'
     | '/_app/finances'
+    | '/_app/formations'
     | '/_app/historique'
     | '/_app/membres'
     | '/_app/objectifs'
+    | '/_app/formations'
     | '/_app/parametres'
     | '/_app/rapports'
     | '/_app/temples'
@@ -369,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObjectifsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/formations': {
+      id: '/_app/formations'
+      path: '/formations'
+      fullPath: '/formations'
+      preLoaderRoute: typeof AppFormationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/membres': {
       id: '/_app/membres'
       path: '/membres'
@@ -381,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/historique'
       fullPath: '/historique'
       preLoaderRoute: typeof AppHistoriqueRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/formations': {
+      id: '/_app/formations'
+      path: '/formations'
+      fullPath: '/formations'
+      preLoaderRoute: typeof AppFormationsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/finances': {
@@ -441,9 +479,11 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppExportsRoute: typeof AppExportsRoute
   AppFinancesRoute: typeof AppFinancesRoute
+  AppFormationsRoute: typeof AppFormationsRoute
   AppHistoriqueRoute: typeof AppHistoriqueRoute
   AppMembresRoute: typeof AppMembresRoute
   AppObjectifsRoute: typeof AppObjectifsRoute
+  AppFormationsRoute: typeof AppFormationsRoute
   AppParametresRoute: typeof AppParametresRoute
   AppRapportsRoute: typeof AppRapportsRoute
   AppTemplesRoute: typeof AppTemplesRoute
@@ -459,9 +499,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppExportsRoute: AppExportsRoute,
   AppFinancesRoute: AppFinancesRoute,
+  AppFormationsRoute: AppFormationsRoute,
   AppHistoriqueRoute: AppHistoriqueRoute,
   AppMembresRoute: AppMembresRoute,
   AppObjectifsRoute: AppObjectifsRoute,
+  AppFormationsRoute: AppFormationsRoute,
   AppParametresRoute: AppParametresRoute,
   AppRapportsRoute: AppRapportsRoute,
   AppTemplesRoute: AppTemplesRoute,
