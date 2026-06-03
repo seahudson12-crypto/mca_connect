@@ -123,7 +123,7 @@ function ObjectifsPage() {
           .update(payload).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("objectifs_temple" as never).insert(payload as never as never);
+        const { error } = await (supabase.from("objectifs_temple" as never) as never as { insert: (p: unknown) => Promise<{ error: Error | null }> }).insert(payload);
         if (error) throw error;
       }
     },
