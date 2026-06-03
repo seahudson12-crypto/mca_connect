@@ -48,6 +48,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
       )}
 
+      <Link to="/objectifs" onClick={() => setOpen(false)} className={linkCls(path === "/objectifs")}>
+        <Target className="h-4 w-4" /> Objectifs
+      </Link>
+
+
       {isAdmin && (
         <>
           <div className="mt-4 mb-1 px-3 text-xs font-semibold uppercase text-sidebar-foreground/60">
