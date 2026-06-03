@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <Link to="/objectifs" onClick={() => setOpen(false)} className={linkCls(path === "/objectifs")}>
         <Target className="h-4 w-4" /> Objectifs
+      </Link>
+
+      <Link to="/formations" onClick={() => setOpen(false)} className={linkCls(path === "/formations")}>
+        <GraduationCap className="h-4 w-4" /> Formation & Discipulat
       </Link>
 
 
