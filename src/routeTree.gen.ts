@@ -151,7 +151,6 @@ export interface FileRoutesByFullPath {
   '/membres': typeof AppMembresRoute
   '/objectifs': typeof AppObjectifsRoute
   '/parametres': typeof AppParametresRoute
-  '/objectifs': typeof AppObjectifsRoute
   '/rapports': typeof AppRapportsRoute
   '/temples': typeof AppTemplesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
