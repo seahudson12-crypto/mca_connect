@@ -118,12 +118,15 @@ function ObjectifsPage() {
 
   const upsertM = useMutation({
     mutationFn: async (payload: Partial<Objectif>) => {
+      const table = supabase.from("objectifs_temple" as never) as unknown as {
+        update: (p: unknown) => { eq: (k: string, v: unknown) => Promise<{ error: Error | null }> };
+        insert: (p: unknown) => Promise<{ error: Error | null }>;
+      };
       if (payload.id) {
-        const { error } = await supabase.from("objectifs_temple" as never)
-          .update(payload).eq("id", payload.id);
+        const { error } = await table.update(payload).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await (supabase.from("objectifs_temple" as never) as never as { insert: (p: unknown) => Promise<{ error: Error | null }> }).insert(payload);
+        const { error } = await table.insert(payload);
         if (error) throw error;
       }
     },
