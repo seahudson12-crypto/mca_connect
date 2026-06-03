@@ -19,7 +19,6 @@ import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppRapportsRouteImport } from './routes/_app/rapports'
-import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
 import { Route as AppParametresRouteImport } from './routes/_app/parametres'
 import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
 import { Route as AppMembresRouteImport } from './routes/_app/membres'
@@ -79,6 +78,11 @@ const AppTemplesRoute = AppTemplesRouteImport.update({
 const AppRapportsRoute = AppRapportsRouteImport.update({
   id: '/rapports',
   path: '/rapports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppObjectifsRoute = AppObjectifsRouteImport.update({
+  id: '/objectifs',
+  path: '/objectifs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppParametresRoute = AppParametresRouteImport.update({
