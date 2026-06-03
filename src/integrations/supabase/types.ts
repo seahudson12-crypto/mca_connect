@@ -296,6 +296,45 @@ export type Database = {
           },
         ]
       }
+      objectifs_temple: {
+        Row: {
+          annee: number
+          created_at: string
+          created_by: string | null
+          id: string
+          libelle: string | null
+          notes: string | null
+          temple_id: string
+          type_objectif: Database["public"]["Enums"]["objectif_type"]
+          updated_at: string
+          valeur_cible: number
+        }
+        Insert: {
+          annee: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          libelle?: string | null
+          notes?: string | null
+          temple_id: string
+          type_objectif: Database["public"]["Enums"]["objectif_type"]
+          updated_at?: string
+          valeur_cible?: number
+        }
+        Update: {
+          annee?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          libelle?: string | null
+          notes?: string | null
+          temple_id?: string
+          type_objectif?: Database["public"]["Enums"]["objectif_type"]
+          updated_at?: string
+          valeur_cible?: number
+        }
+        Relationships: []
+      }
       presences: {
         Row: {
           created_at: string
@@ -532,6 +571,15 @@ export type Database = {
         | "serviteurs_de_dieu"
         | "nouvelles_ames"
         | "pasteurs"
+      objectif_type:
+        | "membres"
+        | "nouvelles_ames"
+        | "baptemes"
+        | "visiteurs"
+        | "presence_moyenne"
+        | "offrandes"
+        | "dimes"
+        | "autre"
       presence_statut: "present" | "absent" | "excuse"
       sexe: "M" | "F"
     }
@@ -687,6 +735,16 @@ export const Constants = {
         "serviteurs_de_dieu",
         "nouvelles_ames",
         "pasteurs",
+      ],
+      objectif_type: [
+        "membres",
+        "nouvelles_ames",
+        "baptemes",
+        "visiteurs",
+        "presence_moyenne",
+        "offrandes",
+        "dimes",
+        "autre",
       ],
       presence_statut: ["present", "absent", "excuse"],
       sexe: ["M", "F"],
