@@ -80,11 +80,6 @@ const AppRapportsRoute = AppRapportsRouteImport.update({
   path: '/rapports',
   getParentRoute: () => AppRoute,
 } as any)
-const AppObjectifsRoute = AppObjectifsRouteImport.update({
-  id: '/objectifs',
-  path: '/objectifs',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppParametresRoute = AppParametresRouteImport.update({
   id: '/parametres',
   path: '/parametres',
@@ -156,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/membres': typeof AppMembresRoute
   '/objectifs': typeof AppObjectifsRoute
   '/parametres': typeof AppParametresRoute
+  '/objectifs': typeof AppObjectifsRoute
   '/rapports': typeof AppRapportsRoute
   '/temples': typeof AppTemplesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
