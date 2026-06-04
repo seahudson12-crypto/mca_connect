@@ -66,13 +66,17 @@ export function generateRapportPdf({
     14, y,
   );
   y += 6;
+  const hasMultiOrateurs = Array.isArray(orateurs) && orateurs.length > 0;
+  // Règle module 44 : ne pas afficher le responsable prière si la prière intense est désactivée
+  const priereActive = culte.priere_intense_active !== false;
   const infos: Array<[string, string | null | undefined]> = [
     ["Horaire", [culte.heure_debut, culte.heure_fin].filter(Boolean).join(" – ") || null],
     ["Président", culte.president],
     ["Thème présidence", culte.theme_presidence],
     ["Versets", culte.versets],
-    ["Responsable prière", culte.responsable_priere],
-    ["Orateur", culte.orateur],
+    ["Responsable prière", priereActive ? culte.responsable_priere : null],
+    // Si on a plusieurs orateurs, on les rendra en bloc dédié juste après
+    ["Orateur", hasMultiOrateurs ? null : culte.orateur],
     ["Thème principal", culte.theme_principal],
   ];
   infos.forEach(([k, v]) => {
@@ -84,6 +88,34 @@ export function generateRapportPdf({
       y += 5 * split.length;
     }
   });
+
+  // Module 45 : bloc multi-orateurs
+  if (hasMultiOrateurs) {
+    y += 2;
+    doc.setFont(undefined as never, "bold");
+    doc.setFontSize(11);
+    doc.text("Orateurs :", 14, y);
+    doc.setFont(undefined as never, "normal");
+    doc.setFontSize(9);
+    y += 5;
+    orateurs!.forEach((o, i) => {
+      const header = `${i + 1}. ${o.nom}${o.fonction ? ` (${o.fonction})` : ""}`;
+      doc.setFont(undefined as never, "bold");
+      doc.text(header, 18, y);
+      doc.setFont(undefined as never, "normal");
+      y += 5;
+      if (o.theme) {
+        const split = doc.splitTextToSize(`Thème : ${o.theme}`, 175);
+        doc.text(split, 22, y);
+        y += 4.5 * split.length;
+      }
+      if (o.versets) {
+        doc.text(`Versets : ${o.versets}`, 22, y);
+        y += 5;
+      }
+    });
+    doc.setFontSize(10);
+  }
 
   // Stats globales
   const presMap = new Map(presences.map((p) => [p.membre_id, p.statut]));
