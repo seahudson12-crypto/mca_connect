@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Save, Plus, Send, FileDown, ArrowLeft, UserCheck, UserX, Sparkles } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import { CATEGORIES, categoryLabel, culteTypeLabel, TEMPLE_FULL_NAME } from "@/lib/constants";
+import { CATEGORIES, categoryLabel, culteTypeLabel, TEMPLE_FULL_NAME, isEcodimAllowed, ECODIM_CATEGORY } from "@/lib/constants";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -46,7 +46,7 @@ function PointagePage() {
     },
   });
 
-  const { data: membres = [] } = useQuery({
+  const { data: membresAll = [] } = useQuery({
     queryKey: ["membres-actifs", culte?.temple_id],
     enabled: !!culte?.temple_id,
     queryFn: async () => {
@@ -60,6 +60,14 @@ function PointagePage() {
       return data as Membre[];
     },
   });
+
+  // Règle ECODIM : exclure les enfants pour tout culte qui n'est pas du dimanche
+  const membres = useMemo(
+    () => isEcodimAllowed(culte?.type_culte)
+      ? membresAll
+      : membresAll.filter((m) => m.categorie !== ECODIM_CATEGORY),
+    [membresAll, culte?.type_culte],
+  );
 
   const { data: presencesExistantes = [] } = useQuery({
     queryKey: ["presences", culteId],

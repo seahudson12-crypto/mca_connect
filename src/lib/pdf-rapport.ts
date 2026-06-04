@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CATEGORIES, categoryLabel, culteTypeLabel } from "@/lib/constants";
+import { CATEGORIES, categoryLabel, culteTypeLabel, isEcodimAllowed, ECODIM_CATEGORY } from "@/lib/constants";
 import { formatXof } from "@/lib/audit";
 
 export interface RapportPdfData {
@@ -34,8 +34,12 @@ export interface RapportPdfData {
 type LastTable = { lastAutoTable?: { finalY: number } };
 
 export function generateRapportPdf({
-  culte, temple, membres, presences, finance, includeFinances = true,
+  culte, temple, membres: membresIn, presences, finance, includeFinances = true,
 }: RapportPdfData): jsPDF {
+  // Règle ECODIM : exclure les enfants si le culte n'est pas du dimanche
+  const membres = isEcodimAllowed(culte.type_culte)
+    ? membresIn
+    : membresIn.filter((m) => m.categorie !== ECODIM_CATEGORY);
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
 
