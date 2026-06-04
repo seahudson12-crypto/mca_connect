@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Save, Plus, Send, FileDown, ArrowLeft, UserCheck, UserX, Sparkles } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import { CATEGORIES, categoryLabel, culteTypeLabel, TEMPLE_FULL_NAME } from "@/lib/constants";
+import { CATEGORIES, categoryLabel, culteTypeLabel, TEMPLE_FULL_NAME, isEcodimAllowed, ECODIM_CATEGORY } from "@/lib/constants";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
