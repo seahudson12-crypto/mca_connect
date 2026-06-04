@@ -31,6 +31,8 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
 import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
 import { Route as AppActivitesRouteImport } from './routes/_app/activites'
+import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
+import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
 import { Route as AppPresencesCulteIdRouteImport } from './routes/_app/presences.$culteId'
 
