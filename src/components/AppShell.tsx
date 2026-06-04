@@ -56,6 +56,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <GraduationCap className="h-4 w-4" /> Formation & Discipulat
       </Link>
 
+      <Link to="/themes-annee" onClick={() => setOpen(false)} className={linkCls(path === "/themes-annee")}>
+        <BookOpen className="h-4 w-4" /> Thème de l'année
+      </Link>
+
+
+
+
 
       {isAdmin && (
         <>
