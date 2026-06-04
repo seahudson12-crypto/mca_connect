@@ -20,10 +20,12 @@ export interface RapportPdfData {
     theme_principal?: string | null;
     statut?: string;
     validated_at?: string | null;
+    priere_intense_active?: boolean;
   };
   temple: { nom_temple: string; ville?: string | null; pays?: string | null };
   membres: Array<{ id: string; categorie: string; nom: string; prenoms: string }>;
   presences: Array<{ membre_id: string; statut: string }>;
+  orateurs?: Array<{ nom: string; fonction?: string | null; theme?: string | null; versets?: string | null }>;
   finance?: {
     offrande: number; dime: number; action_grace: number; semence: number;
     contribution_speciale: number; depense: number; solde: number; observation: string | null;
