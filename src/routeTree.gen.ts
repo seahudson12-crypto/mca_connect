@@ -17,6 +17,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
+import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppRapportsRouteImport } from './routes/_app/rapports'
 import { Route as AppParametresRouteImport } from './routes/_app/parametres'
@@ -28,6 +29,7 @@ import { Route as AppFinancesRouteImport } from './routes/_app/finances'
 import { Route as AppExportsRouteImport } from './routes/_app/exports'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
+import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
 import { Route as AppActivitesRouteImport } from './routes/_app/activites'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
 import { Route as AppPresencesCulteIdRouteImport } from './routes/_app/presences.$culteId'
@@ -69,6 +71,11 @@ const AppWhatsappRoute = AppWhatsappRouteImport.update({
 const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
   id: '/utilisateurs',
   path: '/utilisateurs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppThemesAnneeRoute = AppThemesAnneeRouteImport.update({
+  id: '/themes-annee',
+  path: '/themes-annee',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTemplesRoute = AppTemplesRouteImport.update({
@@ -126,6 +133,11 @@ const AppCultesRoute = AppCultesRouteImport.update({
   path: '/cultes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAlertesRoute = AppAlertesRouteImport.update({
+  id: '/alertes',
+  path: '/alertes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppActivitesRoute = AppActivitesRouteImport.update({
   id: '/activites',
   path: '/activites',
@@ -149,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/activites': typeof AppActivitesRoute
+  '/alertes': typeof AppAlertesRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
@@ -160,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/parametres': typeof AppParametresRoute
   '/rapports': typeof AppRapportsRoute
   '/temples': typeof AppTemplesRoute
+  '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
@@ -172,6 +186,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/activites': typeof AppActivitesRoute
+  '/alertes': typeof AppAlertesRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
@@ -183,6 +198,7 @@ export interface FileRoutesByTo {
   '/parametres': typeof AppParametresRoute
   '/rapports': typeof AppRapportsRoute
   '/temples': typeof AppTemplesRoute
+  '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
@@ -197,6 +213,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_app/activites': typeof AppActivitesRoute
+  '/_app/alertes': typeof AppAlertesRoute
   '/_app/cultes': typeof AppCultesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/exports': typeof AppExportsRoute
@@ -208,6 +225,7 @@ export interface FileRoutesById {
   '/_app/parametres': typeof AppParametresRoute
   '/_app/rapports': typeof AppRapportsRoute
   '/_app/temples': typeof AppTemplesRoute
+  '/_app/themes-annee': typeof AppThemesAnneeRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
@@ -222,6 +240,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/activites'
+    | '/alertes'
     | '/cultes'
     | '/dashboard'
     | '/exports'
@@ -233,6 +252,7 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/rapports'
     | '/temples'
+    | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
     | '/presences/$culteId'
@@ -245,6 +265,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/activites'
+    | '/alertes'
     | '/cultes'
     | '/dashboard'
     | '/exports'
@@ -256,6 +277,7 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/rapports'
     | '/temples'
+    | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
     | '/presences/$culteId'
@@ -269,6 +291,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_app/activites'
+    | '/_app/alertes'
     | '/_app/cultes'
     | '/_app/dashboard'
     | '/_app/exports'
@@ -280,6 +303,7 @@ export interface FileRouteTypes {
     | '/_app/parametres'
     | '/_app/rapports'
     | '/_app/temples'
+    | '/_app/themes-annee'
     | '/_app/utilisateurs'
     | '/_app/whatsapp'
     | '/_app/presences/$culteId'
@@ -351,6 +375,13 @@ declare module '@tanstack/react-router' {
       path: '/utilisateurs'
       fullPath: '/utilisateurs'
       preLoaderRoute: typeof AppUtilisateursRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/themes-annee': {
+      id: '/_app/themes-annee'
+      path: '/themes-annee'
+      fullPath: '/themes-annee'
+      preLoaderRoute: typeof AppThemesAnneeRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/temples': {
@@ -430,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCultesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/alertes': {
+      id: '/_app/alertes'
+      path: '/alertes'
+      fullPath: '/alertes'
+      preLoaderRoute: typeof AppAlertesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/activites': {
       id: '/_app/activites'
       path: '/activites'
@@ -456,6 +494,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppActivitesRoute: typeof AppActivitesRoute
+  AppAlertesRoute: typeof AppAlertesRoute
   AppCultesRoute: typeof AppCultesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppExportsRoute: typeof AppExportsRoute
@@ -467,6 +506,7 @@ interface AppRouteChildren {
   AppParametresRoute: typeof AppParametresRoute
   AppRapportsRoute: typeof AppRapportsRoute
   AppTemplesRoute: typeof AppTemplesRoute
+  AppThemesAnneeRoute: typeof AppThemesAnneeRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
@@ -475,6 +515,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppActivitesRoute: AppActivitesRoute,
+  AppAlertesRoute: AppAlertesRoute,
   AppCultesRoute: AppCultesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppExportsRoute: AppExportsRoute,
@@ -486,6 +527,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppParametresRoute: AppParametresRoute,
   AppRapportsRoute: AppRapportsRoute,
   AppTemplesRoute: AppTemplesRoute,
+  AppThemesAnneeRoute: AppThemesAnneeRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
@@ -505,3 +547,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
