@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CATEGORIES, categoryLabel, culteTypeLabel } from "@/lib/constants";
+import { CATEGORIES, categoryLabel, culteTypeLabel, isEcodimAllowed, ECODIM_CATEGORY } from "@/lib/constants";
 import { formatXof } from "@/lib/audit";
 
 export interface RapportPdfData {
