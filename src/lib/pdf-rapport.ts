@@ -36,7 +36,7 @@ export interface RapportPdfData {
 type LastTable = { lastAutoTable?: { finalY: number } };
 
 export function generateRapportPdf({
-  culte, temple, membres: membresIn, presences, finance, includeFinances = true,
+  culte, temple, membres: membresIn, presences, orateurs, finance, includeFinances = true,
 }: RapportPdfData): jsPDF {
   // Règle ECODIM : exclure les enfants si le culte n'est pas du dimanche
   const membres = isEcodimAllowed(culte.type_culte)
