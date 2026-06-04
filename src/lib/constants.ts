@@ -37,3 +37,13 @@ export const culteTypeLabel = (v: string) =>
   CULTE_TYPES.find((c) => c.value === v)?.label ?? v;
 export const roleLabel = (v: string) =>
   ROLES.find((r) => r.value === v)?.label ?? v;
+
+/**
+ * Règle ECODIM : la catégorie ECODIM (enfants) n'est prise en compte
+ * que lors des cultes du dimanche. Pour tous les autres types de cultes,
+ * les enfants ne sont ni affichés, ni pointés, ni comptés.
+ */
+export const isEcodimAllowed = (typeCulte: string | undefined | null): boolean =>
+  typeCulte === "dimanche";
+
+export const ECODIM_CATEGORY = "ecodim";
