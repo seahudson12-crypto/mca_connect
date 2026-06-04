@@ -143,16 +143,6 @@ const AppActivitesRoute = AppActivitesRouteImport.update({
   path: '/activites',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAlertesRoute = AppAlertesRouteImport.update({
-  id: '/alertes',
-  path: '/alertes',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppThemesAnneeRoute = AppThemesAnneeRouteImport.update({
-  id: '/themes-annee',
-  path: '/themes-annee',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppPresencesIndexRoute = AppPresencesIndexRouteImport.update({
   id: '/presences/',
   path: '/presences/',
