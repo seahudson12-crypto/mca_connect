@@ -75,6 +75,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link to="/activites" onClick={() => setOpen(false)} className={linkCls(path === "/activites")}>
             <Activity className="h-4 w-4" /> Activités
           </Link>
+          <Link to="/alertes" onClick={() => setOpen(false)} className={linkCls(path === "/alertes")}>
+            <Bell className="h-4 w-4" /> Alertes
+          </Link>
           <Link to="/exports" onClick={() => setOpen(false)} className={linkCls(path === "/exports")}>
             <Download className="h-4 w-4" /> Exports avancés
           </Link>
