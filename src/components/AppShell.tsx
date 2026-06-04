@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
