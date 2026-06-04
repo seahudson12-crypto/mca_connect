@@ -58,6 +58,7 @@ export type Database = {
           offrandes: number | null
           orateur: string | null
           president: string | null
+          priere_intense_active: boolean
           responsable_priere: string | null
           solde_caisse: number | null
           statut: Database["public"]["Enums"]["culte_statut"]
@@ -83,6 +84,7 @@ export type Database = {
           offrandes?: number | null
           orateur?: string | null
           president?: string | null
+          priere_intense_active?: boolean
           responsable_priere?: string | null
           solde_caisse?: number | null
           statut?: Database["public"]["Enums"]["culte_statut"]
@@ -108,6 +110,7 @@ export type Database = {
           offrandes?: number | null
           orateur?: string | null
           president?: string | null
+          priere_intense_active?: boolean
           responsable_priere?: string | null
           solde_caisse?: number | null
           statut?: Database["public"]["Enums"]["culte_statut"]
@@ -382,6 +385,42 @@ export type Database = {
         }
         Relationships: []
       }
+      orateurs_culte: {
+        Row: {
+          created_at: string
+          culte_id: string
+          fonction: string | null
+          id: string
+          nom: string
+          ordre: number
+          theme: string | null
+          updated_at: string
+          versets: string | null
+        }
+        Insert: {
+          created_at?: string
+          culte_id: string
+          fonction?: string | null
+          id?: string
+          nom: string
+          ordre?: number
+          theme?: string | null
+          updated_at?: string
+          versets?: string | null
+        }
+        Update: {
+          created_at?: string
+          culte_id?: string
+          fonction?: string | null
+          id?: string
+          nom?: string
+          ordre?: number
+          theme?: string | null
+          updated_at?: string
+          versets?: string | null
+        }
+        Relationships: []
+      }
       presences: {
         Row: {
           created_at: string
@@ -546,6 +585,56 @@ export type Database = {
         }
         Relationships: []
       }
+      sous_themes_annee: {
+        Row: {
+          activites: string | null
+          avancement: number
+          created_at: string
+          id: string
+          objectifs: string | null
+          periode_num: number
+          periode_type: Database["public"]["Enums"]["sous_theme_periode"]
+          theme_id: string
+          titre: string
+          updated_at: string
+          versets: string | null
+        }
+        Insert: {
+          activites?: string | null
+          avancement?: number
+          created_at?: string
+          id?: string
+          objectifs?: string | null
+          periode_num: number
+          periode_type: Database["public"]["Enums"]["sous_theme_periode"]
+          theme_id: string
+          titre: string
+          updated_at?: string
+          versets?: string | null
+        }
+        Update: {
+          activites?: string | null
+          avancement?: number
+          created_at?: string
+          id?: string
+          objectifs?: string | null
+          periode_num?: number
+          periode_type?: Database["public"]["Enums"]["sous_theme_periode"]
+          theme_id?: string
+          titre?: string
+          updated_at?: string
+          versets?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sous_themes_annee_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes_annee"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       temples: {
         Row: {
           actif: boolean
@@ -591,6 +680,42 @@ export type Database = {
           telephone?: string | null
           updated_at?: string
           ville?: string | null
+        }
+        Relationships: []
+      }
+      themes_annee: {
+        Row: {
+          annee: number
+          created_at: string
+          created_by: string | null
+          id: string
+          temple_id: string | null
+          titre: string
+          updated_at: string
+          versets: string | null
+          vision: string | null
+        }
+        Insert: {
+          annee: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          temple_id?: string | null
+          titre: string
+          updated_at?: string
+          versets?: string | null
+          vision?: string | null
+        }
+        Update: {
+          annee?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          temple_id?: string | null
+          titre?: string
+          updated_at?: string
+          versets?: string | null
+          vision?: string | null
         }
         Relationships: []
       }
@@ -691,6 +816,7 @@ export type Database = {
         | "autre"
       presence_statut: "present" | "absent" | "excuse"
       sexe: "M" | "F"
+      sous_theme_periode: "trimestre" | "mois"
       trimestre_type: "T1" | "T2" | "T3" | "T4" | "annuel"
     }
     CompositeTypes: {
@@ -867,6 +993,7 @@ export const Constants = {
       ],
       presence_statut: ["present", "absent", "excuse"],
       sexe: ["M", "F"],
+      sous_theme_periode: ["trimestre", "mois"],
       trimestre_type: ["T1", "T2", "T3", "T4", "annuel"],
     },
   },

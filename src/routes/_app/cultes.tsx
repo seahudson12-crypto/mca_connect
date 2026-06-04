@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, ClipboardCheck, Trash2, Pencil, CheckCircle2, Lock, ShieldCheck } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, ClipboardCheck, Trash2, Pencil, CheckCircle2, Lock, ShieldCheck, X } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
 import { CULTE_TYPES, culteTypeLabel } from "@/lib/constants";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -27,13 +28,18 @@ type Culte = {
   president: string | null; theme_presidence: string | null; versets: string | null;
   responsable_priere: string | null; orateur: string | null; theme_principal: string | null;
   statut: CulteStatut; validated_at: string | null; validated_by: string | null;
-  created_by: string | null;
+  created_by: string | null; priere_intense_active: boolean;
 };
 
 type Finance = {
   id: string; culte_id: string;
   offrande: number; dime: number; action_grace: number; semence: number;
   contribution_speciale: number; depense: number; solde: number; observation: string | null;
+};
+
+type Orateur = {
+  id?: string; culte_id?: string;
+  nom: string; fonction: string | null; theme: string | null; versets: string | null; ordre: number;
 };
 
 export const Route = createFileRoute("/_app/cultes")({ component: CultesPage });
@@ -85,23 +91,58 @@ function CultesPage() {
     return m;
   }, [finances]);
 
+  const { data: orateursEdit = [] } = useQuery({
+    queryKey: ["orateurs-culte", editing?.id],
+    enabled: !!editing?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("orateurs_culte")
+        .select("*")
+        .eq("culte_id", editing!.id)
+        .order("ordre");
+      if (error) throw error;
+      return data as Orateur[];
+    },
+  });
+
   const canEdit = (c: Culte) => {
     if (isSuperAdmin) return true;
     return c.statut === "brouillon";
   };
 
-  const handleCreate = async (form: FormData) => {
+  const saveOrateurs = async (culteId: string, orateurs: Orateur[]) => {
+    // Stratégie simple : supprimer puis réinsérer
+    await supabase.from("orateurs_culte").delete().eq("culte_id", culteId);
+    const rows = orateurs
+      .filter((o) => o.nom.trim().length > 0)
+      .map((o, i) => ({
+        culte_id: culteId,
+        nom: o.nom.trim(),
+        fonction: o.fonction || null,
+        theme: o.theme || null,
+        versets: o.versets || null,
+        ordre: i + 1,
+      }));
+    if (rows.length > 0) {
+      const { error } = await supabase.from("orateurs_culte").insert(rows);
+      if (error) toast.error(`Orateurs : ${error.message}`);
+    }
+  };
+
+  const handleCreate = async (form: FormData, orateurs: Orateur[], priereIntenseActive: boolean) => {
     if (!scopedTempleId || !user) return toast.error("Profil incomplet");
+    const typeCulte = form.get("type_culte") as string;
     const payload = {
       date: form.get("date") as string,
-      type_culte: form.get("type_culte") as never,
+      type_culte: typeCulte as never,
       heure_debut: (form.get("heure_debut") as string) || null,
       heure_fin: (form.get("heure_fin") as string) || null,
       president: (form.get("president") as string) || null,
       theme_presidence: (form.get("theme_presidence") as string) || null,
       versets: (form.get("versets") as string) || null,
-      responsable_priere: (form.get("responsable_priere") as string) || null,
-      orateur: (form.get("orateur") as string) || null,
+      responsable_priere: priereIntenseActive ? ((form.get("responsable_priere") as string) || null) : null,
+      priere_intense_active: priereIntenseActive,
+      orateur: orateurs[0]?.nom?.trim() || null, // compat legacy : premier orateur
       theme_principal: (form.get("theme_principal") as string) || null,
       temple_id: scopedTempleId,
       created_by: user.id,
@@ -110,13 +151,16 @@ function CultesPage() {
     if (!payload.date || !payload.type_culte) return toast.error("Date et type requis");
     const { data, error } = await supabase.from("cultes").insert(payload).select().maybeSingle();
     if (error) return toast.error(error.message);
-    if (data) await logChange({ userId: user.id, table: "cultes", recordId: data.id, action: "create", after: payload });
+    if (data) {
+      await saveOrateurs(data.id, orateurs);
+      await logChange({ userId: user.id, table: "cultes", recordId: data.id, action: "create", after: payload });
+    }
     toast.success("Culte créé");
     setOpenNew(false);
     qc.invalidateQueries({ queryKey: ["cultes"] });
   };
 
-  const handleUpdate = async (form: FormData) => {
+  const handleUpdate = async (form: FormData, orateurs: Orateur[], priereIntenseActive: boolean) => {
     if (!editing || !user) return;
     const num = (k: string) => Number(String(form.get(k) || "0")) || 0;
     const before = { ...editing };
@@ -128,22 +172,22 @@ function CultesPage() {
       president: (form.get("president") as string) || null,
       theme_presidence: (form.get("theme_presidence") as string) || null,
       versets: (form.get("versets") as string) || null,
-      responsable_priere: (form.get("responsable_priere") as string) || null,
-      orateur: (form.get("orateur") as string) || null,
+      responsable_priere: priereIntenseActive ? ((form.get("responsable_priere") as string) || null) : null,
+      priere_intense_active: priereIntenseActive,
+      orateur: orateurs[0]?.nom?.trim() || null,
       theme_principal: (form.get("theme_principal") as string) || null,
-      // Si super admin modifie un rapport déjà validé → marquer "corrige_admin"
       statut: (isSuperAdmin && (editing.statut === "valide" || editing.statut === "corrige_admin"))
         ? ("corrige_admin" as CulteStatut)
         : editing.statut,
     };
     const { error } = await supabase.from("cultes").update(updates).eq("id", editing.id);
     if (error) return toast.error(error.message);
+    await saveOrateurs(editing.id, orateurs);
     await logChange({
       userId: user.id, table: "cultes", recordId: editing.id, action: "update",
       before, after: { ...before, ...updates },
     });
 
-    // Finances (admin only)
     if (isAdmin) {
       const offrande = num("offrande");
       const dime = num("dime");
@@ -175,6 +219,7 @@ function CultesPage() {
     qc.invalidateQueries({ queryKey: ["cultes"] });
     qc.invalidateQueries({ queryKey: ["finances-all"] });
     qc.invalidateQueries({ queryKey: ["finances"] });
+    qc.invalidateQueries({ queryKey: ["orateurs-culte"] });
   };
 
   const handleValidate = async (c: Culte) => {
@@ -215,6 +260,7 @@ function CultesPage() {
               isAdmin={false}
               defaults={null}
               finance={null}
+              orateursDefaults={[]}
               onCancel={() => setOpenNew(false)}
               submitLabel="Créer"
             />
@@ -333,6 +379,7 @@ function CultesPage() {
               isAdmin={isAdmin}
               defaults={editing}
               finance={financeByCulte.get(editing.id) ?? null}
+              orateursDefaults={orateursEdit}
               onCancel={() => setEditing(null)}
               submitLabel="Enregistrer"
             />
@@ -344,16 +391,44 @@ function CultesPage() {
 }
 
 function CulteForm({
-  onSubmit, isAdmin, defaults, finance, onCancel, submitLabel,
+  onSubmit, isAdmin, defaults, finance, orateursDefaults, onCancel, submitLabel,
 }: {
-  onSubmit: (f: FormData) => unknown;
+  onSubmit: (f: FormData, orateurs: Orateur[], priereIntenseActive: boolean) => unknown;
   isAdmin: boolean;
   defaults: Culte | null;
   finance: Finance | null;
+  orateursDefaults: Orateur[];
   onCancel: () => void;
   submitLabel: string;
 }) {
-  // Live total preview
+  const [typeCulte, setTypeCulte] = useState<string>(defaults?.type_culte ?? "dimanche");
+  // Module 44 : prière intense auto pour dimanche, sinon désactivée par défaut
+  const [priereIntenseActive, setPriereIntenseActive] = useState<boolean>(
+    defaults?.priere_intense_active ?? (typeCulte === "dimanche"),
+  );
+  // Module 45 : liste dynamique d'orateurs
+  const [orateurs, setOrateurs] = useState<Orateur[]>(
+    orateursDefaults.length > 0
+      ? orateursDefaults
+      : defaults?.orateur
+        ? [{ nom: defaults.orateur, fonction: null, theme: defaults.theme_principal ?? null, versets: null, ordre: 1 }]
+        : [{ nom: "", fonction: null, theme: null, versets: null, ordre: 1 }],
+  );
+
+  // Quand l'utilisateur change le type de culte, on bascule la prière intense automatiquement
+  useEffect(() => {
+    if (!defaults) {
+      setPriereIntenseActive(typeCulte === "dimanche");
+    }
+  }, [typeCulte, defaults]);
+
+  // Sync orateurs si chargement asynchrone en édition
+  useEffect(() => {
+    if (orateursDefaults.length > 0) {
+      setOrateurs(orateursDefaults);
+    }
+  }, [orateursDefaults]);
+
   const [live, setLive] = useState({
     offrande: Number(finance?.offrande ?? 0),
     dime: Number(finance?.dime ?? 0),
@@ -365,13 +440,28 @@ function CulteForm({
   const recettes = live.offrande + live.dime + live.action_grace + live.semence + live.contribution_speciale;
   const solde = recettes - live.depense;
 
+  const updateOrateur = (i: number, patch: Partial<Orateur>) => {
+    setOrateurs((arr) => arr.map((o, idx) => (idx === i ? { ...o, ...patch } : o)));
+  };
+  const addOrateur = () => {
+    setOrateurs((arr) => [...arr, { nom: "", fonction: null, theme: null, versets: null, ordre: arr.length + 1 }]);
+  };
+  const removeOrateur = (i: number) => {
+    setOrateurs((arr) => arr.filter((_, idx) => idx !== i));
+  };
+
+  const isDimanche = typeCulte === "dimanche";
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(new FormData(e.currentTarget)); }} className="space-y-3">
+    <form
+      onSubmit={(e) => { e.preventDefault(); onSubmit(new FormData(e.currentTarget), orateurs, priereIntenseActive); }}
+      className="space-y-3"
+    >
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5"><Label>Date *</Label><Input type="date" name="date" required defaultValue={defaults?.date ?? format(new Date(), "yyyy-MM-dd")} /></div>
         <div className="space-y-1.5">
           <Label>Type *</Label>
-          <Select name="type_culte" defaultValue={defaults?.type_culte ?? "dimanche"}>
+          <Select name="type_culte" value={typeCulte} onValueChange={setTypeCulte}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{CULTE_TYPES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
           </Select>
@@ -382,9 +472,67 @@ function CulteForm({
       <div className="space-y-1.5"><Label>Président du culte</Label><Input name="president" defaultValue={defaults?.president ?? ""} /></div>
       <div className="space-y-1.5"><Label>Thème de la présidence</Label><Input name="theme_presidence" defaultValue={defaults?.theme_presidence ?? ""} /></div>
       <div className="space-y-1.5"><Label>Versets</Label><Input name="versets" defaultValue={defaults?.versets ?? ""} placeholder="Ex: Psaumes 23:1-6" /></div>
-      <div className="space-y-1.5"><Label>Responsable prière intense</Label><Input name="responsable_priere" defaultValue={defaults?.responsable_priere ?? ""} /></div>
-      <div className="space-y-1.5"><Label>Orateur</Label><Input name="orateur" defaultValue={defaults?.orateur ?? ""} /></div>
-      <div className="space-y-1.5"><Label>Thème principal</Label><Textarea name="theme_principal" rows={2} defaultValue={defaults?.theme_principal ?? ""} /></div>
+
+      {/* Module 44 : prière intense conditionnelle */}
+      {!isDimanche && (
+        <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+          <Checkbox
+            id="priere_intense_active"
+            checked={priereIntenseActive}
+            onCheckedChange={(c) => setPriereIntenseActive(c === true)}
+          />
+          <Label htmlFor="priere_intense_active" className="text-sm cursor-pointer">
+            Activer la prière intense pour ce culte
+            <p className="text-xs text-muted-foreground font-normal mt-0.5">
+              Par défaut, la prière intense n'est affichée que pour les cultes du dimanche.
+            </p>
+          </Label>
+        </div>
+      )}
+      {priereIntenseActive && (
+        <div className="space-y-1.5">
+          <Label>Responsable prière intense</Label>
+          <Input name="responsable_priere" defaultValue={defaults?.responsable_priere ?? ""} />
+        </div>
+      )}
+
+      {/* Module 45 : multi-orateurs */}
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold text-primary">Orateurs</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addOrateur}>
+            <Plus className="mr-1 h-3.5 w-3.5" /> Ajouter un orateur
+          </Button>
+        </div>
+        {orateurs.map((o, i) => (
+          <div key={i} className="rounded-md border bg-card p-3 space-y-2 relative">
+            <div className="flex items-center justify-between">
+              <Badge variant="outline">Orateur {i + 1}</Badge>
+              {orateurs.length > 1 && (
+                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeOrateur(i)}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1"><Label className="text-xs">Nom *</Label>
+                <Input value={o.nom} onChange={(e) => updateOrateur(i, { nom: e.target.value })} placeholder="Pasteur X" />
+              </div>
+              <div className="space-y-1"><Label className="text-xs">Fonction</Label>
+                <Input value={o.fonction ?? ""} onChange={(e) => updateOrateur(i, { fonction: e.target.value })} placeholder="Pasteur, Évangéliste…" />
+              </div>
+            </div>
+            <div className="space-y-1"><Label className="text-xs">Thème de l'intervention</Label>
+              <Input value={o.theme ?? ""} onChange={(e) => updateOrateur(i, { theme: e.target.value })} />
+            </div>
+            <div className="space-y-1"><Label className="text-xs">Versets de référence</Label>
+              <Input value={o.versets ?? ""} onChange={(e) => updateOrateur(i, { versets: e.target.value })} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-1.5"><Label>Thème principal du culte</Label><Textarea name="theme_principal" rows={2} defaultValue={defaults?.theme_principal ?? ""} /></div>
 
       {isAdmin && defaults && (
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">

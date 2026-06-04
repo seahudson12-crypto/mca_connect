@@ -76,16 +76,18 @@ function RapportsPage() {
 
   const exportPdf = async (r: CulteRow) => {
     if (!r.temple) return toast.error("Temple manquant");
-    const [{ data: membres }, { data: presences }, { data: finance }] = await Promise.all([
+    const [{ data: membres }, { data: presences }, { data: finance }, { data: orateurs }] = await Promise.all([
       supabase.from("membres").select("id,nom,prenoms,categorie").eq("temple_id", r.temple_id).eq("actif", true),
       supabase.from("presences").select("membre_id,statut").eq("culte_id", r.id),
       supabase.from("finances_culte").select("*").eq("culte_id", r.id).maybeSingle(),
+      supabase.from("orateurs_culte").select("nom,fonction,theme,versets,ordre").eq("culte_id", r.id).order("ordre"),
     ]);
     const doc = generateRapportPdf({
       culte: r,
       temple: r.temple,
       membres: (membres ?? []) as never,
       presences: (presences ?? []) as never,
+      orateurs: (orateurs ?? []) as never,
       finance: (finance as never) ?? null,
     });
     doc.save(`rapport-${r.temple.nom_temple.replace(/\s+/g, "_")}-${r.date}.pdf`);
