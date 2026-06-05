@@ -133,6 +133,93 @@ export type Database = {
           },
         ]
       }
+      evenements: {
+        Row: {
+          all_day: boolean
+          couleur: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string | null
+          description: string | null
+          id: string
+          lieu: string | null
+          temple_id: string | null
+          titre: string
+          type_evenement: Database["public"]["Enums"]["evenement_type"]
+          updated_at: string
+        }
+        Insert: {
+          all_day?: boolean
+          couleur?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin?: string | null
+          description?: string | null
+          id?: string
+          lieu?: string | null
+          temple_id?: string | null
+          titre: string
+          type_evenement?: Database["public"]["Enums"]["evenement_type"]
+          updated_at?: string
+        }
+        Update: {
+          all_day?: boolean
+          couleur?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string | null
+          description?: string | null
+          id?: string
+          lieu?: string | null
+          temple_id?: string | null
+          titre?: string
+          type_evenement?: Database["public"]["Enums"]["evenement_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      familles: {
+        Row: {
+          adresse: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          nom_famille: string
+          notes: string | null
+          telephone_principal: string | null
+          telephone_secondaire: string | null
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          adresse?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom_famille: string
+          notes?: string | null
+          telephone_principal?: string | null
+          telephone_secondaire?: string | null
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          adresse?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom_famille?: string
+          notes?: string | null
+          telephone_principal?: string | null
+          telephone_secondaire?: string | null
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       finances_culte: {
         Row: {
           action_grace: number
@@ -283,10 +370,12 @@ export type Database = {
           date_naissance: string | null
           email: string | null
           entreprise: string | null
+          famille_id: string | null
           id: string
           nom: string
           prenoms: string
           profession: string | null
+          role_famille: Database["public"]["Enums"]["role_famille"] | null
           secteur_activite: string | null
           sexe: Database["public"]["Enums"]["sexe"] | null
           telephone: string | null
@@ -304,10 +393,12 @@ export type Database = {
           date_naissance?: string | null
           email?: string | null
           entreprise?: string | null
+          famille_id?: string | null
           id?: string
           nom: string
           prenoms: string
           profession?: string | null
+          role_famille?: Database["public"]["Enums"]["role_famille"] | null
           secteur_activite?: string | null
           sexe?: Database["public"]["Enums"]["sexe"] | null
           telephone?: string | null
@@ -325,10 +416,12 @@ export type Database = {
           date_naissance?: string | null
           email?: string | null
           entreprise?: string | null
+          famille_id?: string | null
           id?: string
           nom?: string
           prenoms?: string
           profession?: string | null
+          role_famille?: Database["public"]["Enums"]["role_famille"] | null
           secteur_activite?: string | null
           sexe?: Database["public"]["Enums"]["sexe"] | null
           telephone?: string | null
@@ -785,6 +878,13 @@ export type Database = {
         | "veillee"
         | "reunion_speciale"
         | "jeune_priere"
+      evenement_type:
+        | "culte"
+        | "formation"
+        | "reunion"
+        | "priere"
+        | "sortie"
+        | "autre"
       formation_statut: "inscrit" | "en_cours" | "complete" | "abandonne"
       formation_type:
         | "discipulat"
@@ -815,6 +915,7 @@ export type Database = {
         | "dimes"
         | "autre"
       presence_statut: "present" | "absent" | "excuse"
+      role_famille: "chef" | "conjoint" | "enfant" | "autre"
       sexe: "M" | "F"
       sous_theme_periode: "trimestre" | "mois"
       trimestre_type: "T1" | "T2" | "T3" | "T4" | "annuel"
@@ -959,6 +1060,14 @@ export const Constants = {
         "reunion_speciale",
         "jeune_priere",
       ],
+      evenement_type: [
+        "culte",
+        "formation",
+        "reunion",
+        "priere",
+        "sortie",
+        "autre",
+      ],
       formation_statut: ["inscrit", "en_cours", "complete", "abandonne"],
       formation_type: [
         "discipulat",
@@ -992,6 +1101,7 @@ export const Constants = {
         "autre",
       ],
       presence_statut: ["present", "absent", "excuse"],
+      role_famille: ["chef", "conjoint", "enfant", "autre"],
       sexe: ["M", "F"],
       sous_theme_periode: ["trimestre", "mois"],
       trimestre_type: ["T1", "T2", "T3", "T4", "annuel"],
