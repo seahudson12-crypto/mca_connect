@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Wallet className="h-4 w-4" /> Finances
         </Link>
       )}
+
+      <Link to="/familles" onClick={() => setOpen(false)} className={linkCls(path === "/familles")}>
+        <Users2 className="h-4 w-4" /> Familles
+      </Link>
+
+      <Link to="/calendrier" onClick={() => setOpen(false)} className={linkCls(path === "/calendrier")}>
+        <CalendarDays className="h-4 w-4" /> Calendrier MCA
+      </Link>
 
       <Link to="/objectifs" onClick={() => setOpen(false)} className={linkCls(path === "/objectifs")}>
         <Target className="h-4 w-4" /> Objectifs
