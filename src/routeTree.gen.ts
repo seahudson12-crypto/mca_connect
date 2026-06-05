@@ -26,9 +26,11 @@ import { Route as AppMembresRouteImport } from './routes/_app/membres'
 import { Route as AppHistoriqueRouteImport } from './routes/_app/historique'
 import { Route as AppFormationsRouteImport } from './routes/_app/formations'
 import { Route as AppFinancesRouteImport } from './routes/_app/finances'
+import { Route as AppFamillesRouteImport } from './routes/_app/familles'
 import { Route as AppExportsRouteImport } from './routes/_app/exports'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
+import { Route as AppCalendrierRouteImport } from './routes/_app/calendrier'
 import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
 import { Route as AppActivitesRouteImport } from './routes/_app/activites'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
@@ -118,6 +120,11 @@ const AppFinancesRoute = AppFinancesRouteImport.update({
   path: '/finances',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFamillesRoute = AppFamillesRouteImport.update({
+  id: '/familles',
+  path: '/familles',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppExportsRoute = AppExportsRouteImport.update({
   id: '/exports',
   path: '/exports',
@@ -131,6 +138,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
 const AppCultesRoute = AppCultesRouteImport.update({
   id: '/cultes',
   path: '/cultes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCalendrierRoute = AppCalendrierRouteImport.update({
+  id: '/calendrier',
+  path: '/calendrier',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAlertesRoute = AppAlertesRouteImport.update({
@@ -162,9 +174,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/activites': typeof AppActivitesRoute
   '/alertes': typeof AppAlertesRoute
+  '/calendrier': typeof AppCalendrierRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
+  '/familles': typeof AppFamillesRoute
   '/finances': typeof AppFinancesRoute
   '/formations': typeof AppFormationsRoute
   '/historique': typeof AppHistoriqueRoute
@@ -187,9 +201,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/activites': typeof AppActivitesRoute
   '/alertes': typeof AppAlertesRoute
+  '/calendrier': typeof AppCalendrierRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
+  '/familles': typeof AppFamillesRoute
   '/finances': typeof AppFinancesRoute
   '/formations': typeof AppFormationsRoute
   '/historique': typeof AppHistoriqueRoute
@@ -214,9 +230,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_app/activites': typeof AppActivitesRoute
   '/_app/alertes': typeof AppAlertesRoute
+  '/_app/calendrier': typeof AppCalendrierRoute
   '/_app/cultes': typeof AppCultesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/exports': typeof AppExportsRoute
+  '/_app/familles': typeof AppFamillesRoute
   '/_app/finances': typeof AppFinancesRoute
   '/_app/formations': typeof AppFormationsRoute
   '/_app/historique': typeof AppHistoriqueRoute
@@ -241,9 +259,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/activites'
     | '/alertes'
+    | '/calendrier'
     | '/cultes'
     | '/dashboard'
     | '/exports'
+    | '/familles'
     | '/finances'
     | '/formations'
     | '/historique'
@@ -266,9 +286,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/activites'
     | '/alertes'
+    | '/calendrier'
     | '/cultes'
     | '/dashboard'
     | '/exports'
+    | '/familles'
     | '/finances'
     | '/formations'
     | '/historique'
@@ -292,9 +314,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_app/activites'
     | '/_app/alertes'
+    | '/_app/calendrier'
     | '/_app/cultes'
     | '/_app/dashboard'
     | '/_app/exports'
+    | '/_app/familles'
     | '/_app/finances'
     | '/_app/formations'
     | '/_app/historique'
@@ -440,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFinancesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/familles': {
+      id: '/_app/familles'
+      path: '/familles'
+      fullPath: '/familles'
+      preLoaderRoute: typeof AppFamillesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/exports': {
       id: '/_app/exports'
       path: '/exports'
@@ -459,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/cultes'
       fullPath: '/cultes'
       preLoaderRoute: typeof AppCultesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/calendrier': {
+      id: '/_app/calendrier'
+      path: '/calendrier'
+      fullPath: '/calendrier'
+      preLoaderRoute: typeof AppCalendrierRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/alertes': {
@@ -495,9 +533,11 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppActivitesRoute: typeof AppActivitesRoute
   AppAlertesRoute: typeof AppAlertesRoute
+  AppCalendrierRoute: typeof AppCalendrierRoute
   AppCultesRoute: typeof AppCultesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppExportsRoute: typeof AppExportsRoute
+  AppFamillesRoute: typeof AppFamillesRoute
   AppFinancesRoute: typeof AppFinancesRoute
   AppFormationsRoute: typeof AppFormationsRoute
   AppHistoriqueRoute: typeof AppHistoriqueRoute
@@ -516,9 +556,11 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppActivitesRoute: AppActivitesRoute,
   AppAlertesRoute: AppAlertesRoute,
+  AppCalendrierRoute: AppCalendrierRoute,
   AppCultesRoute: AppCultesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppExportsRoute: AppExportsRoute,
+  AppFamillesRoute: AppFamillesRoute,
   AppFinancesRoute: AppFinancesRoute,
   AppFormationsRoute: AppFormationsRoute,
   AppHistoriqueRoute: AppHistoriqueRoute,
