@@ -33,6 +33,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
 import { Route as AppCartographieRouteImport } from './routes/_app/cartographie'
 import { Route as AppCalendrierRouteImport } from './routes/_app/calendrier'
+import { Route as AppAssistantRouteImport } from './routes/_app/assistant'
 import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
 import { Route as AppActivitesRouteImport } from './routes/_app/activites'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
@@ -157,6 +158,11 @@ const AppCalendrierRoute = AppCalendrierRouteImport.update({
   path: '/calendrier',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssistantRoute = AppAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAlertesRoute = AppAlertesRouteImport.update({
   id: '/alertes',
   path: '/alertes',
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/activites': typeof AppActivitesRoute
   '/alertes': typeof AppAlertesRoute
+  '/assistant': typeof AppAssistantRoute
   '/calendrier': typeof AppCalendrierRoute
   '/cartographie': typeof AppCartographieRoute
   '/cultes': typeof AppCultesRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/activites': typeof AppActivitesRoute
   '/alertes': typeof AppAlertesRoute
+  '/assistant': typeof AppAssistantRoute
   '/calendrier': typeof AppCalendrierRoute
   '/cartographie': typeof AppCartographieRoute
   '/cultes': typeof AppCultesRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_app/activites': typeof AppActivitesRoute
   '/_app/alertes': typeof AppAlertesRoute
+  '/_app/assistant': typeof AppAssistantRoute
   '/_app/calendrier': typeof AppCalendrierRoute
   '/_app/cartographie': typeof AppCartographieRoute
   '/_app/cultes': typeof AppCultesRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/activites'
     | '/alertes'
+    | '/assistant'
     | '/calendrier'
     | '/cartographie'
     | '/cultes'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/activites'
     | '/alertes'
+    | '/assistant'
     | '/calendrier'
     | '/cartographie'
     | '/cultes'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_app/activites'
     | '/_app/alertes'
+    | '/_app/assistant'
     | '/_app/calendrier'
     | '/_app/cartographie'
     | '/_app/cultes'
@@ -537,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendrierRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assistant': {
+      id: '/_app/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AppAssistantRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/alertes': {
       id: '/_app/alertes'
       path: '/alertes'
@@ -571,6 +590,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppActivitesRoute: typeof AppActivitesRoute
   AppAlertesRoute: typeof AppAlertesRoute
+  AppAssistantRoute: typeof AppAssistantRoute
   AppCalendrierRoute: typeof AppCalendrierRoute
   AppCartographieRoute: typeof AppCartographieRoute
   AppCultesRoute: typeof AppCultesRoute
@@ -596,6 +616,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppActivitesRoute: AppActivitesRoute,
   AppAlertesRoute: AppAlertesRoute,
+  AppAssistantRoute: AppAssistantRoute,
   AppCalendrierRoute: AppCalendrierRoute,
   AppCartographieRoute: AppCartographieRoute,
   AppCultesRoute: AppCultesRoute,
@@ -631,3 +652,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
