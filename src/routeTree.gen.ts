@@ -19,6 +19,7 @@ import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppTemplesRouteImport } from './routes/_app/temples'
+import { Route as AppSanteTempleRouteImport } from './routes/_app/sante-temple'
 import { Route as AppRapportsRouteImport } from './routes/_app/rapports'
 import { Route as AppParametresRouteImport } from './routes/_app/parametres'
 import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
@@ -30,6 +31,7 @@ import { Route as AppFamillesRouteImport } from './routes/_app/familles'
 import { Route as AppExportsRouteImport } from './routes/_app/exports'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
+import { Route as AppCartographieRouteImport } from './routes/_app/cartographie'
 import { Route as AppCalendrierRouteImport } from './routes/_app/calendrier'
 import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
 import { Route as AppActivitesRouteImport } from './routes/_app/activites'
@@ -83,6 +85,11 @@ const AppThemesAnneeRoute = AppThemesAnneeRouteImport.update({
 const AppTemplesRoute = AppTemplesRouteImport.update({
   id: '/temples',
   path: '/temples',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSanteTempleRoute = AppSanteTempleRouteImport.update({
+  id: '/sante-temple',
+  path: '/sante-temple',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRapportsRoute = AppRapportsRouteImport.update({
@@ -140,6 +147,11 @@ const AppCultesRoute = AppCultesRouteImport.update({
   path: '/cultes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCartographieRoute = AppCartographieRouteImport.update({
+  id: '/cartographie',
+  path: '/cartographie',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCalendrierRoute = AppCalendrierRouteImport.update({
   id: '/calendrier',
   path: '/calendrier',
@@ -175,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/activites': typeof AppActivitesRoute
   '/alertes': typeof AppAlertesRoute
   '/calendrier': typeof AppCalendrierRoute
+  '/cartographie': typeof AppCartographieRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
@@ -186,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/objectifs': typeof AppObjectifsRoute
   '/parametres': typeof AppParametresRoute
   '/rapports': typeof AppRapportsRoute
+  '/sante-temple': typeof AppSanteTempleRoute
   '/temples': typeof AppTemplesRoute
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
@@ -202,6 +216,7 @@ export interface FileRoutesByTo {
   '/activites': typeof AppActivitesRoute
   '/alertes': typeof AppAlertesRoute
   '/calendrier': typeof AppCalendrierRoute
+  '/cartographie': typeof AppCartographieRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
   '/exports': typeof AppExportsRoute
@@ -213,6 +228,7 @@ export interface FileRoutesByTo {
   '/objectifs': typeof AppObjectifsRoute
   '/parametres': typeof AppParametresRoute
   '/rapports': typeof AppRapportsRoute
+  '/sante-temple': typeof AppSanteTempleRoute
   '/temples': typeof AppTemplesRoute
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
@@ -231,6 +247,7 @@ export interface FileRoutesById {
   '/_app/activites': typeof AppActivitesRoute
   '/_app/alertes': typeof AppAlertesRoute
   '/_app/calendrier': typeof AppCalendrierRoute
+  '/_app/cartographie': typeof AppCartographieRoute
   '/_app/cultes': typeof AppCultesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/exports': typeof AppExportsRoute
@@ -242,6 +259,7 @@ export interface FileRoutesById {
   '/_app/objectifs': typeof AppObjectifsRoute
   '/_app/parametres': typeof AppParametresRoute
   '/_app/rapports': typeof AppRapportsRoute
+  '/_app/sante-temple': typeof AppSanteTempleRoute
   '/_app/temples': typeof AppTemplesRoute
   '/_app/themes-annee': typeof AppThemesAnneeRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
@@ -260,6 +278,7 @@ export interface FileRouteTypes {
     | '/activites'
     | '/alertes'
     | '/calendrier'
+    | '/cartographie'
     | '/cultes'
     | '/dashboard'
     | '/exports'
@@ -271,6 +290,7 @@ export interface FileRouteTypes {
     | '/objectifs'
     | '/parametres'
     | '/rapports'
+    | '/sante-temple'
     | '/temples'
     | '/themes-annee'
     | '/utilisateurs'
@@ -287,6 +307,7 @@ export interface FileRouteTypes {
     | '/activites'
     | '/alertes'
     | '/calendrier'
+    | '/cartographie'
     | '/cultes'
     | '/dashboard'
     | '/exports'
@@ -298,6 +319,7 @@ export interface FileRouteTypes {
     | '/objectifs'
     | '/parametres'
     | '/rapports'
+    | '/sante-temple'
     | '/temples'
     | '/themes-annee'
     | '/utilisateurs'
@@ -315,6 +337,7 @@ export interface FileRouteTypes {
     | '/_app/activites'
     | '/_app/alertes'
     | '/_app/calendrier'
+    | '/_app/cartographie'
     | '/_app/cultes'
     | '/_app/dashboard'
     | '/_app/exports'
@@ -326,6 +349,7 @@ export interface FileRouteTypes {
     | '/_app/objectifs'
     | '/_app/parametres'
     | '/_app/rapports'
+    | '/_app/sante-temple'
     | '/_app/temples'
     | '/_app/themes-annee'
     | '/_app/utilisateurs'
@@ -415,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTemplesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/sante-temple': {
+      id: '/_app/sante-temple'
+      path: '/sante-temple'
+      fullPath: '/sante-temple'
+      preLoaderRoute: typeof AppSanteTempleRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/rapports': {
       id: '/_app/rapports'
       path: '/rapports'
@@ -492,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCultesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/cartographie': {
+      id: '/_app/cartographie'
+      path: '/cartographie'
+      fullPath: '/cartographie'
+      preLoaderRoute: typeof AppCartographieRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/calendrier': {
       id: '/_app/calendrier'
       path: '/calendrier'
@@ -534,6 +572,7 @@ interface AppRouteChildren {
   AppActivitesRoute: typeof AppActivitesRoute
   AppAlertesRoute: typeof AppAlertesRoute
   AppCalendrierRoute: typeof AppCalendrierRoute
+  AppCartographieRoute: typeof AppCartographieRoute
   AppCultesRoute: typeof AppCultesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppExportsRoute: typeof AppExportsRoute
@@ -545,6 +584,7 @@ interface AppRouteChildren {
   AppObjectifsRoute: typeof AppObjectifsRoute
   AppParametresRoute: typeof AppParametresRoute
   AppRapportsRoute: typeof AppRapportsRoute
+  AppSanteTempleRoute: typeof AppSanteTempleRoute
   AppTemplesRoute: typeof AppTemplesRoute
   AppThemesAnneeRoute: typeof AppThemesAnneeRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
@@ -557,6 +597,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppActivitesRoute: AppActivitesRoute,
   AppAlertesRoute: AppAlertesRoute,
   AppCalendrierRoute: AppCalendrierRoute,
+  AppCartographieRoute: AppCartographieRoute,
   AppCultesRoute: AppCultesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppExportsRoute: AppExportsRoute,
@@ -568,6 +609,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppObjectifsRoute: AppObjectifsRoute,
   AppParametresRoute: AppParametresRoute,
   AppRapportsRoute: AppRapportsRoute,
+  AppSanteTempleRoute: AppSanteTempleRoute,
   AppTemplesRoute: AppTemplesRoute,
   AppThemesAnneeRoute: AppThemesAnneeRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
@@ -589,13 +631,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

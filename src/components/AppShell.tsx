@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -86,6 +86,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link to="/alertes" onClick={() => setOpen(false)} className={linkCls(path === "/alertes")}>
             <Bell className="h-4 w-4" /> Alertes
           </Link>
+          <Link to="/sante-temple" onClick={() => setOpen(false)} className={linkCls(path === "/sante-temple")}>
+            <HeartPulse className="h-4 w-4" /> Santé du temple
+          </Link>
           <Link to="/exports" onClick={() => setOpen(false)} className={linkCls(path === "/exports")}>
             <Download className="h-4 w-4" /> Exports avancés
           </Link>
@@ -96,6 +99,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
               <Link to="/temples" onClick={() => setOpen(false)} className={linkCls(path === "/temples")}>
                 <Building2 className="h-4 w-4" /> Temples
+              </Link>
+              <Link to="/cartographie" onClick={() => setOpen(false)} className={linkCls(path === "/cartographie")}>
+                <Globe2 className="h-4 w-4" /> Cartographie MCA
               </Link>
               <Link to="/utilisateurs" onClick={() => setOpen(false)} className={linkCls(path === "/utilisateurs")}>
                 <UserCog className="h-4 w-4" /> Équipe de gestion
