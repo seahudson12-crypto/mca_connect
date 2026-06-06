@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <Link to="/themes-annee" onClick={() => setOpen(false)} className={linkCls(path === "/themes-annee")}>
         <BookOpen className="h-4 w-4" /> Thème de l'année
+      </Link>
+
+      <Link to="/assistant" onClick={() => setOpen(false)} className={linkCls(path === "/assistant")}>
+        <Sparkles className="h-4 w-4" /> Assistant IA
       </Link>
 
 
