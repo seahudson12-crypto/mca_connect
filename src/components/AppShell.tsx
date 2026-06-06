@@ -68,6 +68,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <BookOpen className="h-4 w-4" /> Thème de l'année
       </Link>
 
+      <Link to="/assistant" onClick={() => setOpen(false)} className={linkCls(path === "/assistant")}>
+        <Sparkles className="h-4 w-4" /> Assistant IA
+      </Link>
+
 
 
 
