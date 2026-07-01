@@ -83,16 +83,22 @@ function SignupPage() {
           </div>
           <div className="space-y-2">
             <Label>Temple d'appartenance</Label>
-            <Select value={templeId} onValueChange={setTempleId}>
-              <SelectTrigger><SelectValue placeholder="Choisissez votre temple" /></SelectTrigger>
-              <SelectContent>
-                {temples.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.nom_temple}{t.ville ? ` — ${t.ville}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {temples.length === 0 ? (
+              <p className="text-xs text-destructive">
+                Aucun temple disponible. Veuillez contacter l'administrateur.
+              </p>
+            ) : (
+              <Select value={templeId} onValueChange={setTempleId}>
+                <SelectTrigger><SelectValue placeholder="Choisissez votre temple" /></SelectTrigger>
+                <SelectContent>
+                  {temples.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.nom_temple}{t.ville ? ` — ${t.ville}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
