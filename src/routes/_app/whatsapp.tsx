@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import {
   MessageCircle, Send, Users, Copy, FileSpreadsheet, UsersRound, Megaphone, Cloud, CheckCircle2, AlertTriangle,
+  ChevronRight, SkipForward, X,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useState, useMemo } from "react";
 import { CATEGORIES, categoryLabel } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +49,14 @@ function WhatsAppPage() {
     "Bonjour, vous êtes attendus au prochain culte. Que Dieu vous bénisse ! — MCA Treichville"
   );
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // File d'attente pour la diffusion séquentielle
+  type BroadcastItem = { id: string; nom: string; prenoms: string; number: string; categorie: string };
+  const [broadcastQueue, setBroadcastQueue] = useState<BroadcastItem[]>([]);
+  const [broadcastIndex, setBroadcastIndex] = useState(0);
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const [broadcastSent, setBroadcastSent] = useState<Set<string>>(new Set());
+  const [broadcastSkipped, setBroadcastSkipped] = useState<Set<string>>(new Set());
 
   const { data: membres = [] } = useQuery({
     queryKey: ["membres-wa"],
@@ -116,18 +126,65 @@ function WhatsAppPage() {
     setDialogOpen(true);
   };
 
-  // OPTION 1 — Liste de diffusion : copier les numéros au presse-papier
-  const optionBroadcastList = async () => {
-    const numbers = validation.valid.map((v) => "+" + v.number).join("\n");
-    try {
-      await navigator.clipboard.writeText(numbers);
-      toast.success(
-        `${validation.valid.length} numéros copiés. Ouvrez WhatsApp → Nouvelle liste de diffusion et collez-les.`
-      );
-    } catch {
-      toast.error("Impossible de copier. Utilisez l'export Excel.");
-    }
+  // OPTION 1 — Liste de diffusion : envoi séquentiel automatisé à tous les destinataires
+  const optionBroadcastList = () => {
+    if (validation.valid.length === 0) return;
+    setBroadcastQueue(validation.valid);
+    setBroadcastIndex(0);
+    setBroadcastSent(new Set());
+    setBroadcastSkipped(new Set());
     setDialogOpen(false);
+    setBroadcastOpen(true);
+    // Copie aussi les numéros au presse-papier pour créer la liste de diffusion officielle si souhaité
+    const numbers = validation.valid.map((v) => "+" + v.number).join("\n");
+    navigator.clipboard.writeText(numbers).catch(() => {});
+  };
+
+  const currentBroadcast: BroadcastItem | null = broadcastQueue[broadcastIndex] ?? null;
+
+  const openCurrentBroadcast = () => {
+    if (!currentBroadcast) return;
+    window.open(
+      `https://wa.me/${currentBroadcast.number}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+    setBroadcastSent((s) => new Set(s).add(currentBroadcast.id));
+  };
+
+  const nextBroadcast = () => {
+    if (broadcastIndex + 1 >= broadcastQueue.length) {
+      toast.success(
+        `Diffusion terminée : ${broadcastSent.size + 1} envoyé(s), ${broadcastSkipped.size} passé(s)`
+      );
+      setBroadcastOpen(false);
+      return;
+    }
+    setBroadcastIndex((i) => i + 1);
+  };
+
+  const sendAndNext = () => {
+    openCurrentBroadcast();
+    // Laisse le temps à l'onglet WhatsApp de s'ouvrir avant de passer au suivant
+    setTimeout(() => nextBroadcast(), 400);
+  };
+
+  const skipCurrent = () => {
+    if (!currentBroadcast) return;
+    setBroadcastSkipped((s) => new Set(s).add(currentBroadcast.id));
+    if (broadcastIndex + 1 >= broadcastQueue.length) {
+      toast.info(`Diffusion terminée : ${broadcastSent.size} envoyé(s), ${broadcastSkipped.size + 1} passé(s)`);
+      setBroadcastOpen(false);
+      return;
+    }
+    setBroadcastIndex((i) => i + 1);
+  };
+
+  const cancelBroadcast = () => {
+    setBroadcastOpen(false);
+    if (broadcastSent.size > 0) {
+      toast.info(`Diffusion interrompue : ${broadcastSent.size} envoyé(s) sur ${broadcastQueue.length}`);
+    }
   };
 
   // OPTION 2 — Groupe WhatsApp : ouvrir l'assistant de création
@@ -316,9 +373,10 @@ function WhatsAppPage() {
             >
               <Megaphone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <div className="font-medium text-sm">Créer une liste de diffusion</div>
+                <div className="font-medium text-sm">Diffusion séquentielle automatisée</div>
                 <div className="text-xs text-muted-foreground">
-                  Copie les {validCount} numéros. Ouvrez WhatsApp → Nouvelle liste de diffusion, collez-les puis envoyez.
+                  Envoie le message aux {validCount} destinataires un par un dans un flux guidé.
+                  Les numéros sont aussi copiés au presse-papier pour créer la liste officielle si besoin.
                 </div>
               </div>
               <Copy className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
@@ -369,6 +427,78 @@ function WhatsAppPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diffusion séquentielle : envoi guidé à tous les destinataires */}
+      <Dialog open={broadcastOpen} onOpenChange={(o) => (o ? setBroadcastOpen(true) : cancelBroadcast())}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Diffusion en cours</DialogTitle>
+            <DialogDescription>
+              Envoi séquentiel du même message à {broadcastQueue.length} destinataire(s).
+              Chaque clic ouvre WhatsApp pour un contact, puis passe au suivant.
+            </DialogDescription>
+          </DialogHeader>
+
+          {currentBroadcast && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                  <span>
+                    Destinataire {broadcastIndex + 1} / {broadcastQueue.length}
+                  </span>
+                  <span>
+                    {broadcastSent.size} envoyé(s) · {broadcastSkipped.size} passé(s)
+                  </span>
+                </div>
+                <Progress
+                  value={((broadcastIndex) / Math.max(1, broadcastQueue.length)) * 100}
+                  className="h-2"
+                />
+              </div>
+
+              <div className="rounded-lg border p-4 bg-muted/40">
+                <div className="text-sm font-semibold">
+                  {currentBroadcast.nom} {currentBroadcast.prenoms}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {categoryLabel(currentBroadcast.categorie)} · +{currentBroadcast.number}
+                </div>
+              </div>
+
+              <div className="rounded-lg border p-3 bg-background text-xs text-muted-foreground max-h-24 overflow-y-auto whitespace-pre-wrap">
+                {message}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={skipCurrent}
+                  className="w-full"
+                >
+                  <SkipForward className="mr-2 h-4 w-4" /> Passer
+                </Button>
+                <Button
+                  onClick={sendAndNext}
+                  className="w-full gradient-brand text-primary-foreground border-0 shadow-elegant"
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Envoyer <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Astuce : autorisez les pop-ups pour ce site afin que chaque contact s'ouvre correctement.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={cancelBroadcast}>
+              <X className="mr-2 h-4 w-4" /> Interrompre la diffusion
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
