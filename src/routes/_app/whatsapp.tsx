@@ -430,6 +430,78 @@ function WhatsAppPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Diffusion séquentielle : envoi guidé à tous les destinataires */}
+      <Dialog open={broadcastOpen} onOpenChange={(o) => (o ? setBroadcastOpen(true) : cancelBroadcast())}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Diffusion en cours</DialogTitle>
+            <DialogDescription>
+              Envoi séquentiel du même message à {broadcastQueue.length} destinataire(s).
+              Chaque clic ouvre WhatsApp pour un contact, puis passe au suivant.
+            </DialogDescription>
+          </DialogHeader>
+
+          {currentBroadcast && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                  <span>
+                    Destinataire {broadcastIndex + 1} / {broadcastQueue.length}
+                  </span>
+                  <span>
+                    {broadcastSent.size} envoyé(s) · {broadcastSkipped.size} passé(s)
+                  </span>
+                </div>
+                <Progress
+                  value={((broadcastIndex) / Math.max(1, broadcastQueue.length)) * 100}
+                  className="h-2"
+                />
+              </div>
+
+              <div className="rounded-lg border p-4 bg-muted/40">
+                <div className="text-sm font-semibold">
+                  {currentBroadcast.nom} {currentBroadcast.prenoms}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {categoryLabel(currentBroadcast.categorie)} · +{currentBroadcast.number}
+                </div>
+              </div>
+
+              <div className="rounded-lg border p-3 bg-background text-xs text-muted-foreground max-h-24 overflow-y-auto whitespace-pre-wrap">
+                {message}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={skipCurrent}
+                  className="w-full"
+                >
+                  <SkipForward className="mr-2 h-4 w-4" /> Passer
+                </Button>
+                <Button
+                  onClick={sendAndNext}
+                  className="w-full gradient-brand text-primary-foreground border-0 shadow-elegant"
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Envoyer <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Astuce : autorisez les pop-ups pour ce site afin que chaque contact s'ouvre correctement.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={cancelBroadcast}>
+              <X className="mr-2 h-4 w-4" /> Interrompre la diffusion
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
