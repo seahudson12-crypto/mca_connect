@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import {
   MessageCircle, Send, Users, Copy, FileSpreadsheet, UsersRound, Megaphone, Cloud, CheckCircle2, AlertTriangle,
+  ChevronRight, SkipForward, X,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useState, useMemo } from "react";
 import { CATEGORIES, categoryLabel } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
