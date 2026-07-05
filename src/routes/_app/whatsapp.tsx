@@ -50,6 +50,14 @@ function WhatsAppPage() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  // File d'attente pour la diffusion séquentielle
+  type BroadcastItem = { id: string; nom: string; prenoms: string; number: string; categorie: string };
+  const [broadcastQueue, setBroadcastQueue] = useState<BroadcastItem[]>([]);
+  const [broadcastIndex, setBroadcastIndex] = useState(0);
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const [broadcastSent, setBroadcastSent] = useState<Set<string>>(new Set());
+  const [broadcastSkipped, setBroadcastSkipped] = useState<Set<string>>(new Set());
+
   const { data: membres = [] } = useQuery({
     queryKey: ["membres-wa"],
     queryFn: async () => {
