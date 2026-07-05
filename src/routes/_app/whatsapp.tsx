@@ -373,9 +373,10 @@ function WhatsAppPage() {
             >
               <Megaphone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <div className="font-medium text-sm">Créer une liste de diffusion</div>
+                <div className="font-medium text-sm">Diffusion séquentielle automatisée</div>
                 <div className="text-xs text-muted-foreground">
-                  Copie les {validCount} numéros. Ouvrez WhatsApp → Nouvelle liste de diffusion, collez-les puis envoyez.
+                  Envoie le message aux {validCount} destinataires un par un dans un flux guidé.
+                  Les numéros sont aussi copiés au presse-papier pour créer la liste officielle si besoin.
                 </div>
               </div>
               <Copy className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
