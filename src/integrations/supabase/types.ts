@@ -844,6 +844,269 @@ export type Database = {
           },
         ]
       }
+      wa_campagnes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          destinataires_manuels: string[] | null
+          filter_categories: string[] | null
+          filter_statuses: string[] | null
+          filter_temples: string[] | null
+          id: string
+          media_mime: string | null
+          media_url: string | null
+          message: string | null
+          message_type: Database["public"]["Enums"]["wa_message_type"]
+          nom: string
+          scheduled_at: string | null
+          sent_at: string | null
+          stats_delivered: number
+          stats_failed: number
+          stats_read: number
+          stats_sent: number
+          stats_total: number
+          status: Database["public"]["Enums"]["wa_campagne_status"]
+          template_lang: string | null
+          template_name: string | null
+          template_variables: Json | null
+          temple_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          destinataires_manuels?: string[] | null
+          filter_categories?: string[] | null
+          filter_statuses?: string[] | null
+          filter_temples?: string[] | null
+          id?: string
+          media_mime?: string | null
+          media_url?: string | null
+          message?: string | null
+          message_type?: Database["public"]["Enums"]["wa_message_type"]
+          nom: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          stats_delivered?: number
+          stats_failed?: number
+          stats_read?: number
+          stats_sent?: number
+          stats_total?: number
+          status?: Database["public"]["Enums"]["wa_campagne_status"]
+          template_lang?: string | null
+          template_name?: string | null
+          template_variables?: Json | null
+          temple_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          destinataires_manuels?: string[] | null
+          filter_categories?: string[] | null
+          filter_statuses?: string[] | null
+          filter_temples?: string[] | null
+          id?: string
+          media_mime?: string | null
+          media_url?: string | null
+          message?: string | null
+          message_type?: Database["public"]["Enums"]["wa_message_type"]
+          nom?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          stats_delivered?: number
+          stats_failed?: number
+          stats_read?: number
+          stats_sent?: number
+          stats_total?: number
+          status?: Database["public"]["Enums"]["wa_campagne_status"]
+          template_lang?: string | null
+          template_name?: string | null
+          template_variables?: Json | null
+          temple_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_campagnes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_envois: {
+        Row: {
+          campagne_id: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          error: string | null
+          failed_at: string | null
+          id: string
+          membre_id: string | null
+          message_type: Database["public"]["Enums"]["wa_message_type"]
+          phone_e164: string
+          read_at: string | null
+          rendered_message: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["wa_envoi_status"]
+          temple_id: string | null
+          updated_at: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          campagne_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          error?: string | null
+          failed_at?: string | null
+          id?: string
+          membre_id?: string | null
+          message_type?: Database["public"]["Enums"]["wa_message_type"]
+          phone_e164: string
+          read_at?: string | null
+          rendered_message?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["wa_envoi_status"]
+          temple_id?: string | null
+          updated_at?: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          campagne_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          error?: string | null
+          failed_at?: string | null
+          id?: string
+          membre_id?: string | null
+          message_type?: Database["public"]["Enums"]["wa_message_type"]
+          phone_e164?: string
+          read_at?: string | null
+          rendered_message?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["wa_envoi_status"]
+          temple_id?: string | null
+          updated_at?: string
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_envois_campagne_id_fkey"
+            columns: ["campagne_id"]
+            isOneToOne: false
+            referencedRelation: "wa_campagnes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_envois_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_envois_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_notifications_auto: {
+        Row: {
+          config: Json | null
+          created_at: string
+          enabled: boolean
+          id: string
+          last_run_at: string | null
+          message: string | null
+          template_lang: string | null
+          template_name: string | null
+          temple_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          message?: string | null
+          template_lang?: string | null
+          template_name?: string | null
+          temple_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          message?: string | null
+          template_lang?: string | null
+          template_name?: string | null
+          temple_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_notifications_auto_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_templates: {
+        Row: {
+          category: string | null
+          components: Json | null
+          created_at: string
+          id: string
+          language: string
+          meta_id: string | null
+          name: string
+          status: string | null
+          synced_at: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          components?: Json | null
+          created_at?: string
+          id?: string
+          language?: string
+          meta_id?: string | null
+          name: string
+          status?: string | null
+          synced_at?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          components?: Json | null
+          created_at?: string
+          id?: string
+          language?: string
+          meta_id?: string | null
+          name?: string
+          status?: string | null
+          synced_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -919,6 +1182,21 @@ export type Database = {
       sexe: "M" | "F"
       sous_theme_periode: "trimestre" | "mois"
       trimestre_type: "T1" | "T2" | "T3" | "T4" | "annuel"
+      wa_campagne_status:
+        | "draft"
+        | "scheduled"
+        | "sending"
+        | "sent"
+        | "failed"
+        | "cancelled"
+      wa_envoi_status: "queued" | "sent" | "delivered" | "read" | "failed"
+      wa_message_type:
+        | "text"
+        | "image"
+        | "document"
+        | "video"
+        | "audio"
+        | "template"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1105,6 +1383,23 @@ export const Constants = {
       sexe: ["M", "F"],
       sous_theme_periode: ["trimestre", "mois"],
       trimestre_type: ["T1", "T2", "T3", "T4", "annuel"],
+      wa_campagne_status: [
+        "draft",
+        "scheduled",
+        "sending",
+        "sent",
+        "failed",
+        "cancelled",
+      ],
+      wa_envoi_status: ["queued", "sent", "delivered", "read", "failed"],
+      wa_message_type: [
+        "text",
+        "image",
+        "document",
+        "video",
+        "audio",
+        "template",
+      ],
     },
   },
 } as const
