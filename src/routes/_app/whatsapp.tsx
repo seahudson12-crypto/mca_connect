@@ -126,18 +126,65 @@ function WhatsAppPage() {
     setDialogOpen(true);
   };
 
-  // OPTION 1 — Liste de diffusion : copier les numéros au presse-papier
-  const optionBroadcastList = async () => {
-    const numbers = validation.valid.map((v) => "+" + v.number).join("\n");
-    try {
-      await navigator.clipboard.writeText(numbers);
-      toast.success(
-        `${validation.valid.length} numéros copiés. Ouvrez WhatsApp → Nouvelle liste de diffusion et collez-les.`
-      );
-    } catch {
-      toast.error("Impossible de copier. Utilisez l'export Excel.");
-    }
+  // OPTION 1 — Liste de diffusion : envoi séquentiel automatisé à tous les destinataires
+  const optionBroadcastList = () => {
+    if (validation.valid.length === 0) return;
+    setBroadcastQueue(validation.valid);
+    setBroadcastIndex(0);
+    setBroadcastSent(new Set());
+    setBroadcastSkipped(new Set());
     setDialogOpen(false);
+    setBroadcastOpen(true);
+    // Copie aussi les numéros au presse-papier pour créer la liste de diffusion officielle si souhaité
+    const numbers = validation.valid.map((v) => "+" + v.number).join("\n");
+    navigator.clipboard.writeText(numbers).catch(() => {});
+  };
+
+  const currentBroadcast: BroadcastItem | null = broadcastQueue[broadcastIndex] ?? null;
+
+  const openCurrentBroadcast = () => {
+    if (!currentBroadcast) return;
+    window.open(
+      `https://wa.me/${currentBroadcast.number}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+    setBroadcastSent((s) => new Set(s).add(currentBroadcast.id));
+  };
+
+  const nextBroadcast = () => {
+    if (broadcastIndex + 1 >= broadcastQueue.length) {
+      toast.success(
+        `Diffusion terminée : ${broadcastSent.size + 1} envoyé(s), ${broadcastSkipped.size} passé(s)`
+      );
+      setBroadcastOpen(false);
+      return;
+    }
+    setBroadcastIndex((i) => i + 1);
+  };
+
+  const sendAndNext = () => {
+    openCurrentBroadcast();
+    // Laisse le temps à l'onglet WhatsApp de s'ouvrir avant de passer au suivant
+    setTimeout(() => nextBroadcast(), 400);
+  };
+
+  const skipCurrent = () => {
+    if (!currentBroadcast) return;
+    setBroadcastSkipped((s) => new Set(s).add(currentBroadcast.id));
+    if (broadcastIndex + 1 >= broadcastQueue.length) {
+      toast.info(`Diffusion terminée : ${broadcastSent.size} envoyé(s), ${broadcastSkipped.size + 1} passé(s)`);
+      setBroadcastOpen(false);
+      return;
+    }
+    setBroadcastIndex((i) => i + 1);
+  };
+
+  const cancelBroadcast = () => {
+    setBroadcastOpen(false);
+    if (broadcastSent.size > 0) {
+      toast.info(`Diffusion interrompue : ${broadcastSent.size} envoyé(s) sur ${broadcastQueue.length}`);
+    }
   };
 
   // OPTION 2 — Groupe WhatsApp : ouvrir l'assistant de création
