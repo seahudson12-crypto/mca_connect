@@ -108,6 +108,7 @@ function RootComponent() {
         <ActiveTempleProvider>
           <Outlet />
           <Toaster richColors position="top-right" />
+          <InstallAppButton />
         </ActiveTempleProvider>
       </AuthProvider>
     </QueryClientProvider>
