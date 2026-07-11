@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ActiveTempleProvider } from "@/hooks/use-active-temple";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 function NotFoundComponent() {
   return (
@@ -70,8 +71,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "MCA CONNECT : plateforme intelligente de gestion des temples MCA, centralisant membres, présences, finances, rapports, statistiques et suivi pastoral." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/69e7b7fd-f72a-4fa7-ac83-45af3048f834" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/69e7b7fd-f72a-4fa7-ac83-45af3048f834" },
+      { name: "theme-color", content: "#1e40af" },
+      { name: "application-name", content: "MCA CONNECT" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "MCA Connect" },
+      { name: "mobile-web-app-capable", content: "yes" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -96,6 +109,7 @@ function RootComponent() {
         <ActiveTempleProvider>
           <Outlet />
           <Toaster richColors position="top-right" />
+          <InstallAppButton />
         </ActiveTempleProvider>
       </AuthProvider>
     </QueryClientProvider>
