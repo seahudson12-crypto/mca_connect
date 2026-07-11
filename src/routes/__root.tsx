@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ActiveTempleProvider } from "@/hooks/use-active-temple";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 function NotFoundComponent() {
   return (
