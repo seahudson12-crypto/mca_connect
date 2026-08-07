@@ -37,7 +37,7 @@ type Membre = {
   actif: boolean;
 };
 
-export const Route = createFileRoute("/_app/membres")({
+export const Route = createFileRoute("/_app/membres/")({
   component: MembresPage,
 });
 

@@ -77,7 +77,7 @@ function RapportsPage() {
   const exportPdf = async (r: CulteRow) => {
     if (!r.temple) return toast.error("Temple manquant");
     const [{ data: membres }, { data: presences }, { data: finance }, { data: orateurs }] = await Promise.all([
-      supabase.from("membres").select("id,nom,prenoms,categorie").eq("temple_id", r.temple_id).eq("actif", true),
+      supabase.from("membres").select("id,nom,prenoms,categorie,matricule").eq("temple_id", r.temple_id).eq("actif", true),
       supabase.from("presences").select("membre_id,statut").eq("culte_id", r.id),
       supabase.from("finances_culte").select("*").eq("culte_id", r.id).maybeSingle(),
       supabase.from("orateurs_culte").select("nom,fonction,theme,versets,ordre").eq("culte_id", r.id).order("ordre"),
@@ -226,7 +226,7 @@ function RapportDetail({ rapport, onExport }: { rapport: CulteRow; onExport: () 
     queryKey: ["rapport-detail", rapport.id],
     queryFn: async () => {
       const [{ data: membres }, { data: presences }, { data: finance }] = await Promise.all([
-        supabase.from("membres").select("id,nom,prenoms,categorie").eq("temple_id", rapport.temple_id).eq("actif", true),
+        supabase.from("membres").select("id,nom,prenoms,categorie,matricule").eq("temple_id", rapport.temple_id).eq("actif", true),
         supabase.from("presences").select("membre_id,statut").eq("culte_id", rapport.id),
         supabase.from("finances_culte").select("*").eq("culte_id", rapport.id).maybeSingle(),
       ]);
