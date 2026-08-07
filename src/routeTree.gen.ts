@@ -9,49 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
-import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
-import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
-import { Route as AppTemplesRouteImport } from './routes/_app/temples'
-import { Route as AppSanteTempleRouteImport } from './routes/_app/sante-temple'
-import { Route as AppRapportsRouteImport } from './routes/_app/rapports'
-import { Route as AppParametresRouteImport } from './routes/_app/parametres'
-import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
-import { Route as AppMembresRouteImport } from './routes/_app/membres'
-import { Route as AppHistoriqueRouteImport } from './routes/_app/historique'
-import { Route as AppFormationsRouteImport } from './routes/_app/formations'
-import { Route as AppFinancesRouteImport } from './routes/_app/finances'
-import { Route as AppFamillesRouteImport } from './routes/_app/familles'
-import { Route as AppExportsRouteImport } from './routes/_app/exports'
-import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
-import { Route as AppCultesRouteImport } from './routes/_app/cultes'
-import { Route as AppCartographieRouteImport } from './routes/_app/cartographie'
-import { Route as AppCalendrierRouteImport } from './routes/_app/calendrier'
-import { Route as AppAssistantRouteImport } from './routes/_app/assistant'
-import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppActivitesRouteImport } from './routes/_app/activites'
+import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
+import { Route as AppAssistantRouteImport } from './routes/_app/assistant'
+import { Route as AppCalendrierRouteImport } from './routes/_app/calendrier'
+import { Route as AppCartographieRouteImport } from './routes/_app/cartographie'
+import { Route as AppCultesRouteImport } from './routes/_app/cultes'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppExportsRouteImport } from './routes/_app/exports'
+import { Route as AppFamillesRouteImport } from './routes/_app/familles'
+import { Route as AppFinancesRouteImport } from './routes/_app/finances'
+import { Route as AppFormationsRouteImport } from './routes/_app/formations'
+import { Route as AppHistoriqueRouteImport } from './routes/_app/historique'
+import { Route as AppMembresRouteImport } from './routes/_app/membres'
+import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
+import { Route as AppParametresRouteImport } from './routes/_app/parametres'
+import { Route as AppRapportsRouteImport } from './routes/_app/rapports'
+import { Route as AppSanteTempleRouteImport } from './routes/_app/sante-temple'
+import { Route as AppTemplesRouteImport } from './routes/_app/temples'
+import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
+import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
+import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
 import { Route as AppPresencesCulteIdRouteImport } from './routes/_app/presences.$culteId'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -59,108 +53,24 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppWhatsappRoute = AppWhatsappRouteImport.update({
-  id: '/whatsapp',
-  path: '/whatsapp',
-  getParentRoute: () => AppRoute,
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
-  id: '/utilisateurs',
-  path: '/utilisateurs',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppThemesAnneeRoute = AppThemesAnneeRouteImport.update({
-  id: '/themes-annee',
-  path: '/themes-annee',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppTemplesRoute = AppTemplesRouteImport.update({
-  id: '/temples',
-  path: '/temples',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSanteTempleRoute = AppSanteTempleRouteImport.update({
-  id: '/sante-temple',
-  path: '/sante-temple',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppRapportsRoute = AppRapportsRouteImport.update({
-  id: '/rapports',
-  path: '/rapports',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppParametresRoute = AppParametresRouteImport.update({
-  id: '/parametres',
-  path: '/parametres',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppObjectifsRoute = AppObjectifsRouteImport.update({
-  id: '/objectifs',
-  path: '/objectifs',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMembresRoute = AppMembresRouteImport.update({
-  id: '/membres',
-  path: '/membres',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppHistoriqueRoute = AppHistoriqueRouteImport.update({
-  id: '/historique',
-  path: '/historique',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFormationsRoute = AppFormationsRouteImport.update({
-  id: '/formations',
-  path: '/formations',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFinancesRoute = AppFinancesRouteImport.update({
-  id: '/finances',
-  path: '/finances',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFamillesRoute = AppFamillesRouteImport.update({
-  id: '/familles',
-  path: '/familles',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppExportsRoute = AppExportsRouteImport.update({
-  id: '/exports',
-  path: '/exports',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCultesRoute = AppCultesRouteImport.update({
-  id: '/cultes',
-  path: '/cultes',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCartographieRoute = AppCartographieRouteImport.update({
-  id: '/cartographie',
-  path: '/cartographie',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCalendrierRoute = AppCalendrierRouteImport.update({
-  id: '/calendrier',
-  path: '/calendrier',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAssistantRoute = AppAssistantRouteImport.update({
-  id: '/assistant',
-  path: '/assistant',
+const AppActivitesRoute = AppActivitesRouteImport.update({
+  id: '/activites',
+  path: '/activites',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAlertesRoute = AppAlertesRouteImport.update({
@@ -168,9 +78,99 @@ const AppAlertesRoute = AppAlertesRouteImport.update({
   path: '/alertes',
   getParentRoute: () => AppRoute,
 } as any)
-const AppActivitesRoute = AppActivitesRouteImport.update({
-  id: '/activites',
-  path: '/activites',
+const AppAssistantRoute = AppAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCalendrierRoute = AppCalendrierRouteImport.update({
+  id: '/calendrier',
+  path: '/calendrier',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCartographieRoute = AppCartographieRouteImport.update({
+  id: '/cartographie',
+  path: '/cartographie',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCultesRoute = AppCultesRouteImport.update({
+  id: '/cultes',
+  path: '/cultes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExportsRoute = AppExportsRouteImport.update({
+  id: '/exports',
+  path: '/exports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFamillesRoute = AppFamillesRouteImport.update({
+  id: '/familles',
+  path: '/familles',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesRoute = AppFinancesRouteImport.update({
+  id: '/finances',
+  path: '/finances',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFormationsRoute = AppFormationsRouteImport.update({
+  id: '/formations',
+  path: '/formations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoriqueRoute = AppHistoriqueRouteImport.update({
+  id: '/historique',
+  path: '/historique',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMembresRoute = AppMembresRouteImport.update({
+  id: '/membres',
+  path: '/membres',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppObjectifsRoute = AppObjectifsRouteImport.update({
+  id: '/objectifs',
+  path: '/objectifs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppParametresRoute = AppParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRapportsRoute = AppRapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSanteTempleRoute = AppSanteTempleRouteImport.update({
+  id: '/sante-temple',
+  path: '/sante-temple',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTemplesRoute = AppTemplesRouteImport.update({
+  id: '/temples',
+  path: '/temples',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppThemesAnneeRoute = AppThemesAnneeRouteImport.update({
+  id: '/themes-annee',
+  path: '/themes-annee',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
+  id: '/utilisateurs',
+  path: '/utilisateurs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWhatsappRoute = AppWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPresencesIndexRoute = AppPresencesIndexRouteImport.update({
@@ -381,32 +381,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -416,144 +395,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/whatsapp': {
-      id: '/_app/whatsapp'
-      path: '/whatsapp'
-      fullPath: '/whatsapp'
-      preLoaderRoute: typeof AppWhatsappRouteImport
-      parentRoute: typeof AppRoute
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/utilisateurs': {
-      id: '/_app/utilisateurs'
-      path: '/utilisateurs'
-      fullPath: '/utilisateurs'
-      preLoaderRoute: typeof AppUtilisateursRouteImport
-      parentRoute: typeof AppRoute
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/themes-annee': {
-      id: '/_app/themes-annee'
-      path: '/themes-annee'
-      fullPath: '/themes-annee'
-      preLoaderRoute: typeof AppThemesAnneeRouteImport
-      parentRoute: typeof AppRoute
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/temples': {
-      id: '/_app/temples'
-      path: '/temples'
-      fullPath: '/temples'
-      preLoaderRoute: typeof AppTemplesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/sante-temple': {
-      id: '/_app/sante-temple'
-      path: '/sante-temple'
-      fullPath: '/sante-temple'
-      preLoaderRoute: typeof AppSanteTempleRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/rapports': {
-      id: '/_app/rapports'
-      path: '/rapports'
-      fullPath: '/rapports'
-      preLoaderRoute: typeof AppRapportsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/parametres': {
-      id: '/_app/parametres'
-      path: '/parametres'
-      fullPath: '/parametres'
-      preLoaderRoute: typeof AppParametresRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/objectifs': {
-      id: '/_app/objectifs'
-      path: '/objectifs'
-      fullPath: '/objectifs'
-      preLoaderRoute: typeof AppObjectifsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/membres': {
-      id: '/_app/membres'
-      path: '/membres'
-      fullPath: '/membres'
-      preLoaderRoute: typeof AppMembresRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/historique': {
-      id: '/_app/historique'
-      path: '/historique'
-      fullPath: '/historique'
-      preLoaderRoute: typeof AppHistoriqueRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/formations': {
-      id: '/_app/formations'
-      path: '/formations'
-      fullPath: '/formations'
-      preLoaderRoute: typeof AppFormationsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/finances': {
-      id: '/_app/finances'
-      path: '/finances'
-      fullPath: '/finances'
-      preLoaderRoute: typeof AppFinancesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/familles': {
-      id: '/_app/familles'
-      path: '/familles'
-      fullPath: '/familles'
-      preLoaderRoute: typeof AppFamillesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/exports': {
-      id: '/_app/exports'
-      path: '/exports'
-      fullPath: '/exports'
-      preLoaderRoute: typeof AppExportsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/dashboard': {
-      id: '/_app/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/cultes': {
-      id: '/_app/cultes'
-      path: '/cultes'
-      fullPath: '/cultes'
-      preLoaderRoute: typeof AppCultesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/cartographie': {
-      id: '/_app/cartographie'
-      path: '/cartographie'
-      fullPath: '/cartographie'
-      preLoaderRoute: typeof AppCartographieRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/calendrier': {
-      id: '/_app/calendrier'
-      path: '/calendrier'
-      fullPath: '/calendrier'
-      preLoaderRoute: typeof AppCalendrierRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/assistant': {
-      id: '/_app/assistant'
-      path: '/assistant'
-      fullPath: '/assistant'
-      preLoaderRoute: typeof AppAssistantRouteImport
+    '/_app/activites': {
+      id: '/_app/activites'
+      path: '/activites'
+      fullPath: '/activites'
+      preLoaderRoute: typeof AppActivitesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/alertes': {
@@ -563,11 +437,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/activites': {
-      id: '/_app/activites'
-      path: '/activites'
-      fullPath: '/activites'
-      preLoaderRoute: typeof AppActivitesRouteImport
+    '/_app/assistant': {
+      id: '/_app/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AppAssistantRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/calendrier': {
+      id: '/_app/calendrier'
+      path: '/calendrier'
+      fullPath: '/calendrier'
+      preLoaderRoute: typeof AppCalendrierRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cartographie': {
+      id: '/_app/cartographie'
+      path: '/cartographie'
+      fullPath: '/cartographie'
+      preLoaderRoute: typeof AppCartographieRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cultes': {
+      id: '/_app/cultes'
+      path: '/cultes'
+      fullPath: '/cultes'
+      preLoaderRoute: typeof AppCultesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/exports': {
+      id: '/_app/exports'
+      path: '/exports'
+      fullPath: '/exports'
+      preLoaderRoute: typeof AppExportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/familles': {
+      id: '/_app/familles'
+      path: '/familles'
+      fullPath: '/familles'
+      preLoaderRoute: typeof AppFamillesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances': {
+      id: '/_app/finances'
+      path: '/finances'
+      fullPath: '/finances'
+      preLoaderRoute: typeof AppFinancesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/formations': {
+      id: '/_app/formations'
+      path: '/formations'
+      fullPath: '/formations'
+      preLoaderRoute: typeof AppFormationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/historique': {
+      id: '/_app/historique'
+      path: '/historique'
+      fullPath: '/historique'
+      preLoaderRoute: typeof AppHistoriqueRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/membres': {
+      id: '/_app/membres'
+      path: '/membres'
+      fullPath: '/membres'
+      preLoaderRoute: typeof AppMembresRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/objectifs': {
+      id: '/_app/objectifs'
+      path: '/objectifs'
+      fullPath: '/objectifs'
+      preLoaderRoute: typeof AppObjectifsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/parametres': {
+      id: '/_app/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof AppParametresRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/rapports': {
+      id: '/_app/rapports'
+      path: '/rapports'
+      fullPath: '/rapports'
+      preLoaderRoute: typeof AppRapportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/sante-temple': {
+      id: '/_app/sante-temple'
+      path: '/sante-temple'
+      fullPath: '/sante-temple'
+      preLoaderRoute: typeof AppSanteTempleRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/temples': {
+      id: '/_app/temples'
+      path: '/temples'
+      fullPath: '/temples'
+      preLoaderRoute: typeof AppTemplesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/themes-annee': {
+      id: '/_app/themes-annee'
+      path: '/themes-annee'
+      fullPath: '/themes-annee'
+      preLoaderRoute: typeof AppThemesAnneeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/utilisateurs': {
+      id: '/_app/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/utilisateurs'
+      preLoaderRoute: typeof AppUtilisateursRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/whatsapp': {
+      id: '/_app/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof AppWhatsappRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/presences/': {
@@ -652,3 +652,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
