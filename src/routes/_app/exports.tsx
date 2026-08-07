@@ -54,6 +54,7 @@ function ExportsPage() {
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []).map((m) => ({
+        Matricule: m.matricule ?? "",
         Temple: allTemples.find((t) => t.id === m.temple_id)?.nom_temple ?? "",
         Nom: m.nom, Prénoms: m.prenoms, Sexe: m.sexe ?? "",
         Catégorie: categoryLabel(m.categorie),
@@ -80,11 +81,12 @@ function ExportsPage() {
       if (culteIds.length === 0) return [];
       const { data, error } = await supabase
         .from("presences")
-        .select("statut,membre:membres(nom,prenoms,categorie),culte:cultes(date,type_culte,temple_id)")
+        .select("statut,membre:membres(matricule,nom,prenoms,categorie),culte:cultes(date,type_culte,temple_id)")
         .in("culte_id", culteIds);
       if (error) throw error;
       return (data ?? []).map((p: any) => ({
         Temple: allTemples.find((t) => t.id === p.culte?.temple_id)?.nom_temple ?? "",
+        Matricule: p.membre?.matricule ?? "",
         Date: p.culte?.date ?? "",
         "Type culte": culteTypeLabel(p.culte?.type_culte ?? ""),
         Nom: p.membre?.nom ?? "", Prénoms: p.membre?.prenoms ?? "",

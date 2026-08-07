@@ -24,7 +24,7 @@ import { formatXof } from "@/lib/audit";
 
 export const Route = createFileRoute("/_app/presences/$culteId")({ component: PointagePage });
 
-type Membre = { id: string; nom: string; prenoms: string; categorie: string; whatsapp: string | null; telephone: string | null };
+type Membre = { id: string; nom: string; prenoms: string; categorie: string; whatsapp: string | null; telephone: string | null; matricule: string | null };
 
 function PointagePage() {
   const { culteId } = Route.useParams();
@@ -52,7 +52,7 @@ function PointagePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("membres")
-        .select("id,nom,prenoms,categorie,whatsapp,telephone")
+        .select("id,nom,prenoms,categorie,whatsapp,telephone,matricule")
         .eq("actif", true)
         .eq("temple_id", culte!.temple_id)
         .order("nom");
@@ -155,10 +155,10 @@ function PointagePage() {
 
     doc.setFontSize(12); doc.text(`Présents: ${stats.present}   Absents: ${stats.absent}   Nouvelles âmes: ${stats.nouvelles}`, 14, 60);
 
-    const rows = membres.map((m) => [`${m.nom} ${m.prenoms}`, categoryLabel(m.categorie), statuts[m.id] === "present" ? "Présent" : statuts[m.id] === "absent" ? "Absent" : "—"]);
+    const rows = membres.map((m) => [m.matricule ?? "—", `${m.nom} ${m.prenoms}`, categoryLabel(m.categorie), statuts[m.id] === "present" ? "Présent" : statuts[m.id] === "absent" ? "Absent" : "—"]);
     autoTable(doc, {
       startY: 66,
-      head: [["Nom & Prénoms", "Catégorie", "Statut"]],
+      head: [["Matricule", "Nom & Prénoms", "Catégorie", "Statut"]],
       body: rows,
       headStyles: { fillColor: [42, 80, 180] },
       styles: { fontSize: 9 },
@@ -287,7 +287,10 @@ function PointagePage() {
                     const s = statuts[m.id];
                     return (
                       <div key={m.id} className="flex items-center justify-between gap-2 rounded-lg border bg-card p-3">
-                        <div className="min-w-0 font-medium truncate">{m.nom} {m.prenoms}</div>
+                        <div className="min-w-0">
+                          {m.matricule && <div className="font-mono text-[11px] text-muted-foreground">{m.matricule}</div>}
+                          <div className="font-medium truncate">{m.nom} {m.prenoms}</div>
+                        </div>
                         <div className="flex gap-1 shrink-0">
                           <Button size="sm" variant={s === "present" ? "default" : "outline"} className={s === "present" ? "bg-success text-success-foreground hover:bg-success/90" : ""} onClick={() => toggle(m.id, "present")}>P</Button>
                           <Button size="sm" variant={s === "absent" ? "default" : "outline"} className={s === "absent" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""} onClick={() => toggle(m.id, "absent")}>A</Button>

@@ -23,7 +23,7 @@ export interface RapportPdfData {
     priere_intense_active?: boolean;
   };
   temple: { nom_temple: string; ville?: string | null; pays?: string | null };
-  membres: Array<{ id: string; categorie: string; nom: string; prenoms: string }>;
+  membres: Array<{ id: string; categorie: string; nom: string; prenoms: string; matricule?: string | null }>;
   presences: Array<{ membre_id: string; statut: string }>;
   orateurs?: Array<{ nom: string; fonction?: string | null; theme?: string | null; versets?: string | null }>;
   finance?: {
@@ -157,6 +157,31 @@ export function generateRapportPdf({
     headStyles: { fillColor: [42, 80, 180] },
     styles: { fontSize: 9 },
   });
+
+  // Liste détaillée (identification par matricule)
+  const detailRows = membres
+    .slice()
+    .sort((a, b) => (a.matricule ?? "").localeCompare(b.matricule ?? "") || a.nom.localeCompare(b.nom))
+    .map((m) => {
+      const s = presMap.get(m.id);
+      return [
+        m.matricule ?? "—",
+        m.nom,
+        m.prenoms,
+        categoryLabel(m.categorie),
+        s === "present" ? "Présent" : s === "absent" ? "Absent" : "—",
+      ];
+    });
+  if (detailRows.length > 0) {
+    const lastY = (doc as unknown as LastTable).lastAutoTable?.finalY ?? y;
+    autoTable(doc, {
+      startY: lastY + 8,
+      head: [["Matricule", "Nom", "Prénoms", "Catégorie", "Statut"]],
+      body: detailRows,
+      headStyles: { fillColor: [42, 80, 180] },
+      styles: { fontSize: 8 },
+    });
+  }
 
   // Finances
   if (includeFinances && finance) {

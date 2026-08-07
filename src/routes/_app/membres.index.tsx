@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Search, Download, Phone } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Download, Phone, Eye } from "lucide-react";
 import { useState } from "react";
 import { CATEGORIES, categoryLabel } from "@/lib/constants";
 import { toast } from "sonner";
@@ -35,9 +36,13 @@ type Membre = {
   date_ajout: string;
   temple_id: string;
   actif: boolean;
+  matricule: string | null;
+  photo_url: string | null;
+  observations: string | null;
+  famille_id?: string | null;
 };
 
-export const Route = createFileRoute("/_app/membres")({
+export const Route = createFileRoute("/_app/membres/")({
   component: MembresPage,
 });
 
@@ -66,7 +71,7 @@ function MembresPage() {
   });
 
   const filtered = membres.filter((m) => {
-    const matchSearch = !search || `${m.nom} ${m.prenoms} ${m.telephone ?? ""}`.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search || `${m.nom} ${m.prenoms} ${m.telephone ?? ""} ${m.matricule ?? ""}`.toLowerCase().includes(search.toLowerCase());
     const matchCat = filterCat === "all" || m.categorie === filterCat;
     return matchSearch && matchCat;
   });
@@ -85,6 +90,8 @@ function MembresPage() {
       profession: String(form.get("profession") || "").trim() || null,
       secteur_activite: String(form.get("secteur_activite") || "").trim() || null,
       entreprise: String(form.get("entreprise") || "").trim() || null,
+      photo_url: String(form.get("photo_url") || "").trim() || null,
+      observations: String(form.get("observations") || "").trim() || null,
       categorie: form.get("categorie") as never,
       temple_id: scopedTempleId ?? "",
     };
@@ -116,7 +123,7 @@ function MembresPage() {
 
   const exportExcel = () => {
     const rows = filtered.map((m) => ({
-      Nom: m.nom, Prénoms: m.prenoms, Sexe: m.sexe ?? "", Téléphone: m.telephone ?? "",
+      Matricule: m.matricule ?? "", Nom: m.nom, Prénoms: m.prenoms, Sexe: m.sexe ?? "", Téléphone: m.telephone ?? "",
       WhatsApp: m.whatsapp ?? "", Email: m.email ?? "", Catégorie: categoryLabel(m.categorie),
       "Date d'entrée": m.date_entree ?? "", "Date de naissance": m.date_naissance ?? "",
       Adresse: m.adresse ?? "", Profession: m.profession ?? "",
@@ -185,6 +192,13 @@ function MembresPage() {
                   </div>
                   <div className="space-y-1.5 mt-3"><Label>Entreprise (optionnel)</Label><Input name="entreprise" defaultValue={editing?.entreprise ?? ""} /></div>
                 </div>
+                <div className="pt-2 border-t space-y-3">
+                  <div className="space-y-1.5"><Label>Photo (URL)</Label><Input name="photo_url" placeholder="https://…" defaultValue={editing?.photo_url ?? ""} /></div>
+                  <div className="space-y-1.5"><Label>Observations</Label><Textarea name="observations" rows={3} defaultValue={editing?.observations ?? ""} /></div>
+                  {editing?.matricule && (
+                    <p className="text-xs text-muted-foreground">Matricule : <span className="font-mono font-semibold text-foreground">{editing.matricule}</span> (définitif)</p>
+                  )}
+                </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
                   <Button type="submit" className="gradient-brand text-primary-foreground border-0">Enregistrer</Button>
@@ -214,18 +228,20 @@ function MembresPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Matricule</TableHead>
                 <TableHead>Nom & Prénoms</TableHead>
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Téléphone</TableHead>
                 <TableHead>Sexe</TableHead>
-                <TableHead className="w-24"></TableHead>
+                <TableHead className="w-32"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Chargement...</TableCell></TableRow>}
-              {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Aucun membre trouvé</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Chargement...</TableCell></TableRow>}
+              {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucun membre trouvé</TableCell></TableRow>}
               {filtered.map((m) => (
                 <TableRow key={m.id}>
+                  <TableCell className="font-mono text-xs whitespace-nowrap">{m.matricule ?? "—"}</TableCell>
                   <TableCell><div className="font-medium">{m.nom} {m.prenoms}</div></TableCell>
                   <TableCell><Badge variant="secondary">{categoryLabel(m.categorie)}</Badge></TableCell>
                   <TableCell className="text-sm">
@@ -234,6 +250,9 @@ function MembresPage() {
                   <TableCell>{m.sexe === "M" ? "H" : m.sexe === "F" ? "F" : "—"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <Button asChild size="icon" variant="ghost" title="Voir la fiche">
+                        <Link to="/membres/$membreId" params={{ membreId: m.id }}><Eye className="h-4 w-4" /></Link>
+                      </Button>
                       {isAdmin && (
                         <>
                           <Button size="icon" variant="ghost" onClick={() => { setEditing(m); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>

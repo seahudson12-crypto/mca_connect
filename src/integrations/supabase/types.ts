@@ -379,7 +379,10 @@ export type Database = {
           entreprise: string | null
           famille_id: string | null
           id: string
+          matricule: string | null
           nom: string
+          observations: string | null
+          photo_url: string | null
           prenoms: string
           profession: string | null
           role_famille: Database["public"]["Enums"]["role_famille"] | null
@@ -402,7 +405,10 @@ export type Database = {
           entreprise?: string | null
           famille_id?: string | null
           id?: string
+          matricule?: string | null
           nom: string
+          observations?: string | null
+          photo_url?: string | null
           prenoms: string
           profession?: string | null
           role_famille?: Database["public"]["Enums"]["role_famille"] | null
@@ -425,7 +431,10 @@ export type Database = {
           entreprise?: string | null
           famille_id?: string | null
           id?: string
+          matricule?: string | null
           nom?: string
+          observations?: string | null
+          photo_url?: string | null
           prenoms?: string
           profession?: string | null
           role_famille?: Database["public"]["Enums"]["role_famille"] | null
@@ -752,6 +761,8 @@ export type Database = {
       temples: {
         Row: {
           actif: boolean
+          code_pays: string | null
+          code_temple: string | null
           commune: string | null
           couleur_primaire: string | null
           created_at: string
@@ -768,6 +779,8 @@ export type Database = {
         }
         Insert: {
           actif?: boolean
+          code_pays?: string | null
+          code_temple?: string | null
           commune?: string | null
           couleur_primaire?: string | null
           created_at?: string
@@ -784,6 +797,8 @@ export type Database = {
         }
         Update: {
           actif?: boolean
+          code_pays?: string | null
+          code_temple?: string | null
           commune?: string | null
           couleur_primaire?: string | null
           created_at?: string
@@ -1208,6 +1223,7 @@ export type Database = {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_principal: { Args: { _user_id: string }; Returns: boolean }
       is_super: { Args: { _user_id: string }; Returns: boolean }
+      temple_matricule_prefix: { Args: { _temple_id: string }; Returns: string }
     }
     Enums: {
       app_role:
