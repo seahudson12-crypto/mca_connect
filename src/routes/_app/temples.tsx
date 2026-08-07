@@ -186,6 +186,12 @@ function TemplesPage() {
                       <span className="truncate">{t.pasteur_responsable}</span>
                     </p>
                   )}
+                  {t.pasteur_adjoint && (
+                    <p className="flex items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">Adjoint : {t.pasteur_adjoint}</span>
+                    </p>
+                  )}
                   {t.telephone && (
                     <p className="flex items-center gap-1.5">
                       <Phone className="h-3.5 w-3.5 shrink-0" />
@@ -290,6 +296,14 @@ function TemplesPage() {
                 name="pasteur"
                 maxLength={120}
                 defaultValue={editing?.pasteur_responsable ?? ""}
+              />
+            </div>
+            <div>
+              <Label>Pasteur adjoint</Label>
+              <Input
+                name="pasteur_adjoint"
+                maxLength={120}
+                defaultValue={editing?.pasteur_adjoint ?? ""}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
