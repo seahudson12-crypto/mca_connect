@@ -39,6 +39,7 @@ type Temple = {
   commune: string | null;
   pays: string | null;
   pasteur_responsable: string | null;
+  pasteur_adjoint: string | null;
   telephone: string | null;
   email: string | null;
   couleur_primaire: string | null;
@@ -85,20 +86,29 @@ function TemplesPage() {
       commune: (form.get("commune") as string)?.trim() || null,
       pays: (form.get("pays") as string)?.trim() || "Côte d'Ivoire",
       pasteur_responsable: (form.get("pasteur") as string)?.trim() || null,
+      pasteur_adjoint: (form.get("pasteur_adjoint") as string)?.trim() || null,
       telephone: (form.get("telephone") as string)?.trim() || null,
       email: (form.get("email") as string)?.trim() || null,
       couleur_primaire: (form.get("couleur") as string) || "#1e40af",
     };
 
-    const { error } = editing
-      ? await supabase.from("temples").update(payload).eq("id", editing.id)
-      : await supabase.from("temples").insert(payload);
+    const { data, error } = editing
+      ? await supabase.from("temples").update(payload).eq("id", editing.id).select("id")
+      : await supabase.from("temples").insert(payload).select("id");
 
     if (error) return toast.error(error.message);
-    toast.success(editing ? "Temple mis à jour" : "Temple créé");
+    if (!data || data.length === 0) {
+      return toast.error(
+        "Aucune modification enregistrée : vous n'avez pas les droits nécessaires sur ce temple.",
+      );
+    }
+    toast.success(editing ? "Temple modifié avec succès" : "Temple créé");
     setOpen(false);
     setEditing(null);
-    qc.invalidateQueries({ queryKey: ["temples"] });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["temples"] }),
+      qc.invalidateQueries({ queryKey: ["temples", "all"] }),
+    ]);
   };
 
   const toggleActif = async (t: Temple) => {
@@ -174,6 +184,12 @@ function TemplesPage() {
                     <p className="flex items-center gap-1.5">
                       <User className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate">{t.pasteur_responsable}</span>
+                    </p>
+                  )}
+                  {t.pasteur_adjoint && (
+                    <p className="flex items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">Adjoint : {t.pasteur_adjoint}</span>
                     </p>
                   )}
                   {t.telephone && (
@@ -280,6 +296,14 @@ function TemplesPage() {
                 name="pasteur"
                 maxLength={120}
                 defaultValue={editing?.pasteur_responsable ?? ""}
+              />
+            </div>
+            <div>
+              <Label>Pasteur adjoint</Label>
+              <Input
+                name="pasteur_adjoint"
+                maxLength={120}
+                defaultValue={editing?.pasteur_adjoint ?? ""}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
