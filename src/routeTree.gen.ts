@@ -36,6 +36,7 @@ import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppMembresIndexRouteImport } from './routes/_app/membres.index'
+import { Route as AppMembresMembreIdRouteImport } from './routes/_app/membres.$membreId'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
 import { Route as AppPresencesCulteIdRouteImport } from './routes/_app/presences.$culteId'
 
@@ -173,6 +174,11 @@ const AppMembresIndexRoute = AppMembresIndexRouteImport.update({
   path: '/membres/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMembresMembreIdRoute = AppMembresMembreIdRouteImport.update({
+  id: '/membres/$membreId',
+  path: '/membres/$membreId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPresencesIndexRoute = AppPresencesIndexRouteImport.update({
   id: '/presences/',
   path: '/presences/',
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/membres/': typeof AppMembresIndexRoute
   '/presences/': typeof AppPresencesIndexRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/membres': typeof AppMembresIndexRoute
   '/presences': typeof AppPresencesIndexRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/_app/themes-annee': typeof AppThemesAnneeRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
+  '/_app/membres/$membreId': typeof AppMembresMembreIdRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/_app/membres/': typeof AppMembresIndexRoute
   '/_app/presences/': typeof AppPresencesIndexRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/membres/$membreId'
     | '/presences/$culteId'
     | '/membres/'
     | '/presences/'
@@ -334,6 +344,7 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/membres/$membreId'
     | '/presences/$culteId'
     | '/membres'
     | '/presences'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/_app/themes-annee'
     | '/_app/utilisateurs'
     | '/_app/whatsapp'
+    | '/_app/membres/$membreId'
     | '/_app/presences/$culteId'
     | '/_app/membres/'
     | '/_app/presences/'
@@ -570,6 +582,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMembresIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/membres/$membreId': {
+      id: '/_app/membres/$membreId'
+      path: '/membres/$membreId'
+      fullPath: '/membres/$membreId'
+      preLoaderRoute: typeof AppMembresMembreIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/presences/': {
       id: '/_app/presences/'
       path: '/presences'
@@ -608,6 +627,7 @@ interface AppRouteChildren {
   AppThemesAnneeRoute: typeof AppThemesAnneeRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
+  AppMembresMembreIdRoute: typeof AppMembresMembreIdRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
   AppMembresIndexRoute: typeof AppMembresIndexRoute
   AppPresencesIndexRoute: typeof AppPresencesIndexRoute
@@ -634,6 +654,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppThemesAnneeRoute: AppThemesAnneeRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
+  AppMembresMembreIdRoute: AppMembresMembreIdRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
   AppMembresIndexRoute: AppMembresIndexRoute,
   AppPresencesIndexRoute: AppPresencesIndexRoute,

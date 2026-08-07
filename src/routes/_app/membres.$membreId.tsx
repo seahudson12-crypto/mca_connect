@@ -273,7 +273,7 @@ function FicheMembrePage() {
                     <TableRow><TableCell colSpan={3} className="py-8 text-center text-muted-foreground">Aucun pointage enregistré</TableCell></TableRow>
                   )}
                   {historique.map((h) => (
-                    <TableRow key={h.culte_id}>
+                    <TableRow key={h.id}>
                       <TableCell>{format(new Date(h.date), "EEE d MMM yyyy", { locale: fr })}</TableCell>
                       <TableCell>{culteTypeLabel(h.type_culte)}</TableCell>
                       <TableCell>
