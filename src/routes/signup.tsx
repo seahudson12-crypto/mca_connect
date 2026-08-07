@@ -32,8 +32,12 @@ function SignupPage() {
   }, [user, navigate]);
 
   useEffect(() => {
-    supabase.from("temples").select("id,nom_temple,ville").eq("actif", true).order("nom_temple").then(({ data }) => {
-      setTemples(data ?? []);
+    supabase.from("temples_public").select("id,nom_temple,ville").order("nom_temple").then(({ data }) => {
+      setTemples(
+        (data ?? [])
+          .filter((t) => t.id && t.nom_temple)
+          .map((t) => ({ id: t.id!, nom_temple: t.nom_temple!, ville: t.ville })),
+      );
     });
   }, []);
 

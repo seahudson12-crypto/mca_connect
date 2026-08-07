@@ -131,6 +131,13 @@ export type Database = {
             referencedRelation: "temples"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cultes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       evenements: {
@@ -437,6 +444,13 @@ export type Database = {
             referencedRelation: "temples"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "membres_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       objectifs_temple: {
@@ -590,6 +604,13 @@ export type Database = {
             columns: ["temple_id"]
             isOneToOne: false
             referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
             referencedColumns: ["id"]
           },
         ]
@@ -845,6 +866,13 @@ export type Database = {
             referencedRelation: "temples"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_roles_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wa_campagnes: {
@@ -937,6 +965,13 @@ export type Database = {
             referencedRelation: "temples"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wa_campagnes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wa_envois: {
@@ -1019,6 +1054,13 @@ export type Database = {
             referencedRelation: "temples"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wa_envois_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wa_notifications_auto: {
@@ -1069,6 +1111,13 @@ export type Database = {
             referencedRelation: "temples"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wa_notifications_auto_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wa_templates: {
@@ -1112,7 +1161,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      temples_public: {
+        Row: {
+          commune: string | null
+          couleur_primaire: string | null
+          id: string | null
+          logo: string | null
+          nom_temple: string | null
+          pays: string | null
+          ville: string | null
+        }
+        Insert: {
+          commune?: string | null
+          couleur_primaire?: string | null
+          id?: string | null
+          logo?: string | null
+          nom_temple?: string | null
+          pays?: string | null
+          ville?: string | null
+        }
+        Update: {
+          commune?: string | null
+          couleur_primaire?: string | null
+          id?: string | null
+          logo?: string | null
+          nom_temple?: string | null
+          pays?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_access_temple: {
