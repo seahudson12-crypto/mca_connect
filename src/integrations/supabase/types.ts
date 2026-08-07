@@ -738,6 +738,7 @@ export type Database = {
           id: string
           logo: string | null
           nom_temple: string
+          pasteur_adjoint: string | null
           pasteur_responsable: string | null
           pays: string | null
           telephone: string | null
@@ -753,6 +754,7 @@ export type Database = {
           id?: string
           logo?: string | null
           nom_temple: string
+          pasteur_adjoint?: string | null
           pasteur_responsable?: string | null
           pays?: string | null
           telephone?: string | null
@@ -768,6 +770,7 @@ export type Database = {
           id?: string
           logo?: string | null
           nom_temple?: string
+          pasteur_adjoint?: string | null
           pasteur_responsable?: string | null
           pays?: string | null
           telephone?: string | null
