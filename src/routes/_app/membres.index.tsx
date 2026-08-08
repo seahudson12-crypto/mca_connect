@@ -149,9 +149,18 @@ function MembresPage() {
             <DialogTrigger asChild>
               <Button className="gradient-brand text-primary-foreground border-0"><Plus className="mr-2 h-4 w-4" /> Ajouter</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader><DialogTitle>{editing ? "Modifier le membre" : "Nouveau membre"}</DialogTitle></DialogHeader>
-              <form onSubmit={(e) => { e.preventDefault(); handleSave(new FormData(e.currentTarget)); }} className="space-y-4">
+            <DialogContent className="w-[95vw] max-w-lg max-h-[92dvh] p-0 gap-0 flex flex-col overflow-hidden">
+              <DialogHeader className="shrink-0 border-b px-5 py-4">
+                <DialogTitle>{editing ? "Modifier le membre" : "Nouveau membre"}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={(e) => { e.preventDefault(); handleSave(new FormData(e.currentTarget)); }} className="flex min-h-0 flex-1 flex-col">
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-4">
+                {editing?.matricule && (
+                  <div className="space-y-1.5">
+                    <Label>Matricule</Label>
+                    <Input value={editing.matricule} readOnly disabled className="font-mono" />
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5"><Label>Nom *</Label><Input name="nom" defaultValue={editing?.nom} required /></div>
                   <div className="space-y-1.5"><Label>Prénoms *</Label><Input name="prenoms" defaultValue={editing?.prenoms} required /></div>
@@ -193,18 +202,17 @@ function MembresPage() {
                   <div className="space-y-1.5 mt-3"><Label>Entreprise (optionnel)</Label><Input name="entreprise" defaultValue={editing?.entreprise ?? ""} /></div>
                 </div>
                 <div className="pt-2 border-t space-y-3">
-                  <div className="space-y-1.5"><Label>Photo (URL)</Label><Input name="photo_url" placeholder="https://…" defaultValue={editing?.photo_url ?? ""} /></div>
+                  <input type="hidden" name="photo_url" value={editing?.photo_url ?? ""} />
                   <div className="space-y-1.5"><Label>Observations</Label><Textarea name="observations" rows={3} defaultValue={editing?.observations ?? ""} /></div>
-                  {editing?.matricule && (
-                    <p className="text-xs text-muted-foreground">Matricule : <span className="font-mono font-semibold text-foreground">{editing.matricule}</span> (définitif)</p>
-                  )}
                 </div>
-                <DialogFooter>
+                </div>
+                <DialogFooter className="shrink-0 border-t bg-background px-5 py-3">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
                   <Button type="submit" className="gradient-brand text-primary-foreground border-0">Enregistrer</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
+
           </Dialog>
         </div>
       </div>
