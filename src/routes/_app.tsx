@@ -9,12 +9,21 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayout() {
-  const { user, loading } = useAuth();
+  const { user, loading, canAccessPath, defaultRoute } = useAuth();
   const navigate = useNavigate();
+  const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
+
+  // Redirection si le rôle n'a pas accès au chemin demandé (l'URL seule ne donne aucun droit)
+  useEffect(() => {
+    if (!loading && user && !canAccessPath(path)) {
+      navigate({ to: defaultRoute, replace: true });
+    }
+  }, [loading, user, path, canAccessPath, defaultRoute, navigate]);
+
 
   if (loading || !user) {
     return (
