@@ -14,9 +14,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-type Role = "super_admin_principal" | "super_admin" | "admin_temple" | "utilisateur";
+type Role = "super_admin_principal" | "super_admin" | "admin_temple" | "finances" | "responsable_departement" | "utilisateur";
 type Profile = { id: string; nom: string | null; email: string | null; temple_id: string | null; actif?: boolean | null; derniere_connexion?: string | null };
-type RoleRow = { user_id: string; role: Role; temple_id: string | null };
+type RoleRow = { user_id: string; role: Role; temple_id: string | null; departement_id: string | null };
+type Departement = { id: string; nom: string; temple_id: string };
 type Temple = { id: string; nom_temple: string };
 type RoleChange = {
   id: string;
@@ -32,6 +33,8 @@ const roleLabel = (r: Role | null) =>
   r === "super_admin_principal" ? "Super Admin Principal"
   : r === "super_admin" ? "Super Admin"
   : r === "admin_temple" ? "Admin Temple"
+  : r === "finances" ? "Finances"
+  : r === "responsable_departement" ? "Responsable de département"
   : r === "utilisateur" ? "Utilisateur" : "—";
 
 export const Route = createFileRoute("/_app/utilisateurs")({ component: UtilisateursPage });
@@ -39,15 +42,15 @@ export const Route = createFileRoute("/_app/utilisateurs")({ component: Utilisat
 function UtilisateursPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { isSuperAdmin, loading } = useAuth();
+  const { isSuperAdmin, isAdmin, isAdminTemple, templeId, loading } = useAuth();
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    if (!loading && !isSuperAdmin) {
-      toast.error("Accès réservé au super administrateur");
+    if (!loading && !isAdmin) {
+      toast.error("Accès réservé aux administrateurs");
       navigate({ to: "/dashboard" });
     }
-  }, [loading, isSuperAdmin, navigate]);
+  }, [loading, isAdmin, navigate]);
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["all-profiles"],
@@ -56,17 +59,17 @@ function UtilisateursPage() {
       if (error) throw error;
       return data as Profile[];
     },
-    enabled: isSuperAdmin,
+    enabled: isAdmin,
   });
 
   const { data: roleRows = [] } = useQuery({
     queryKey: ["all-roles"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("user_roles").select("user_id,role,temple_id");
+      const { data, error } = await supabase.from("user_roles").select("user_id,role,temple_id,departement_id");
       if (error) throw error;
       return data as RoleRow[];
     },
-    enabled: isSuperAdmin,
+    enabled: isAdmin,
   });
 
   const { data: temples = [] } = useQuery({
@@ -76,7 +79,17 @@ function UtilisateursPage() {
       if (error) throw error;
       return data as Temple[];
     },
-    enabled: isSuperAdmin,
+    enabled: isAdmin,
+  });
+
+  const { data: departements = [] } = useQuery({
+    queryKey: ["departements-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("departements").select("id,nom,temple_id").order("nom");
+      if (error) throw error;
+      return data as Departement[];
+    },
+    enabled: isAdmin,
   });
 
   const { data: history = [] } = useQuery({
@@ -90,7 +103,7 @@ function UtilisateursPage() {
       if (error) throw error;
       return data as RoleChange[];
     },
-    enabled: isSuperAdmin,
+    enabled: isAdmin,
   });
 
   const rolesByUser = new Map<string, RoleRow[]>();
@@ -111,13 +124,13 @@ function UtilisateursPage() {
     !search || `${p.nom ?? ""} ${p.email ?? ""}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const setRole = async (userId: string, role: Role, templeId: string | null, previousRole: Role) => {
+  const setRole = async (userId: string, role: Role, templeId: string | null, previousRole: Role, departementId: string | null = null) => {
     const { data: auth } = await supabase.auth.getUser();
     const actorId = auth.user?.id ?? null;
     // Remove all existing roles for the user, then insert the new one
     const del = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (del.error) return toast.error(del.error.message);
-    const ins = await supabase.from("user_roles").insert({ user_id: userId, role, temple_id: templeId });
+    const ins = await supabase.from("user_roles").insert({ user_id: userId, role, temple_id: templeId, departement_id: departementId });
     if (ins.error) return toast.error(ins.error.message);
     if (previousRole !== role || (role === "admin_temple")) {
       const log = await supabase.from("role_changes").insert({
@@ -134,7 +147,7 @@ function UtilisateursPage() {
     qc.invalidateQueries({ queryKey: ["role-changes"] });
   };
 
-  if (!isSuperAdmin) return null;
+  if (!isAdmin) return null;
 
   return (
     <div className="space-y-6">
@@ -210,7 +223,11 @@ function UtilisateursPage() {
                         currentRole={current}
                         currentTempleId={currentTempleId}
                         temples={temples}
-                        onApply={(role, templeId) => setRole(p.id, role, templeId, current)}
+                        currentDepartementId={userRoles[0]?.departement_id ?? null}
+                        departements={departements}
+                        isSuperAdmin={isSuperAdmin}
+                        lockedTempleId={isAdminTemple && !isSuperAdmin ? templeId : null}
+                        onApply={(role, tId, deptId) => setRole(p.id, role, tId, current, deptId)}
                       />
                     </TableCell>
                   </TableRow>
@@ -286,15 +303,22 @@ function UtilisateursPage() {
 }
 
 function RoleEditor({
-  currentRole, currentTempleId, temples, onApply,
+  currentRole, currentTempleId, currentDepartementId, temples, departements, isSuperAdmin, lockedTempleId, onApply,
 }: {
   currentRole: Role;
   currentTempleId: string | null;
+  currentDepartementId: string | null;
   temples: Temple[];
-  onApply: (role: Role, templeId: string | null) => void;
+  departements: Departement[];
+  isSuperAdmin: boolean;
+  lockedTempleId: string | null;
+  onApply: (role: Role, templeId: string | null, departementId: string | null) => void;
 }) {
   const [role, setRole] = useState<Role>(currentRole);
-  const [templeId, setTempleId] = useState<string | null>(currentTempleId);
+  const [templeId, setTempleId] = useState<string | null>(lockedTempleId ?? currentTempleId);
+  const [deptId, setDeptId] = useState<string | null>(currentDepartementId);
+  const needsTemple = role === "admin_temple" || role === "finances" || role === "responsable_departement";
+  const deptOptions = departements.filter((d) => !templeId || d.temple_id === templeId);
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -302,12 +326,14 @@ function RoleEditor({
         <SelectTrigger className="w-[170px] h-9"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="utilisateur">Utilisateur</SelectItem>
+          <SelectItem value="finances">Finances</SelectItem>
+          <SelectItem value="responsable_departement">Responsable de département</SelectItem>
           <SelectItem value="admin_temple">Admin Temple</SelectItem>
-          <SelectItem value="super_admin">Super Admin</SelectItem>
-          <SelectItem value="super_admin_principal">Super Admin Principal</SelectItem>
+          {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
+          {isSuperAdmin && <SelectItem value="super_admin_principal">Super Admin Principal</SelectItem>}
         </SelectContent>
       </Select>
-      {role === "admin_temple" && (
+      {needsTemple && !lockedTempleId && (
         <Select value={templeId ?? ""} onValueChange={(v) => setTempleId(v || null)}>
           <SelectTrigger className="w-[160px] h-9"><SelectValue placeholder="Temple" /></SelectTrigger>
           <SelectContent>
@@ -315,11 +341,23 @@ function RoleEditor({
           </SelectContent>
         </Select>
       )}
+      {role === "responsable_departement" && (
+        <Select value={deptId ?? ""} onValueChange={(v) => setDeptId(v || null)}>
+          <SelectTrigger className="w-[180px] h-9"><SelectValue placeholder="Département" /></SelectTrigger>
+          <SelectContent>
+            {deptOptions.map((d) => <SelectItem key={d.id} value={d.id}>{d.nom}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
       <Button
         size="sm"
         className="gradient-brand text-primary-foreground border-0"
-        onClick={() => onApply(role, role === "admin_temple" ? templeId : null)}
-        disabled={role === currentRole && (role !== "admin_temple" || templeId === currentTempleId)}
+        onClick={() => onApply(role, needsTemple ? templeId : null, role === "responsable_departement" ? deptId : null)}
+        disabled={
+          (needsTemple && !templeId) ||
+          (role === "responsable_departement" && !deptId) ||
+          (role === currentRole && templeId === currentTempleId && deptId === currentDepartementId)
+        }
       >
         {role === "utilisateur" ? <ShieldOff className="mr-1.5 h-3.5 w-3.5" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}
         Appliquer
