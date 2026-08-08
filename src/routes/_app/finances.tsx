@@ -35,7 +35,7 @@ type FinanceRow = {
 };
 
 function FinancesPage() {
-  const { isAdmin, loading } = useAuth();
+  const { canSeeFinances, loading, defaultRoute } = useAuth();
   const { activeTempleId } = useActiveTemple();
   const today = new Date();
   const [from, setFrom] = useState(format(startOfMonth(subMonths(today, 2)), "yyyy-MM-dd"));
@@ -44,7 +44,7 @@ function FinancesPage() {
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["finances", from, to, typeFilter, activeTempleId],
-    enabled: isAdmin && !!activeTempleId,
+    enabled: canSeeFinances && !!activeTempleId,
     queryFn: async () => {
       let q = supabase
         .from("finances_culte")
@@ -108,7 +108,7 @@ function FinancesPage() {
   };
 
   if (loading) return null;
-  if (!isAdmin) return <Navigate to="/dashboard" />;
+  if (!canSeeFinances) return <Navigate to={defaultRoute} />;
 
   return (
     <div className="space-y-6">

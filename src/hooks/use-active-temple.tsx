@@ -27,15 +27,14 @@ const Ctx = createContext<ActiveTempleCtx | undefined>(undefined);
 const STORAGE_KEY = "mca:activeTempleId";
 
 export function ActiveTempleProvider({ children }: { children: ReactNode }) {
-  const { user, templeId, isSuperAdmin, loading: authLoading } = useAuth();
+  const { user, templeId, isSuperAdmin, isPrincipal, loading: authLoading } = useAuth();
   const [overrideId, setOverrideId] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     return localStorage.getItem(STORAGE_KEY);
   });
 
-  // Charger tous les temples si super admin, sinon juste celui de l'utilisateur
-  const { data: allTemples = [], isLoading: templesLoading } = useQuery({
-    queryKey: ["temples", "all", isSuperAdmin],
+  const { data: temples = [], isLoading: templesLoading } = useQuery({
+    queryKey: ["temples", "all"],
     enabled: !!user && !authLoading,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,24 +47,47 @@ export function ActiveTempleProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Périmètre d'un super admin non principal : temples explicitement attribués
+  const { data: scope = [] } = useQuery({
+    queryKey: ["super-admin-scope", user?.id],
+    enabled: !!user && isSuperAdmin && !isPrincipal,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("super_admin_temples")
+        .select("temple_id")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return ((data ?? []) as Array<{ temple_id: string }>).map((x) => x.temple_id);
+    },
+  });
+
+  // Temples visibles : principal => tous ; super admin => périmètre (ou tous si aucun périmètre défini) ; sinon son temple
+  const allTemples = useMemo(() => {
+    if (isPrincipal) return temples;
+    if (isSuperAdmin) return scope.length > 0 ? temples.filter((t) => scope.includes(t.id)) : temples;
+    return temples.filter((t) => t.id === templeId);
+  }, [temples, isPrincipal, isSuperAdmin, scope, templeId]);
+
   const userTemple = useMemo(
-    () => allTemples.find((t) => t.id === templeId) ?? null,
-    [allTemples, templeId],
+    () => temples.find((t) => t.id === templeId) ?? null,
+    [temples, templeId],
   );
 
-  const activeTempleId = isSuperAdmin && overrideId ? overrideId : templeId;
+  const canSwitch = isSuperAdmin && allTemples.length > 1;
+  const validOverride = canSwitch && overrideId && allTemples.some((t) => t.id === overrideId) ? overrideId : null;
+  const activeTempleId = validOverride ?? templeId ?? allTemples[0]?.id ?? null;
   const activeTemple = useMemo(
     () => allTemples.find((t) => t.id === activeTempleId) ?? userTemple,
     [allTemples, activeTempleId, userTemple],
   );
 
   const setActiveTempleId = (id: string) => {
-    if (!isSuperAdmin) return;
+    if (!canSwitch) return;
     setOverrideId(id);
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, id);
   };
 
-  // Si l'utilisateur n'est pas super admin, on nettoie l'override
+  // Nettoyage de l'override si l'utilisateur n'a plus le droit de changer de temple
   useEffect(() => {
     if (!isSuperAdmin && overrideId) {
       setOverrideId(null);
@@ -81,7 +103,7 @@ export function ActiveTempleProvider({ children }: { children: ReactNode }) {
         userTemple,
         allTemples,
         setActiveTempleId,
-        canSwitch: isSuperAdmin,
+        canSwitch,
         loading: authLoading || templesLoading,
       }}
     >

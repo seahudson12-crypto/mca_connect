@@ -14,6 +14,82 @@ export type Database = {
   }
   public: {
     Tables: {
+      activites_departement: {
+        Row: {
+          avancement: number
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisation: string | null
+          departement_id: string
+          description: string | null
+          id: string
+          observations: string | null
+          rapport: string | null
+          responsable: string | null
+          statut: Database["public"]["Enums"]["activite_dept_statut"]
+          temple_id: string
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          avancement?: number
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisation?: string | null
+          departement_id: string
+          description?: string | null
+          id?: string
+          observations?: string | null
+          rapport?: string | null
+          responsable?: string | null
+          statut?: Database["public"]["Enums"]["activite_dept_statut"]
+          temple_id: string
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          avancement?: number
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisation?: string | null
+          departement_id?: string
+          description?: string | null
+          id?: string
+          observations?: string | null
+          rapport?: string | null
+          responsable?: string | null
+          statut?: Database["public"]["Enums"]["activite_dept_statut"]
+          temple_id?: string
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activites_departement_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activites_departement_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activites_departement_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activites_utilisateurs: {
         Row: {
           created_at: string
@@ -118,6 +194,54 @@ export type Database = {
           },
           {
             foreignKeyName: "cultes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departements: {
+        Row: {
+          actif: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          nom: string
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          nom: string
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          nom?: string
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departements_temple_id_fkey"
             columns: ["temple_id"]
             isOneToOne: false
             referencedRelation: "temples_public"
@@ -743,6 +867,42 @@ export type Database = {
           },
         ]
       }
+      super_admin_temples: {
+        Row: {
+          created_at: string
+          id: string
+          temple_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          temple_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          temple_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "super_admin_temples_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "super_admin_temples_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       temples: {
         Row: {
           actif: boolean
@@ -839,6 +999,7 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
+          departement_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           temple_id: string | null
@@ -846,6 +1007,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          departement_id?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           temple_id?: string | null
@@ -853,12 +1015,20 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          departement_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           temple_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_roles_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_roles_temple_id_fkey"
             columns: ["temple_id"]
@@ -1193,6 +1363,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_access_departement: {
+        Args: { _departement_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_access_temple: {
         Args: { _temple_id: string; _user_id: string }
         Returns: boolean
@@ -1206,16 +1380,30 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_finances: {
+        Args: { _temple_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_principal: { Args: { _user_id: string }; Returns: boolean }
+      is_restricted_role: { Args: { _user_id: string }; Returns: boolean }
       is_super: { Args: { _user_id: string }; Returns: boolean }
+      super_admin_scope_count: { Args: { _user_id: string }; Returns: number }
       temple_matricule_prefix: { Args: { _temple_id: string }; Returns: string }
     }
     Enums: {
+      activite_dept_statut:
+        | "a_faire"
+        | "en_cours"
+        | "realise"
+        | "reporte"
+        | "annule"
       app_role:
         | "super_admin"
         | "admin_temple"
         | "utilisateur"
         | "super_admin_principal"
+        | "finances"
+        | "responsable_departement"
       culte_statut: "brouillon" | "valide" | "corrige_admin"
       culte_type:
         | "dimanche"
@@ -1406,11 +1594,20 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activite_dept_statut: [
+        "a_faire",
+        "en_cours",
+        "realise",
+        "reporte",
+        "annule",
+      ],
       app_role: [
         "super_admin",
         "admin_temple",
         "utilisateur",
         "super_admin_principal",
+        "finances",
+        "responsable_departement",
       ],
       culte_statut: ["brouillon", "valide", "corrige_admin"],
       culte_type: [
