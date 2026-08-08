@@ -1216,6 +1216,8 @@ export type Database = {
         | "admin_temple"
         | "utilisateur"
         | "super_admin_principal"
+        | "finances"
+        | "responsable_departement"
       culte_statut: "brouillon" | "valide" | "corrige_admin"
       culte_type:
         | "dimanche"
@@ -1411,6 +1413,8 @@ export const Constants = {
         "admin_temple",
         "utilisateur",
         "super_admin_principal",
+        "finances",
+        "responsable_departement",
       ],
       culte_statut: ["brouillon", "valide", "corrige_admin"],
       culte_type: [
