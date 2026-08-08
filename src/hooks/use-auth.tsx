@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { type AppRole, allowedPaths, canAccessPath, defaultRoute } from "@/lib/permissions";
 
-export type Role = "super_admin_principal" | "super_admin" | "admin_temple" | "utilisateur";
+export type Role = AppRole;
 
 interface Profile {
   id: string;
@@ -12,19 +13,35 @@ interface Profile {
   actif?: boolean | null;
 }
 
+export interface UserRoleRow {
+  role: Role;
+  temple_id: string | null;
+  departement_id: string | null;
+}
+
 interface AuthCtx {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   roles: Role[];
+  roleRows: UserRoleRow[];
   role: Role;
   templeId: string | null;
+  /** Départements dont l'utilisateur est responsable. */
+  departementIds: string[];
   loading: boolean;
   isAdmin: boolean;
   isAdminTemple: boolean;
   isSuperAdmin: boolean;
   isPrincipal: boolean;
+  isFinances: boolean;
+  isDepartementLead: boolean;
   canSeeFinances: boolean;
+  canSeeMembres: boolean;
+  canManageUsers: boolean;
+  allowedPaths: string[] | null;
+  canAccessPath: (path: string) => boolean;
+  defaultRoute: string;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -35,16 +52,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [roleRows, setRoleRows] = useState<UserRoleRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadUserData = async (userId: string) => {
     const [{ data: prof }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("id,nom,email,temple_id,actif").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.from("user_roles").select("role,temple_id,departement_id").eq("user_id", userId),
     ]);
     setProfile(prof as Profile | null);
-    setRoles(((r ?? []) as Array<{ role: string }>).map((x) => x.role as Role));
+    setRoleRows(((r ?? []) as Array<{ role: string; temple_id: string | null; departement_id: string | null }>).map((x) => ({
+      role: x.role as Role,
+      temple_id: x.temple_id,
+      departement_id: x.departement_id,
+    })));
   };
 
   useEffect(() => {
@@ -65,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, 0);
       } else {
         setProfile(null);
-        setRoles([]);
+        setRoleRows([]);
       }
     });
 
@@ -94,15 +115,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await loadUserData(user.id);
   };
 
+  const roles = roleRows.map((r) => r.role);
   const isPrincipal = roles.includes("super_admin_principal");
   const isSuperAdmin = isPrincipal || roles.includes("super_admin");
   const isAdminTemple = roles.includes("admin_temple");
   const isAdmin = isSuperAdmin || isAdminTemple;
+  const isFinances = !isAdmin && roles.includes("finances");
+  const isDepartementLead = !isAdmin && roles.includes("responsable_departement");
   const role: Role =
     isPrincipal ? "super_admin_principal"
     : roles.includes("super_admin") ? "super_admin"
     : isAdminTemple ? "admin_temple"
+    : roles.includes("finances") ? "finances"
+    : roles.includes("responsable_departement") ? "responsable_departement"
     : "utilisateur";
+
+  const departementIds = roleRows
+    .filter((r) => r.role === "responsable_departement" && r.departement_id)
+    .map((r) => r.departement_id as string);
 
   return (
     <Ctx.Provider
@@ -111,14 +141,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         roles,
+        roleRows,
         role,
-        templeId: profile?.temple_id ?? null,
+        templeId: profile?.temple_id ?? roleRows.find((r) => r.temple_id)?.temple_id ?? null,
+        departementIds,
         loading,
         isAdmin,
         isAdminTemple,
         isSuperAdmin,
         isPrincipal,
-        canSeeFinances: isAdmin,
+        isFinances,
+        isDepartementLead,
+        canSeeFinances: isAdmin || isFinances,
+        canSeeMembres: isAdmin || (!isFinances && !isDepartementLead),
+        canManageUsers: isAdmin,
+        allowedPaths: allowedPaths(role),
+        canAccessPath: (path: string) => canAccessPath(role, path),
+        defaultRoute: defaultRoute(role),
         signOut,
         refresh,
       }}
