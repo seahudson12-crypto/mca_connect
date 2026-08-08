@@ -28,7 +28,33 @@ export const ROLES = [
   { value: "super_admin_principal", label: "Super Admin Principal" },
   { value: "super_admin", label: "Super Administrateur" },
   { value: "admin_temple", label: "Administrateur Temple" },
+  { value: "finances", label: "Finances" },
+  { value: "responsable_departement", label: "Responsable de département" },
   { value: "utilisateur", label: "Utilisateur" },
+] as const;
+
+export const ACTIVITE_STATUTS = [
+  { value: "a_faire", label: "À faire" },
+  { value: "en_cours", label: "En cours" },
+  { value: "realise", label: "Réalisé" },
+  { value: "reporte", label: "Reporté" },
+  { value: "annule", label: "Annulé" },
+] as const;
+
+export const activiteStatutLabel = (v: string) =>
+  ACTIVITE_STATUTS.find((s) => s.value === v)?.label ?? v;
+
+/** Départements proposés par défaut lors de la création d'un département. */
+export const DEPARTEMENTS_SUGGERES = [
+  "Jeunesse",
+  "Femmes",
+  "Hommes",
+  "Évangélisation",
+  "Communication",
+  "Louange",
+  "Accueil",
+  "Intercession",
+  "Enfants (Ecodim)",
 ] as const;
 
 export const categoryLabel = (v: string) =>
