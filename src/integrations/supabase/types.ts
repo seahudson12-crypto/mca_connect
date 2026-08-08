@@ -49,18 +49,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           date: string
-          depenses: number | null
-          dimes: number | null
           heure_debut: string | null
           heure_fin: string | null
           id: string
-          notes_finances: string | null
-          offrandes: number | null
           orateur: string | null
           president: string | null
           priere_intense_active: boolean
           responsable_priere: string | null
-          solde_caisse: number | null
           statut: Database["public"]["Enums"]["culte_statut"]
           temple_id: string
           theme_presidence: string | null
@@ -75,18 +70,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date: string
-          depenses?: number | null
-          dimes?: number | null
           heure_debut?: string | null
           heure_fin?: string | null
           id?: string
-          notes_finances?: string | null
-          offrandes?: number | null
           orateur?: string | null
           president?: string | null
           priere_intense_active?: boolean
           responsable_priere?: string | null
-          solde_caisse?: number | null
           statut?: Database["public"]["Enums"]["culte_statut"]
           temple_id: string
           theme_presidence?: string | null
@@ -101,18 +91,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date?: string
-          depenses?: number | null
-          dimes?: number | null
           heure_debut?: string | null
           heure_fin?: string | null
           id?: string
-          notes_finances?: string | null
-          offrandes?: number | null
           orateur?: string | null
           president?: string | null
           priere_intense_active?: boolean
           responsable_priere?: string | null
-          solde_caisse?: number | null
           statut?: Database["public"]["Enums"]["culte_statut"]
           temple_id?: string
           theme_presidence?: string | null
