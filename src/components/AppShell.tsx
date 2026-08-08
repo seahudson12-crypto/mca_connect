@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -9,17 +9,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { useActiveTemple } from "@/hooks/use-active-temple";
 import { APP_TAGLINE, roleLabel } from "@/lib/constants";
 
-const NAV = [
-  { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { to: "/membres", label: "Membres", icon: Users },
-  { to: "/cultes", label: "Cultes", icon: CalendarCheck },
-  { to: "/presences", label: "Présences", icon: ClipboardCheck },
-  { to: "/whatsapp", label: "WhatsApp", icon: MessageCircle },
-] as const;
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const { profile, role, signOut, isAdmin, isSuperAdmin, isPrincipal, canSeeFinances } = useAuth();
+  const {
+    profile, role, signOut, isAdmin, isSuperAdmin, isPrincipal,
+    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath,
+  } = useAuth();
   const { activeTemple, allTemples, setActiveTempleId, canSwitch } = useActiveTemple();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const templeDisplay = activeTemple?.nom_temple ?? "MCA Connect";
@@ -29,96 +24,68 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       active ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-gold" : "text-sidebar-foreground hover:bg-sidebar-accent"
     }`;
 
+  type NavItem = { to: string; label: string; icon: typeof Users; show?: boolean };
+
+  const mainItems: NavItem[] = [
+    { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
+    { to: "/membres", label: "Membres", icon: Users, show: canSeeMembres },
+    { to: "/cultes", label: "Cultes", icon: CalendarCheck },
+    { to: "/presences", label: "Présences", icon: ClipboardCheck },
+    { to: "/whatsapp", label: "WhatsApp", icon: MessageCircle },
+    { to: "/finances", label: "Finances", icon: Wallet, show: canSeeFinances },
+    { to: "/departements", label: isDepartementLead ? "Mon département" : "Départements", icon: Network },
+    { to: "/familles", label: "Familles", icon: Users2, show: canSeeMembres },
+    { to: "/calendrier", label: "Calendrier MCA", icon: CalendarDays },
+    { to: "/objectifs", label: "Objectifs", icon: Target },
+    { to: "/formations", label: "Formation & Discipulat", icon: GraduationCap },
+    { to: "/themes-annee", label: "Thème de l'année", icon: BookOpen },
+    { to: "/assistant", label: "Assistant IA", icon: Sparkles },
+  ];
+
+  const adminItems: NavItem[] = [
+    { to: "/historique", label: "Historique", icon: History },
+    { to: "/activites", label: "Activités", icon: Activity },
+    { to: "/alertes", label: "Alertes", icon: Bell },
+    { to: "/sante-temple", label: "Santé du temple", icon: HeartPulse },
+    { to: "/exports", label: "Exports avancés", icon: Download },
+    { to: "/rapports", label: "Rapports des temples", icon: FileText, show: isSuperAdmin },
+    { to: "/temples", label: "Temples", icon: Building2, show: isSuperAdmin },
+    { to: "/cartographie", label: "Cartographie MCA", icon: Globe2, show: isSuperAdmin },
+    { to: "/utilisateurs", label: "Équipe & rôles", icon: UserCog },
+    { to: "/parametres", label: "Paramètres", icon: Settings },
+  ];
+
+  const visible = (items: NavItem[]) =>
+    items.filter((i) => i.show !== false && canAccessPath(i.to));
+
+  const renderItems = (items: NavItem[]) =>
+    visible(items).map((item) => {
+      const Icon = item.icon;
+      const active = path === item.to || path.startsWith(item.to + "/");
+      return (
+        <Link key={item.to} to={item.to} onClick={() => setOpen(false)} className={linkCls(active)}>
+          <Icon className="h-4 w-4" />
+          {item.label}
+        </Link>
+      );
+    });
+
+  const adminVisible = isAdmin && visible(adminItems).length > 0;
+
   const NavLinks = () => (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV.map((item) => {
-        const Icon = item.icon;
-        const active = path === item.to || path.startsWith(item.to + "/");
-        return (
-          <Link key={item.to} to={item.to} onClick={() => setOpen(false)} className={linkCls(active)}>
-            <Icon className="h-4 w-4" />
-            {item.label}
-          </Link>
-        );
-      })}
-
-      {canSeeFinances && (
-        <Link to="/finances" onClick={() => setOpen(false)} className={linkCls(path === "/finances")}>
-          <Wallet className="h-4 w-4" /> Finances
-        </Link>
-      )}
-
-      <Link to="/familles" onClick={() => setOpen(false)} className={linkCls(path === "/familles")}>
-        <Users2 className="h-4 w-4" /> Familles
-      </Link>
-
-      <Link to="/calendrier" onClick={() => setOpen(false)} className={linkCls(path === "/calendrier")}>
-        <CalendarDays className="h-4 w-4" /> Calendrier MCA
-      </Link>
-
-      <Link to="/objectifs" onClick={() => setOpen(false)} className={linkCls(path === "/objectifs")}>
-        <Target className="h-4 w-4" /> Objectifs
-      </Link>
-
-      <Link to="/formations" onClick={() => setOpen(false)} className={linkCls(path === "/formations")}>
-        <GraduationCap className="h-4 w-4" /> Formation & Discipulat
-      </Link>
-
-      <Link to="/themes-annee" onClick={() => setOpen(false)} className={linkCls(path === "/themes-annee")}>
-        <BookOpen className="h-4 w-4" /> Thème de l'année
-      </Link>
-
-      <Link to="/assistant" onClick={() => setOpen(false)} className={linkCls(path === "/assistant")}>
-        <Sparkles className="h-4 w-4" /> Assistant IA
-      </Link>
-
-
-
-
-
-      {isAdmin && (
+      {renderItems(mainItems)}
+      {adminVisible && (
         <>
           <div className="mt-4 mb-1 px-3 text-xs font-semibold uppercase text-sidebar-foreground/60">
             Administration
           </div>
-          <Link to="/historique" onClick={() => setOpen(false)} className={linkCls(path === "/historique")}>
-            <History className="h-4 w-4" /> Historique
-          </Link>
-          <Link to="/activites" onClick={() => setOpen(false)} className={linkCls(path === "/activites")}>
-            <Activity className="h-4 w-4" /> Activités
-          </Link>
-          <Link to="/alertes" onClick={() => setOpen(false)} className={linkCls(path === "/alertes")}>
-            <Bell className="h-4 w-4" /> Alertes
-          </Link>
-          <Link to="/sante-temple" onClick={() => setOpen(false)} className={linkCls(path === "/sante-temple")}>
-            <HeartPulse className="h-4 w-4" /> Santé du temple
-          </Link>
-          <Link to="/exports" onClick={() => setOpen(false)} className={linkCls(path === "/exports")}>
-            <Download className="h-4 w-4" /> Exports avancés
-          </Link>
-          {isSuperAdmin && (
-            <>
-              <Link to="/rapports" onClick={() => setOpen(false)} className={linkCls(path === "/rapports")}>
-                <FileText className="h-4 w-4" /> Rapports des temples
-              </Link>
-              <Link to="/temples" onClick={() => setOpen(false)} className={linkCls(path === "/temples")}>
-                <Building2 className="h-4 w-4" /> Temples
-              </Link>
-              <Link to="/cartographie" onClick={() => setOpen(false)} className={linkCls(path === "/cartographie")}>
-                <Globe2 className="h-4 w-4" /> Cartographie MCA
-              </Link>
-              <Link to="/utilisateurs" onClick={() => setOpen(false)} className={linkCls(path === "/utilisateurs")}>
-                <UserCog className="h-4 w-4" /> Équipe de gestion
-              </Link>
-            </>
-          )}
-          <Link to="/parametres" onClick={() => setOpen(false)} className={linkCls(path === "/parametres")}>
-            <Settings className="h-4 w-4" /> Paramètres
-          </Link>
+          {renderItems(adminItems)}
         </>
       )}
     </nav>
   );
+
 
   const RoleBadge = () => (
     <Badge className={
