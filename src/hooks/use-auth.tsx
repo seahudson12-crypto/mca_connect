@@ -19,6 +19,13 @@ export interface UserRoleRow {
   departement_id: string | null;
 }
 
+export interface PendingRequest {
+  id: string;
+  requested_role: Role;
+  statut: "en_attente" | "approuve" | "refuse" | "suspendu";
+  created_at: string;
+}
+
 interface AuthCtx {
   user: User | null;
   session: Session | null;
