@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const {
     profile, role, signOut, isAdmin, isSuperAdmin, isPrincipal,
-    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath,
+    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath, pendingRequest,
   } = useAuth();
   const { activeTemple, allTemples, setActiveTempleId, canSwitch } = useActiveTemple();
   const path = useRouterState({ select: (s) => s.location.pathname });
