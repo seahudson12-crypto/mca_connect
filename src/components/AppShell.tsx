@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network, Inbox, Clock } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const {
     profile, role, signOut, isAdmin, isSuperAdmin, isPrincipal,
-    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath,
+    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath, pendingRequest,
   } = useAuth();
   const { activeTemple, allTemples, setActiveTempleId, canSwitch } = useActiveTemple();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -51,6 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/rapports", label: "Rapports des temples", icon: FileText, show: isSuperAdmin },
     { to: "/temples", label: "Temples", icon: Building2, show: isSuperAdmin },
     { to: "/cartographie", label: "Cartographie MCA", icon: Globe2, show: isSuperAdmin },
+    { to: "/demandes", label: "Demandes de validation", icon: Inbox, show: isAdmin },
     { to: "/utilisateurs", label: "Équipe & rôles", icon: UserCog },
     { to: "/parametres", label: "Paramètres", icon: Settings },
   ];
@@ -172,7 +173,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           )}
         </header>
-        <main className="p-4 lg:p-8">{children}</main>
+        <main className="p-4 lg:p-8">
+          {pendingRequest?.statut === "en_attente" && (
+            <div className="mb-6 flex items-start gap-3 rounded-lg border border-accent/40 bg-accent/10 p-4">
+              <Clock className="mt-0.5 h-5 w-5 text-accent-foreground" />
+              <div className="text-sm">
+                <p className="font-semibold">Demande en attente de validation</p>
+                <p className="text-muted-foreground">
+                  Votre demande de rôle « {roleLabel(pendingRequest.requested_role)} » est en cours d'examen par un
+                  administrateur. Vous accédez pour l'instant à l'application avec les droits d'utilisateur.
+                </p>
+              </div>
+            </div>
+          )}
+          {pendingRequest?.statut === "refuse" && (
+            <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
+              <p className="font-semibold">Demande refusée</p>
+              <p className="text-muted-foreground">
+                Votre demande de rôle « {roleLabel(pendingRequest.requested_role)} » n'a pas été retenue. Contactez
+                l'administrateur de votre temple pour plus d'informations.
+              </p>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );

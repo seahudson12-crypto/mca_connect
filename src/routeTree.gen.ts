@@ -22,6 +22,7 @@ import { Route as AppCalendrierRouteImport } from './routes/_app/calendrier'
 import { Route as AppCartographieRouteImport } from './routes/_app/cartographie'
 import { Route as AppCultesRouteImport } from './routes/_app/cultes'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppDemandesRouteImport } from './routes/_app/demandes'
 import { Route as AppDepartementsRouteImport } from './routes/_app/departements'
 import { Route as AppExportsRouteImport } from './routes/_app/exports'
 import { Route as AppFamillesRouteImport } from './routes/_app/familles'
@@ -103,6 +104,11 @@ const AppCultesRoute = AppCultesRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDemandesRoute = AppDemandesRouteImport.update({
+  id: '/demandes',
+  path: '/demandes',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDepartementsRoute = AppDepartementsRouteImport.update({
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/cartographie': typeof AppCartographieRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
+  '/demandes': typeof AppDemandesRoute
   '/departements': typeof AppDepartementsRoute
   '/exports': typeof AppExportsRoute
   '/familles': typeof AppFamillesRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/cartographie': typeof AppCartographieRoute
   '/cultes': typeof AppCultesRoute
   '/dashboard': typeof AppDashboardRoute
+  '/demandes': typeof AppDemandesRoute
   '/departements': typeof AppDepartementsRoute
   '/exports': typeof AppExportsRoute
   '/familles': typeof AppFamillesRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_app/cartographie': typeof AppCartographieRoute
   '/_app/cultes': typeof AppCultesRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/demandes': typeof AppDemandesRoute
   '/_app/departements': typeof AppDepartementsRoute
   '/_app/exports': typeof AppExportsRoute
   '/_app/familles': typeof AppFamillesRoute
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/cartographie'
     | '/cultes'
     | '/dashboard'
+    | '/demandes'
     | '/departements'
     | '/exports'
     | '/familles'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/cartographie'
     | '/cultes'
     | '/dashboard'
+    | '/demandes'
     | '/departements'
     | '/exports'
     | '/familles'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/_app/cartographie'
     | '/_app/cultes'
     | '/_app/dashboard'
+    | '/_app/demandes'
     | '/_app/departements'
     | '/_app/exports'
     | '/_app/familles'
@@ -494,6 +506,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/demandes': {
+      id: '/_app/demandes'
+      path: '/demandes'
+      fullPath: '/demandes'
+      preLoaderRoute: typeof AppDemandesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/departements': {
@@ -633,6 +652,7 @@ interface AppRouteChildren {
   AppCartographieRoute: typeof AppCartographieRoute
   AppCultesRoute: typeof AppCultesRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDemandesRoute: typeof AppDemandesRoute
   AppDepartementsRoute: typeof AppDepartementsRoute
   AppExportsRoute: typeof AppExportsRoute
   AppFamillesRoute: typeof AppFamillesRoute
@@ -661,6 +681,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCartographieRoute: AppCartographieRoute,
   AppCultesRoute: AppCultesRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppDemandesRoute: AppDemandesRoute,
   AppDepartementsRoute: AppDepartementsRoute,
   AppExportsRoute: AppExportsRoute,
   AppFamillesRoute: AppFamillesRoute,
