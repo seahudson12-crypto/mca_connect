@@ -277,12 +277,12 @@ function DemandesPage() {
         if (error) throw new Error(error.message);
       }
       await logChange({
+        userId: user?.id ?? "",
         table: "role_requests",
         recordId: userId,
-        action: "departements_modifies",
-        champ: "departements",
-        ancienne: current.map((c) => deptName(c.departement_id)).join(", "),
-        nouvelle: ids.map((i) => deptName(i)).join(", "),
+        action: "update",
+        before: { departements: current.map((c) => deptName(c.departement_id)).join(", ") },
+        after: { departements: ids.map((i) => deptName(i)).join(", ") },
       });
     },
     onSuccess: () => {
