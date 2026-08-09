@@ -75,6 +75,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activites_departement_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activites_departement_temple_id_fkey"
             columns: ["temple_id"]
             isOneToOne: false
@@ -817,6 +824,115 @@ export type Database = {
         }
         Relationships: []
       }
+      role_request_departements: {
+        Row: {
+          created_at: string
+          departement_id: string
+          id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          departement_id: string
+          id?: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          departement_id?: string
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_request_departements_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_request_departements_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_request_departements_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "role_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          email: string | null
+          id: string
+          motif: string | null
+          nom: string | null
+          prenoms: string | null
+          requested_role: Database["public"]["Enums"]["app_role"]
+          statut: Database["public"]["Enums"]["demande_statut"]
+          telephone: string | null
+          temple_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          email?: string | null
+          id?: string
+          motif?: string | null
+          nom?: string | null
+          prenoms?: string | null
+          requested_role: Database["public"]["Enums"]["app_role"]
+          statut?: Database["public"]["Enums"]["demande_statut"]
+          telephone?: string | null
+          temple_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          email?: string | null
+          id?: string
+          motif?: string | null
+          nom?: string | null
+          prenoms?: string | null
+          requested_role?: Database["public"]["Enums"]["app_role"]
+          statut?: Database["public"]["Enums"]["demande_statut"]
+          telephone?: string | null
+          temple_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_requests_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_requests_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sous_themes_annee: {
         Row: {
           activites: string | null
@@ -996,6 +1112,71 @@ export type Database = {
         }
         Relationships: []
       }
+      user_departements: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          departement_id: string
+          id: string
+          statut: Database["public"]["Enums"]["demande_statut"]
+          temple_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          departement_id: string
+          id?: string
+          statut?: Database["public"]["Enums"]["demande_statut"]
+          temple_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          departement_id?: string
+          id?: string
+          statut?: Database["public"]["Enums"]["demande_statut"]
+          temple_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_departements_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_departements_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_departements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_departements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1027,6 +1208,13 @@ export type Database = {
             columns: ["departement_id"]
             isOneToOne: false
             referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements_public"
             referencedColumns: ["id"]
           },
           {
@@ -1331,6 +1519,39 @@ export type Database = {
       }
     }
     Views: {
+      departements_public: {
+        Row: {
+          id: string | null
+          nom: string | null
+          temple_id: string | null
+        }
+        Insert: {
+          id?: string | null
+          nom?: string | null
+          temple_id?: string | null
+        }
+        Update: {
+          id?: string | null
+          nom?: string | null
+          temple_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       temples_public: {
         Row: {
           commune: string | null
@@ -1411,6 +1632,7 @@ export type Database = {
         | "veillee"
         | "reunion_speciale"
         | "jeune_priere"
+      demande_statut: "en_attente" | "approuve" | "refuse" | "suspendu"
       evenement_type:
         | "culte"
         | "formation"
@@ -1617,6 +1839,7 @@ export const Constants = {
         "reunion_speciale",
         "jeune_priere",
       ],
+      demande_statut: ["en_attente", "approuve", "refuse", "suspendu"],
       evenement_type: [
         "culte",
         "formation",
