@@ -177,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role,
         templeId: profile?.temple_id ?? roleRows.find((r) => r.temple_id)?.temple_id ?? null,
         departementIds,
+        pendingRequest,
         loading,
         isAdmin,
         isAdminTemple,
