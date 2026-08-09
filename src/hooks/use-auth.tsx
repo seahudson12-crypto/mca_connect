@@ -153,9 +153,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     : roles.includes("responsable_departement") ? "responsable_departement"
     : "utilisateur";
 
-  const departementIds = roleRows
-    .filter((r) => r.role === "responsable_departement" && r.departement_id)
-    .map((r) => r.departement_id as string);
+  const departementIds = Array.from(
+    new Set([
+      ...roleRows
+        .filter((r) => r.role === "responsable_departement" && r.departement_id)
+        .map((r) => r.departement_id as string),
+      ...deptGrants,
+    ]),
+  );
 
   return (
     <Ctx.Provider
