@@ -301,12 +301,12 @@ function DemandesPage() {
         await supabase.from("user_departements").delete().eq("user_id", userId);
       }
       await logChange({
+        userId: user?.id ?? "",
         table: "role_requests",
         recordId: userId,
-        action: "role_retire",
-        champ: "role",
-        ancienne: role,
-        nouvelle: "utilisateur",
+        action: "update",
+        before: { role },
+        after: { role: "utilisateur" },
       });
     },
     onSuccess: () => {
