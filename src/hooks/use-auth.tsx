@@ -53,12 +53,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roleRows, setRoleRows] = useState<UserRoleRow[]>([]);
+  const [deptGrants, setDeptGrants] = useState<string[]>([]);
+  const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadUserData = async (userId: string) => {
-    const [{ data: prof }, { data: r }] = await Promise.all([
+    const [{ data: prof }, { data: r }, { data: ud }, { data: req }] = await Promise.all([
       supabase.from("profiles").select("id,nom,email,temple_id,actif").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role,temple_id,departement_id").eq("user_id", userId),
+      supabase.from("user_departements").select("departement_id,statut").eq("user_id", userId),
+      supabase
+        .from("role_requests")
+        .select("id,requested_role,statut,created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
     setProfile(prof as Profile | null);
     setRoleRows(((r ?? []) as Array<{ role: string; temple_id: string | null; departement_id: string | null }>).map((x) => ({
@@ -66,6 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       temple_id: x.temple_id,
       departement_id: x.departement_id,
     })));
+    setDeptGrants(
+      ((ud ?? []) as Array<{ departement_id: string; statut: string }>)
+        .filter((x) => x.statut === "approuve")
+        .map((x) => x.departement_id),
+    );
+    const latest = (req ?? [])[0] as PendingRequest | undefined;
+    setPendingRequest(latest ?? null);
   };
 
   useEffect(() => {
