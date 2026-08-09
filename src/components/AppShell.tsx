@@ -51,6 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/rapports", label: "Rapports des temples", icon: FileText, show: isSuperAdmin },
     { to: "/temples", label: "Temples", icon: Building2, show: isSuperAdmin },
     { to: "/cartographie", label: "Cartographie MCA", icon: Globe2, show: isSuperAdmin },
+    { to: "/demandes", label: "Demandes de validation", icon: Inbox, show: isAdmin },
     { to: "/utilisateurs", label: "Équipe & rôles", icon: UserCog },
     { to: "/parametres", label: "Paramètres", icon: Settings },
   ];
