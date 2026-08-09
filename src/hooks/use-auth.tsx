@@ -34,8 +34,10 @@ interface AuthCtx {
   roleRows: UserRoleRow[];
   role: Role;
   templeId: string | null;
-  /** Départements dont l'utilisateur est responsable. */
+  /** Départements dont l'utilisateur est responsable (validés). */
   departementIds: string[];
+  /** Dernière demande de rôle de l'utilisateur (statut de validation). */
+  pendingRequest: PendingRequest | null;
   loading: boolean;
   isAdmin: boolean;
   isAdminTemple: boolean;
