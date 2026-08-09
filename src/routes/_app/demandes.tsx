@@ -236,12 +236,12 @@ function DemandesPage() {
       }
 
       await logChange({
+        userId: user?.id ?? "",
         table: "role_requests",
         recordId: req.id,
-        action: statut,
-        champ: "statut",
-        ancienne: previous,
-        nouvelle: statut,
+        action: "validate",
+        before: { statut: previous },
+        after: { statut },
       });
     },
     onSuccess: () => {
