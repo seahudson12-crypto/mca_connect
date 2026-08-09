@@ -110,6 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setRoleRows([]);
+        setDeptGrants([]);
+        setPendingRequest(null);
       }
     });
 
