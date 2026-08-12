@@ -41,7 +41,7 @@ type Membre = {
   adresse: string | null; date_naissance: string | null; date_entree: string | null;
   date_ajout: string; actif: boolean; photo_url: string | null; observations: string | null;
   temple_id: string;
-  temple?: { nom_temple: string; ville: string | null; pays: string | null } | null;
+  temple?: { nom_temple: string; ville: string | null; pays: string | null; code_pays: string | null; code_temple: string | null } | null;
 };
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
