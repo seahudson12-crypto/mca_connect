@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { logChange } from "@/lib/audit";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/StatCard";
 import { ArrowLeft, UserCheck, UserX, Percent, CalendarDays, Sparkles, Phone, MessageCircle } from "lucide-react";
@@ -38,7 +41,7 @@ type Membre = {
   adresse: string | null; date_naissance: string | null; date_entree: string | null;
   date_ajout: string; actif: boolean; photo_url: string | null; observations: string | null;
   temple_id: string;
-  temple?: { nom_temple: string; ville: string | null; pays: string | null } | null;
+  temple?: { nom_temple: string; ville: string | null; pays: string | null; code_pays: string | null; code_temple: string | null } | null;
 };
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -54,15 +57,19 @@ function FicheMembrePage() {
   const { membreId } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user, role } = useAuth();
   const [newCat, setNewCat] = useState<string>("");
+  const [editMat, setEditMat] = useState(false);
+  const [matValue, setMatValue] = useState("");
+  const [confirmMat, setConfirmMat] = useState(false);
+  const [savingMat, setSavingMat] = useState(false);
 
   const { data: membre, isLoading } = useQuery({
     queryKey: ["membre", membreId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("membres")
-        .select("*,temple:temples(nom_temple,ville,pays)")
+        .select("*,temple:temples(nom_temple,ville,pays,code_pays,code_temple)")
         .eq("id", membreId)
         .maybeSingle();
       if (error) throw error;
@@ -136,6 +143,86 @@ function FicheMembrePage() {
     qc.invalidateQueries({ queryKey: ["membres"] });
   };
 
+  const templePrefix = membre?.temple
+    ? `MCA-${(membre.temple.code_pays || "").toUpperCase()}-${(membre.temple.code_temple || "").toUpperCase()}`
+    : null;
+
+  const saveMatricule = async () => {
+    if (!membre) return;
+    const value = matValue.trim().toUpperCase();
+    if (!/^MCA-[A-Z]{2,3}-[A-Z0-9]{2,4}-\d{4,}$/.test(value)) {
+      return toast.error("Format invalide. Exemple attendu : MCA-CI-TR-0001");
+    }
+    if (templePrefix && templePrefix.length > 8 && !value.startsWith(`${templePrefix}-`)) {
+      return toast.error(`Le matricule doit correspondre au temple du membre (${templePrefix}-XXXX).`);
+    }
+    setSavingMat(true);
+    try {
+      const { data: existing, error: checkErr } = await supabase
+        .from("membres")
+        .select("id")
+        .eq("matricule", value)
+        .neq("id", membre.id)
+        .maybeSingle();
+      if (checkErr) throw checkErr;
+      if (existing) {
+        return toast.error("Ce matricule est déjà attribué à un autre membre.");
+      }
+
+      const { data: updated, error } = await supabase
+        .from("membres")
+        .update({ matricule: value })
+        .eq("id", membre.id)
+        .select("id,matricule")
+        .maybeSingle();
+      if (error) {
+        if ((error as { code?: string }).code === "23505") {
+          return toast.error("Ce matricule est déjà attribué à un autre membre.");
+        }
+        throw error;
+      }
+      if (!updated || updated.matricule !== value) {
+        return toast.error("Modification refusée : vous n'avez pas les droits nécessaires sur ce membre.");
+      }
+
+      if (user) {
+        await logChange({
+          userId: user.id,
+          table: "membres",
+          recordId: membre.id,
+          action: "update",
+          before: { matricule: membre.matricule },
+          after: { matricule: value },
+        });
+        await supabase.from("activites_utilisateurs").insert({
+          utilisateur_id: user.id,
+          temple_id: membre.temple_id,
+          type_action: "matricule_update",
+          description: `Matricule modifié : ${membre.matricule ?? "—"} → ${value} (${membre.nom} ${membre.prenoms})`,
+          metadata: {
+            membre_id: membre.id,
+            ancien_matricule: membre.matricule,
+            nouveau_matricule: value,
+            role: role,
+            temple_id: membre.temple_id,
+          },
+        });
+      }
+
+      toast.success("Matricule modifié avec succès.");
+      setConfirmMat(false);
+      setEditMat(false);
+      setMatValue("");
+      qc.invalidateQueries({ queryKey: ["membre", membreId] });
+      qc.invalidateQueries({ queryKey: ["membres"] });
+      qc.invalidateQueries({ queryKey: ["historique"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur lors de la modification du matricule.");
+    } finally {
+      setSavingMat(false);
+    }
+  };
+
   if (isLoading) return <div className="py-12 text-center text-muted-foreground">Chargement...</div>;
   if (!membre) return <div className="py-12 text-center text-muted-foreground">Membre introuvable ou hors de votre temple.</div>;
 
@@ -179,6 +266,51 @@ function FicheMembrePage() {
 
           <h2 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Informations personnelles</h2>
           <Row label="Matricule" value={<span className="font-mono">{membre.matricule ?? "—"}</span>} />
+          {isAdmin && (
+            <div className="py-2">
+              {!editMat ? (
+                <Button size="sm" variant="outline" onClick={() => { setMatValue(membre.matricule ?? (templePrefix ? `${templePrefix}-` : "")); setEditMat(true); }}>
+                  Modifier le matricule
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    value={matValue}
+                    onChange={(e) => setMatValue(e.target.value.toUpperCase())}
+                    placeholder={templePrefix ? `${templePrefix}-0001` : "MCA-CI-TR-0001"}
+                    className="font-mono"
+                    aria-label="Nouveau matricule"
+                  />
+                  <p className="text-xs text-muted-foreground">Format attendu : {templePrefix ? `${templePrefix}-0001` : "MCA-CI-TR-0001"}</p>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => setConfirmMat(true)} disabled={!matValue.trim() || matValue.trim().toUpperCase() === (membre.matricule ?? "")}>
+                      Enregistrer
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditMat(false); setMatValue(""); }}>Annuler</Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Dialog open={confirmMat} onOpenChange={(o) => !o && setConfirmMat(false)}>
+            <DialogContent className="w-[95vw] sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Voulez-vous vraiment modifier le matricule de ce membre ?</DialogTitle>
+                <DialogDescription>Le membre, son historique de présence et ses informations restent inchangés.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 text-sm">
+                <Row label="Ancien matricule" value={<span className="font-mono">{membre.matricule ?? "—"}</span>} />
+                <Row label="Nouveau matricule" value={<span className="font-mono">{matValue.trim().toUpperCase()}</span>} />
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setConfirmMat(false)}>Annuler</Button>
+                <Button onClick={saveMatricule} disabled={savingMat} className="gradient-brand text-primary-foreground border-0">
+                  {savingMat ? "Enregistrement..." : "Confirmer la modification"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Row label="Nom" value={membre.nom} />
           <Row label="Prénoms" value={membre.prenoms} />
           <Row label="Sexe" value={membre.sexe === "M" ? "Masculin" : membre.sexe === "F" ? "Féminin" : "—"} />
