@@ -69,7 +69,7 @@ function FicheMembrePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("membres")
-        .select("*,temple:temples(nom_temple,ville,pays)")
+        .select("*,temple:temples(nom_temple,ville,pays,code_pays,code_temple)")
         .eq("id", membreId)
         .maybeSingle();
       if (error) throw error;
