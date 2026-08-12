@@ -40,7 +40,9 @@ export function isAppInstalled() {
 
 export function subscribeInstallPrompt(listener: Listener) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 export async function triggerInstall() {
