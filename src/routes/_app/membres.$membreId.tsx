@@ -143,6 +143,86 @@ function FicheMembrePage() {
     qc.invalidateQueries({ queryKey: ["membres"] });
   };
 
+  const templePrefix = membre?.temple
+    ? `MCA-${(membre.temple.code_pays || "").toUpperCase()}-${(membre.temple.code_temple || "").toUpperCase()}`
+    : null;
+
+  const saveMatricule = async () => {
+    if (!membre) return;
+    const value = matValue.trim().toUpperCase();
+    if (!/^MCA-[A-Z]{2,3}-[A-Z0-9]{2,4}-\d{4,}$/.test(value)) {
+      return toast.error("Format invalide. Exemple attendu : MCA-CI-TR-0001");
+    }
+    if (templePrefix && templePrefix.length > 8 && !value.startsWith(`${templePrefix}-`)) {
+      return toast.error(`Le matricule doit correspondre au temple du membre (${templePrefix}-XXXX).`);
+    }
+    setSavingMat(true);
+    try {
+      const { data: existing, error: checkErr } = await supabase
+        .from("membres")
+        .select("id")
+        .eq("matricule", value)
+        .neq("id", membre.id)
+        .maybeSingle();
+      if (checkErr) throw checkErr;
+      if (existing) {
+        return toast.error("Ce matricule est déjà attribué à un autre membre.");
+      }
+
+      const { data: updated, error } = await supabase
+        .from("membres")
+        .update({ matricule: value })
+        .eq("id", membre.id)
+        .select("id,matricule")
+        .maybeSingle();
+      if (error) {
+        if ((error as { code?: string }).code === "23505") {
+          return toast.error("Ce matricule est déjà attribué à un autre membre.");
+        }
+        throw error;
+      }
+      if (!updated || updated.matricule !== value) {
+        return toast.error("Modification refusée : vous n'avez pas les droits nécessaires sur ce membre.");
+      }
+
+      if (user) {
+        await logChange({
+          userId: user.id,
+          table: "membres",
+          recordId: membre.id,
+          action: "update",
+          before: { matricule: membre.matricule },
+          after: { matricule: value },
+        });
+        await supabase.from("activites_utilisateurs").insert({
+          utilisateur_id: user.id,
+          temple_id: membre.temple_id,
+          type_action: "matricule_update",
+          description: `Matricule modifié : ${membre.matricule ?? "—"} → ${value} (${membre.nom} ${membre.prenoms})`,
+          metadata: {
+            membre_id: membre.id,
+            ancien_matricule: membre.matricule,
+            nouveau_matricule: value,
+            role: role,
+            temple_id: membre.temple_id,
+          },
+        });
+      }
+
+      toast.success("Matricule modifié avec succès.");
+      setConfirmMat(false);
+      setEditMat(false);
+      setMatValue("");
+      qc.invalidateQueries({ queryKey: ["membre", membreId] });
+      qc.invalidateQueries({ queryKey: ["membres"] });
+      qc.invalidateQueries({ queryKey: ["historique"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur lors de la modification du matricule.");
+    } finally {
+      setSavingMat(false);
+    }
+  };
+
   if (isLoading) return <div className="py-12 text-center text-muted-foreground">Chargement...</div>;
   if (!membre) return <div className="py-12 text-center text-muted-foreground">Membre introuvable ou hors de votre temple.</div>;
 
