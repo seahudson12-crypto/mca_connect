@@ -309,7 +309,6 @@ function FicheMembrePage() {
                   {savingMat ? "Enregistrement..." : "Confirmer la modification"}
                 </Button>
               </DialogFooter>
-            </DialogFooter>
             </DialogContent>
           </Dialog>
           <Row label="Nom" value={membre.nom} />
