@@ -1,12 +1,15 @@
-// Guarded PWA registration + install-prompt hook.
-// Never registers in dev, iframes, Lovable preview, or when ?sw=off is set.
+// Enregistrement du service worker (protégé) + état d'installation PWA.
+// Ne s'enregistre jamais en dev, dans une iframe, en aperçu Lovable, ou avec ?sw=off.
 
 import { useEffect, useState, useCallback } from "react";
-
-type BIPEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
+import {
+  getDeferredPrompt,
+  isAppInstalled,
+  isIOS,
+  isStandaloneDisplay,
+  subscribeInstallPrompt,
+  triggerInstall,
+} from "@/lib/pwa-install";
 
 function isPreviewHost(host: string) {
   return (
@@ -50,57 +53,37 @@ async function unregisterMatching() {
 }
 
 export function usePwa() {
-  const [deferred, setDeferred] = useState<BIPEvent | null>(null);
+  const [canInstall, setCanInstall] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [ios, setIos] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const standalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      // iOS Safari
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-    setIsStandalone(!!standalone);
+    setIsStandalone(isStandaloneDisplay());
+    setIos(isIOS());
+    setCanInstall(!!getDeferredPrompt());
+    setInstalled(isAppInstalled());
+
+    const unsub = subscribeInstallPrompt((e) => {
+      setCanInstall(!!e);
+      setInstalled(isAppInstalled());
+    });
 
     if (!shouldRegister()) {
       void unregisterMatching();
-      return;
+      return unsub;
     }
 
-    // Register SW
     navigator.serviceWorker
       .register("/sw.js", { scope: "/" })
       .catch((err) => console.warn("SW registration failed", err));
 
-    const onBip = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BIPEvent);
-    };
-    const onInstalled = () => {
-      setInstalled(true);
-      setDeferred(null);
-    };
-    window.addEventListener("beforeinstallprompt", onBip);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBip);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
+    return unsub;
   }, []);
 
-  const promptInstall = useCallback(async () => {
-    if (!deferred) return "unavailable" as const;
-    await deferred.prompt();
-    const choice = await deferred.userChoice;
-    setDeferred(null);
-    return choice.outcome;
-  }, [deferred]);
+  const promptInstall = useCallback(async () => triggerInstall(), []);
 
-  return {
-    canInstall: !!deferred,
-    installed,
-    isStandalone,
-    promptInstall,
-  };
+  return { canInstall, installed, isStandalone, isIOS: ios, promptInstall };
 }
