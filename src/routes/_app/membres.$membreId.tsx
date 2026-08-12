@@ -57,8 +57,12 @@ function FicheMembrePage() {
   const { membreId } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user, role } = useAuth();
   const [newCat, setNewCat] = useState<string>("");
+  const [editMat, setEditMat] = useState(false);
+  const [matValue, setMatValue] = useState("");
+  const [confirmMat, setConfirmMat] = useState(false);
+  const [savingMat, setSavingMat] = useState(false);
 
   const { data: membre, isLoading } = useQuery({
     queryKey: ["membre", membreId],
