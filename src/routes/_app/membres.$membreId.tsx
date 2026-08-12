@@ -269,7 +269,7 @@ function FicheMembrePage() {
           {isAdmin && (
             <div className="py-2">
               {!editMat ? (
-                <Button size="sm" variant="outline" onClick={() => { setMatValue(membre.matricule ?? templePrefix ? `${membre.matricule ?? templePrefix + "-"}` : ""); setEditMat(true); }}>
+                <Button size="sm" variant="outline" onClick={() => { setMatValue(membre.matricule ?? (templePrefix ? `${templePrefix}-` : "")); setEditMat(true); }}>
                   Modifier le matricule
                 </Button>
               ) : (
