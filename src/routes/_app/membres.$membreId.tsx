@@ -266,6 +266,52 @@ function FicheMembrePage() {
 
           <h2 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Informations personnelles</h2>
           <Row label="Matricule" value={<span className="font-mono">{membre.matricule ?? "—"}</span>} />
+          {isAdmin && (
+            <div className="py-2">
+              {!editMat ? (
+                <Button size="sm" variant="outline" onClick={() => { setMatValue(membre.matricule ?? templePrefix ? `${membre.matricule ?? templePrefix + "-"}` : ""); setEditMat(true); }}>
+                  Modifier le matricule
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    value={matValue}
+                    onChange={(e) => setMatValue(e.target.value.toUpperCase())}
+                    placeholder={templePrefix ? `${templePrefix}-0001` : "MCA-CI-TR-0001"}
+                    className="font-mono"
+                    aria-label="Nouveau matricule"
+                  />
+                  <p className="text-xs text-muted-foreground">Format attendu : {templePrefix ? `${templePrefix}-0001` : "MCA-CI-TR-0001"}</p>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => setConfirmMat(true)} disabled={!matValue.trim() || matValue.trim().toUpperCase() === (membre.matricule ?? "")}>
+                      Enregistrer
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditMat(false); setMatValue(""); }}>Annuler</Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Dialog open={confirmMat} onOpenChange={(o) => !o && setConfirmMat(false)}>
+            <DialogContent className="w-[95vw] sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Voulez-vous vraiment modifier le matricule de ce membre ?</DialogTitle>
+                <DialogDescription>Le membre, son historique de présence et ses informations restent inchangés.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 text-sm">
+                <Row label="Ancien matricule" value={<span className="font-mono">{membre.matricule ?? "—"}</span>} />
+                <Row label="Nouveau matricule" value={<span className="font-mono">{matValue.trim().toUpperCase()}</span>} />
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setConfirmMat(false)}>Annuler</Button>
+                <Button onClick={saveMatricule} disabled={savingMat} className="gradient-brand text-primary-foreground border-0">
+                  {savingMat ? "Enregistrement..." : "Confirmer la modification"}
+                </Button>
+              </DialogFooter>
+            </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Row label="Nom" value={membre.nom} />
           <Row label="Prénoms" value={membre.prenoms} />
           <Row label="Sexe" value={membre.sexe === "M" ? "Masculin" : membre.sexe === "F" ? "Féminin" : "—"} />
