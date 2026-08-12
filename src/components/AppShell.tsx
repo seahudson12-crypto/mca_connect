@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network, Inbox, Clock } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
+import { InstallMenuItem } from "@/components/InstallMenuItem";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,6 +85,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {renderItems(adminItems)}
         </>
       )}
+      <div className="mt-4 border-t border-sidebar-border pt-3">
+        <InstallMenuItem className={linkCls(false)} onDone={() => setOpen(false)} />
+      </div>
     </nav>
   );
 

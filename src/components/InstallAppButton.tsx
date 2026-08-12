@@ -1,88 +1,87 @@
 import { useEffect, useState } from "react";
-import { Download, X, Smartphone } from "lucide-react";
+import { Download, X, Share, Plus } from "lucide-react";
 import { usePwa } from "@/hooks/use-pwa";
 import { Button } from "@/components/ui/button";
+import { IosInstallHint } from "@/components/IosInstallHint";
 
-const DISMISS_KEY = "mca-pwa-install-dismissed";
+const SNOOZE_KEY = "mca-pwa-install-snooze";
+const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
 
-function isIOS() {
-  if (typeof navigator === "undefined") return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window);
+function isSnoozed() {
+  if (typeof window === "undefined") return true;
+  const raw = window.localStorage.getItem(SNOOZE_KEY);
+  if (!raw) return false;
+  const ts = Number(raw);
+  if (!Number.isFinite(ts)) return false;
+  return Date.now() - ts < SNOOZE_MS;
 }
 
 export function InstallAppButton() {
-  const { canInstall, installed, isStandalone, promptInstall } = usePwa();
-  const [dismissed, setDismissed] = useState(true);
+  const { canInstall, installed, isStandalone, isIOS, promptInstall } = usePwa();
+  const [snoozed, setSnoozed] = useState(true);
   const [showIosHint, setShowIosHint] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setDismissed(window.localStorage.getItem(DISMISS_KEY) === "1");
+    setSnoozed(isSnoozed());
   }, []);
 
   if (installed || isStandalone) return null;
+  if (snoozed) return null;
+  if (!canInstall && !isIOS) return null;
 
-  const ios = isIOS();
-  if (!canInstall && !ios) return null;
-  if (dismissed && !canInstall) return null;
+  const later = () => {
+    window.localStorage.setItem(SNOOZE_KEY, String(Date.now()));
+    setSnoozed(true);
+  };
 
-  const handleClick = async () => {
+  const install = async () => {
     if (canInstall) {
-      await promptInstall();
-    } else if (ios) {
+      const outcome = await promptInstall();
+      if (outcome === "dismissed") later();
+    } else {
       setShowIosHint(true);
     }
   };
 
-  const handleDismiss = () => {
-    window.localStorage.setItem(DISMISS_KEY, "1");
-    setDismissed(true);
-  };
-
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground shadow-lg">
-        <Button
-          onClick={handleClick}
-          variant="ghost"
-          className="h-auto gap-2 p-0 text-primary-foreground hover:bg-transparent hover:text-primary-foreground/90"
-        >
-          <Download className="h-4 w-4" />
-          <span className="text-sm font-medium">Installer MCA CONNECT</span>
-        </Button>
-        <button
-          onClick={handleDismiss}
-          aria-label="Ignorer"
-          className="rounded-full p-1 hover:bg-primary-foreground/10"
-        >
-          <X className="h-3 w-3" />
-        </button>
-      </div>
-
-      {showIosHint && (
-        <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center"
-          onClick={() => setShowIosHint(false)}
-        >
-          <div
-            className="w-full max-w-sm rounded-2xl bg-background p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center gap-2">
-              <Smartphone className="h-5 w-5 text-primary" />
-              <h3 className="text-base font-semibold">Installer sur iPhone/iPad</h3>
+      <div className="fixed inset-x-3 bottom-3 z-50 sm:left-auto sm:right-4 sm:w-80">
+        <div className="rounded-xl border border-border bg-card/95 p-4 shadow-elegant backdrop-blur">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-primary/10 p-2 text-primary">
+              <Download className="h-4 w-4" />
             </div>
-            <ol className="space-y-2 text-sm text-muted-foreground">
-              <li>1. Touchez le bouton <strong>Partager</strong> dans Safari.</li>
-              <li>2. Choisissez <strong>« Sur l'écran d'accueil »</strong>.</li>
-              <li>3. Confirmez avec <strong>Ajouter</strong>.</li>
-            </ol>
-            <Button className="mt-4 w-full" onClick={() => setShowIosHint(false)}>
-              Compris
-            </Button>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground">Installer MCA Connect</p>
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                Installez MCA Connect sur votre téléphone pour y accéder rapidement comme une application.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <Button size="sm" className="flex-1" onClick={install}>
+                  Installer
+                </Button>
+                <Button size="sm" variant="ghost" onClick={later}>
+                  Plus tard
+                </Button>
+              </div>
+              {isIOS && !canInstall && (
+                <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Share className="h-3 w-3" /> Partager <Plus className="h-3 w-3" /> Sur l'écran d'accueil
+                </p>
+              )}
+            </div>
+            <button
+              onClick={later}
+              aria-label="Fermer"
+              className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
-      )}
+      </div>
+
+      <IosInstallHint open={showIosHint} onClose={() => setShowIosHint(false)} />
     </>
   );
 }
