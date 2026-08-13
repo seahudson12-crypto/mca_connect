@@ -122,6 +122,15 @@ function FinancesPage() {
         </Button>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="secondary">
+          <Link to="/finances/cotisations">Cotisations sociales</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link to="/finances/missions">Offrandes missionnaires</Link>
+        </Button>
+      </div>
+
       <Card className="p-4 border-0 shadow-elegant">
         <div className="grid gap-3 md:grid-cols-3">
           <div className="space-y-1.5"><Label>Du</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
