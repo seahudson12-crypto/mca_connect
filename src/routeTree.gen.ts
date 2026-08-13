@@ -37,6 +37,7 @@ import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances.index'
+import { Route as AppFinancesCotisationsRouteImport } from './routes/_app/finances.cotisations'
 import { Route as AppMembresIndexRouteImport } from './routes/_app/membres.index'
 import { Route as AppMembresMembreIdRouteImport } from './routes/_app/membres.$membreId'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
@@ -181,6 +182,11 @@ const AppFinancesIndexRoute = AppFinancesIndexRouteImport.update({
   path: '/finances/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFinancesCotisationsRoute = AppFinancesCotisationsRouteImport.update({
+  id: '/finances/cotisations',
+  path: '/finances/cotisations',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMembresIndexRoute = AppMembresIndexRouteImport.update({
   id: '/membres/',
   path: '/membres/',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/finances/cotisations': typeof AppFinancesCotisationsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/finances/': typeof AppFinancesIndexRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/finances/cotisations': typeof AppFinancesCotisationsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/finances': typeof AppFinancesIndexRoute
@@ -297,6 +305,7 @@ export interface FileRoutesById {
   '/_app/themes-annee': typeof AppThemesAnneeRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
+  '/_app/finances/cotisations': typeof AppFinancesCotisationsRoute
   '/_app/membres/$membreId': typeof AppMembresMembreIdRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/_app/finances/': typeof AppFinancesIndexRoute
@@ -332,6 +341,7 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/finances/cotisations'
     | '/membres/$membreId'
     | '/presences/$culteId'
     | '/finances/'
@@ -365,6 +375,7 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/finances/cotisations'
     | '/membres/$membreId'
     | '/presences/$culteId'
     | '/finances'
@@ -399,6 +410,7 @@ export interface FileRouteTypes {
     | '/_app/themes-annee'
     | '/_app/utilisateurs'
     | '/_app/whatsapp'
+    | '/_app/finances/cotisations'
     | '/_app/membres/$membreId'
     | '/_app/presences/$culteId'
     | '/_app/finances/'
@@ -613,6 +625,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFinancesIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/finances/cotisations': {
+      id: '/_app/finances/cotisations'
+      path: '/finances/cotisations'
+      fullPath: '/finances/cotisations'
+      preLoaderRoute: typeof AppFinancesCotisationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/membres/': {
       id: '/_app/membres/'
       path: '/membres'
@@ -666,6 +685,7 @@ interface AppRouteChildren {
   AppThemesAnneeRoute: typeof AppThemesAnneeRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
+  AppFinancesCotisationsRoute: typeof AppFinancesCotisationsRoute
   AppMembresMembreIdRoute: typeof AppMembresMembreIdRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
   AppFinancesIndexRoute: typeof AppFinancesIndexRoute
@@ -695,6 +715,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppThemesAnneeRoute: AppThemesAnneeRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
+  AppFinancesCotisationsRoute: AppFinancesCotisationsRoute,
   AppMembresMembreIdRoute: AppMembresMembreIdRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
   AppFinancesIndexRoute: AppFinancesIndexRoute,
