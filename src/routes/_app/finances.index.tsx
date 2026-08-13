@@ -18,7 +18,7 @@ import { CULTE_TYPES, culteTypeLabel } from "@/lib/constants";
 import { formatXof } from "@/lib/audit";
 import * as XLSX from "xlsx";
 
-export const Route = createFileRoute("/_app/finances")({ component: FinancesPage });
+export const Route = createFileRoute("/_app/finances/")({ component: FinancesPage });
 
 type FinanceRow = {
   id: string;
