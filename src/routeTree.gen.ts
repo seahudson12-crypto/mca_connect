@@ -38,6 +38,7 @@ import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances.index'
 import { Route as AppFinancesCotisationsRouteImport } from './routes/_app/finances.cotisations'
+import { Route as AppFinancesMissionsRouteImport } from './routes/_app/finances.missions'
 import { Route as AppMembresIndexRouteImport } from './routes/_app/membres.index'
 import { Route as AppMembresMembreIdRouteImport } from './routes/_app/membres.$membreId'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
@@ -187,6 +188,11 @@ const AppFinancesCotisationsRoute = AppFinancesCotisationsRouteImport.update({
   path: '/finances/cotisations',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFinancesMissionsRoute = AppFinancesMissionsRouteImport.update({
+  id: '/finances/missions',
+  path: '/finances/missions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMembresIndexRoute = AppMembresIndexRouteImport.update({
   id: '/membres/',
   path: '/membres/',
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/finances/cotisations': typeof AppFinancesCotisationsRoute
+  '/finances/missions': typeof AppFinancesMissionsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/finances/': typeof AppFinancesIndexRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByTo {
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
   '/finances/cotisations': typeof AppFinancesCotisationsRoute
+  '/finances/missions': typeof AppFinancesMissionsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/finances': typeof AppFinancesIndexRoute
@@ -306,6 +314,7 @@ export interface FileRoutesById {
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
   '/_app/finances/cotisations': typeof AppFinancesCotisationsRoute
+  '/_app/finances/missions': typeof AppFinancesMissionsRoute
   '/_app/membres/$membreId': typeof AppMembresMembreIdRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
   '/_app/finances/': typeof AppFinancesIndexRoute
@@ -342,6 +351,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/whatsapp'
     | '/finances/cotisations'
+    | '/finances/missions'
     | '/membres/$membreId'
     | '/presences/$culteId'
     | '/finances/'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/whatsapp'
     | '/finances/cotisations'
+    | '/finances/missions'
     | '/membres/$membreId'
     | '/presences/$culteId'
     | '/finances'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
     | '/_app/utilisateurs'
     | '/_app/whatsapp'
     | '/_app/finances/cotisations'
+    | '/_app/finances/missions'
     | '/_app/membres/$membreId'
     | '/_app/presences/$culteId'
     | '/_app/finances/'
@@ -632,6 +644,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFinancesCotisationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/finances/missions': {
+      id: '/_app/finances/missions'
+      path: '/finances/missions'
+      fullPath: '/finances/missions'
+      preLoaderRoute: typeof AppFinancesMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/membres/': {
       id: '/_app/membres/'
       path: '/membres'
@@ -686,6 +705,7 @@ interface AppRouteChildren {
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
   AppFinancesCotisationsRoute: typeof AppFinancesCotisationsRoute
+  AppFinancesMissionsRoute: typeof AppFinancesMissionsRoute
   AppMembresMembreIdRoute: typeof AppMembresMembreIdRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
   AppFinancesIndexRoute: typeof AppFinancesIndexRoute
@@ -716,6 +736,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
   AppFinancesCotisationsRoute: AppFinancesCotisationsRoute,
+  AppFinancesMissionsRoute: AppFinancesMissionsRoute,
   AppMembresMembreIdRoute: AppMembresMembreIdRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
   AppFinancesIndexRoute: AppFinancesIndexRoute,

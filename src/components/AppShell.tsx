@@ -34,6 +34,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/presences", label: "Présences", icon: ClipboardCheck },
     { to: "/whatsapp", label: "WhatsApp", icon: MessageCircle },
     { to: "/finances", label: "Finances", icon: Wallet, show: canSeeFinances },
+    { to: "/finances/cotisations", label: "Cotisations sociales", icon: HandCoins, show: canSeeFinances },
+    { to: "/finances/missions", label: "Offrandes missionnaires", icon: Globe2, show: canSeeFinances },
     { to: "/departements", label: isDepartementLead ? "Mon département" : "Départements", icon: Network },
     { to: "/familles", label: "Familles", icon: Users2, show: canSeeMembres },
     { to: "/calendrier", label: "Calendrier MCA", icon: CalendarDays },
