@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network, Inbox, Clock } from "lucide-react";
+import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network, Inbox, Clock, HandCoins } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { InstallMenuItem } from "@/components/InstallMenuItem";
@@ -34,6 +34,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/presences", label: "Présences", icon: ClipboardCheck },
     { to: "/whatsapp", label: "WhatsApp", icon: MessageCircle },
     { to: "/finances", label: "Finances", icon: Wallet, show: canSeeFinances },
+    { to: "/finances/cotisations", label: "Cotisations sociales", icon: HandCoins, show: canSeeFinances },
+    { to: "/finances/missions", label: "Offrandes missionnaires", icon: Globe2, show: canSeeFinances },
     { to: "/departements", label: isDepartementLead ? "Mon département" : "Départements", icon: Network },
     { to: "/familles", label: "Familles", icon: Users2, show: canSeeMembres },
     { to: "/calendrier", label: "Calendrier MCA", icon: CalendarDays },

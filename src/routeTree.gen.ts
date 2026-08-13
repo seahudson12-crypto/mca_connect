@@ -26,7 +26,6 @@ import { Route as AppDemandesRouteImport } from './routes/_app/demandes'
 import { Route as AppDepartementsRouteImport } from './routes/_app/departements'
 import { Route as AppExportsRouteImport } from './routes/_app/exports'
 import { Route as AppFamillesRouteImport } from './routes/_app/familles'
-import { Route as AppFinancesRouteImport } from './routes/_app/finances'
 import { Route as AppFormationsRouteImport } from './routes/_app/formations'
 import { Route as AppHistoriqueRouteImport } from './routes/_app/historique'
 import { Route as AppObjectifsRouteImport } from './routes/_app/objectifs'
@@ -37,6 +36,9 @@ import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
+import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances.index'
+import { Route as AppFinancesCotisationsRouteImport } from './routes/_app/finances.cotisations'
+import { Route as AppFinancesMissionsRouteImport } from './routes/_app/finances.missions'
 import { Route as AppMembresIndexRouteImport } from './routes/_app/membres.index'
 import { Route as AppMembresMembreIdRouteImport } from './routes/_app/membres.$membreId'
 import { Route as AppPresencesIndexRouteImport } from './routes/_app/presences.index'
@@ -126,11 +128,6 @@ const AppFamillesRoute = AppFamillesRouteImport.update({
   path: '/familles',
   getParentRoute: () => AppRoute,
 } as any)
-const AppFinancesRoute = AppFinancesRouteImport.update({
-  id: '/finances',
-  path: '/finances',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppFormationsRoute = AppFormationsRouteImport.update({
   id: '/formations',
   path: '/formations',
@@ -181,6 +178,21 @@ const AppWhatsappRoute = AppWhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFinancesIndexRoute = AppFinancesIndexRouteImport.update({
+  id: '/finances/',
+  path: '/finances/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesCotisationsRoute = AppFinancesCotisationsRouteImport.update({
+  id: '/finances/cotisations',
+  path: '/finances/cotisations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesMissionsRoute = AppFinancesMissionsRouteImport.update({
+  id: '/finances/missions',
+  path: '/finances/missions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMembresIndexRoute = AppMembresIndexRouteImport.update({
   id: '/membres/',
   path: '/membres/',
@@ -219,7 +231,6 @@ export interface FileRoutesByFullPath {
   '/departements': typeof AppDepartementsRoute
   '/exports': typeof AppExportsRoute
   '/familles': typeof AppFamillesRoute
-  '/finances': typeof AppFinancesRoute
   '/formations': typeof AppFormationsRoute
   '/historique': typeof AppHistoriqueRoute
   '/objectifs': typeof AppObjectifsRoute
@@ -230,8 +241,11 @@ export interface FileRoutesByFullPath {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/finances/cotisations': typeof AppFinancesCotisationsRoute
+  '/finances/missions': typeof AppFinancesMissionsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/finances/': typeof AppFinancesIndexRoute
   '/membres/': typeof AppMembresIndexRoute
   '/presences/': typeof AppPresencesIndexRoute
 }
@@ -252,7 +266,6 @@ export interface FileRoutesByTo {
   '/departements': typeof AppDepartementsRoute
   '/exports': typeof AppExportsRoute
   '/familles': typeof AppFamillesRoute
-  '/finances': typeof AppFinancesRoute
   '/formations': typeof AppFormationsRoute
   '/historique': typeof AppHistoriqueRoute
   '/objectifs': typeof AppObjectifsRoute
@@ -263,8 +276,11 @@ export interface FileRoutesByTo {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/finances/cotisations': typeof AppFinancesCotisationsRoute
+  '/finances/missions': typeof AppFinancesMissionsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/finances': typeof AppFinancesIndexRoute
   '/membres': typeof AppMembresIndexRoute
   '/presences': typeof AppPresencesIndexRoute
 }
@@ -287,7 +303,6 @@ export interface FileRoutesById {
   '/_app/departements': typeof AppDepartementsRoute
   '/_app/exports': typeof AppExportsRoute
   '/_app/familles': typeof AppFamillesRoute
-  '/_app/finances': typeof AppFinancesRoute
   '/_app/formations': typeof AppFormationsRoute
   '/_app/historique': typeof AppHistoriqueRoute
   '/_app/objectifs': typeof AppObjectifsRoute
@@ -298,8 +313,11 @@ export interface FileRoutesById {
   '/_app/themes-annee': typeof AppThemesAnneeRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
+  '/_app/finances/cotisations': typeof AppFinancesCotisationsRoute
+  '/_app/finances/missions': typeof AppFinancesMissionsRoute
   '/_app/membres/$membreId': typeof AppMembresMembreIdRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/_app/finances/': typeof AppFinancesIndexRoute
   '/_app/membres/': typeof AppMembresIndexRoute
   '/_app/presences/': typeof AppPresencesIndexRoute
 }
@@ -322,7 +340,6 @@ export interface FileRouteTypes {
     | '/departements'
     | '/exports'
     | '/familles'
-    | '/finances'
     | '/formations'
     | '/historique'
     | '/objectifs'
@@ -333,8 +350,11 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/finances/cotisations'
+    | '/finances/missions'
     | '/membres/$membreId'
     | '/presences/$culteId'
+    | '/finances/'
     | '/membres/'
     | '/presences/'
   fileRoutesByTo: FileRoutesByTo
@@ -355,7 +375,6 @@ export interface FileRouteTypes {
     | '/departements'
     | '/exports'
     | '/familles'
-    | '/finances'
     | '/formations'
     | '/historique'
     | '/objectifs'
@@ -366,8 +385,11 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/finances/cotisations'
+    | '/finances/missions'
     | '/membres/$membreId'
     | '/presences/$culteId'
+    | '/finances'
     | '/membres'
     | '/presences'
   id:
@@ -389,7 +411,6 @@ export interface FileRouteTypes {
     | '/_app/departements'
     | '/_app/exports'
     | '/_app/familles'
-    | '/_app/finances'
     | '/_app/formations'
     | '/_app/historique'
     | '/_app/objectifs'
@@ -400,8 +421,11 @@ export interface FileRouteTypes {
     | '/_app/themes-annee'
     | '/_app/utilisateurs'
     | '/_app/whatsapp'
+    | '/_app/finances/cotisations'
+    | '/_app/finances/missions'
     | '/_app/membres/$membreId'
     | '/_app/presences/$culteId'
+    | '/_app/finances/'
     | '/_app/membres/'
     | '/_app/presences/'
   fileRoutesById: FileRoutesById
@@ -536,13 +560,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFamillesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/finances': {
-      id: '/_app/finances'
-      path: '/finances'
-      fullPath: '/finances'
-      preLoaderRoute: typeof AppFinancesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/formations': {
       id: '/_app/formations'
       path: '/formations'
@@ -613,6 +630,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWhatsappRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/finances/': {
+      id: '/_app/finances/'
+      path: '/finances'
+      fullPath: '/finances/'
+      preLoaderRoute: typeof AppFinancesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances/cotisations': {
+      id: '/_app/finances/cotisations'
+      path: '/finances/cotisations'
+      fullPath: '/finances/cotisations'
+      preLoaderRoute: typeof AppFinancesCotisationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances/missions': {
+      id: '/_app/finances/missions'
+      path: '/finances/missions'
+      fullPath: '/finances/missions'
+      preLoaderRoute: typeof AppFinancesMissionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/membres/': {
       id: '/_app/membres/'
       path: '/membres'
@@ -656,7 +694,6 @@ interface AppRouteChildren {
   AppDepartementsRoute: typeof AppDepartementsRoute
   AppExportsRoute: typeof AppExportsRoute
   AppFamillesRoute: typeof AppFamillesRoute
-  AppFinancesRoute: typeof AppFinancesRoute
   AppFormationsRoute: typeof AppFormationsRoute
   AppHistoriqueRoute: typeof AppHistoriqueRoute
   AppObjectifsRoute: typeof AppObjectifsRoute
@@ -667,8 +704,11 @@ interface AppRouteChildren {
   AppThemesAnneeRoute: typeof AppThemesAnneeRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
+  AppFinancesCotisationsRoute: typeof AppFinancesCotisationsRoute
+  AppFinancesMissionsRoute: typeof AppFinancesMissionsRoute
   AppMembresMembreIdRoute: typeof AppMembresMembreIdRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
+  AppFinancesIndexRoute: typeof AppFinancesIndexRoute
   AppMembresIndexRoute: typeof AppMembresIndexRoute
   AppPresencesIndexRoute: typeof AppPresencesIndexRoute
 }
@@ -685,7 +725,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppDepartementsRoute: AppDepartementsRoute,
   AppExportsRoute: AppExportsRoute,
   AppFamillesRoute: AppFamillesRoute,
-  AppFinancesRoute: AppFinancesRoute,
   AppFormationsRoute: AppFormationsRoute,
   AppHistoriqueRoute: AppHistoriqueRoute,
   AppObjectifsRoute: AppObjectifsRoute,
@@ -696,8 +735,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppThemesAnneeRoute: AppThemesAnneeRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
+  AppFinancesCotisationsRoute: AppFinancesCotisationsRoute,
+  AppFinancesMissionsRoute: AppFinancesMissionsRoute,
   AppMembresMembreIdRoute: AppMembresMembreIdRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
+  AppFinancesIndexRoute: AppFinancesIndexRoute,
   AppMembresIndexRoute: AppMembresIndexRoute,
   AppPresencesIndexRoute: AppPresencesIndexRoute,
 }

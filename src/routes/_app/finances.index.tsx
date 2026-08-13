@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import { CULTE_TYPES, culteTypeLabel } from "@/lib/constants";
 import { formatXof } from "@/lib/audit";
 import * as XLSX from "xlsx";
 
-export const Route = createFileRoute("/_app/finances")({ component: FinancesPage });
+export const Route = createFileRoute("/_app/finances/")({ component: FinancesPage });
 
 type FinanceRow = {
   id: string;
@@ -119,6 +119,15 @@ function FinancesPage() {
         </div>
         <Button variant="outline" onClick={exportExcel} disabled={rows.length === 0}>
           <FileDown className="mr-2 h-4 w-4" /> Excel
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="secondary">
+          <Link to="/finances/cotisations">Cotisations sociales</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link to="/finances/missions">Offrandes missionnaires</Link>
         </Button>
       </div>
 
