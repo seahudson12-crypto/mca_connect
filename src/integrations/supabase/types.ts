@@ -343,6 +343,158 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_baremes: {
+        Row: {
+          actif: boolean
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_echeance: string | null
+          frequence: Database["public"]["Enums"]["finance_frequence"]
+          id: string
+          jours_grace: number
+          libelle: string | null
+          montant_attendu: number
+          notes: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_echeance?: string | null
+          frequence?: Database["public"]["Enums"]["finance_frequence"]
+          id?: string
+          jours_grace?: number
+          libelle?: string | null
+          montant_attendu?: number
+          notes?: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_echeance?: string | null
+          frequence?: Database["public"]["Enums"]["finance_frequence"]
+          id?: string
+          jours_grace?: number
+          libelle?: string | null
+          montant_attendu?: number
+          notes?: string | null
+          op_type?: Database["public"]["Enums"]["finance_op_type"]
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_baremes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_baremes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_paiements: {
+        Row: {
+          bareme_id: string | null
+          created_at: string
+          created_by: string | null
+          date_echeance: string | null
+          date_paiement: string
+          id: string
+          membre_id: string
+          mode_paiement: Database["public"]["Enums"]["finance_mode_paiement"]
+          montant_attendu: number
+          montant_paye: number
+          observation: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          periode: string
+          reference: string | null
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          bareme_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_paiement?: string
+          id?: string
+          membre_id: string
+          mode_paiement?: Database["public"]["Enums"]["finance_mode_paiement"]
+          montant_attendu?: number
+          montant_paye?: number
+          observation?: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          periode: string
+          reference?: string | null
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          bareme_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_paiement?: string
+          id?: string
+          membre_id?: string
+          mode_paiement?: Database["public"]["Enums"]["finance_mode_paiement"]
+          montant_attendu?: number
+          montant_paye?: number
+          observation?: string | null
+          op_type?: Database["public"]["Enums"]["finance_op_type"]
+          periode?: string
+          reference?: string | null
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_paiements_bareme_id_fkey"
+            columns: ["bareme_id"]
+            isOneToOne: false
+            referencedRelation: "finance_baremes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_paiements_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_paiements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_paiements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finances_culte: {
         Row: {
           action_grace: number
@@ -1640,6 +1792,14 @@ export type Database = {
         | "priere"
         | "sortie"
         | "autre"
+      finance_frequence: "mensuelle" | "trimestrielle" | "annuelle"
+      finance_mode_paiement:
+        | "especes"
+        | "mobile_money"
+        | "virement"
+        | "cheque"
+        | "autre"
+      finance_op_type: "social_contribution" | "mission_offering"
       formation_statut: "inscrit" | "en_cours" | "complete" | "abandonne"
       formation_type:
         | "discipulat"
@@ -1848,6 +2008,15 @@ export const Constants = {
         "sortie",
         "autre",
       ],
+      finance_frequence: ["mensuelle", "trimestrielle", "annuelle"],
+      finance_mode_paiement: [
+        "especes",
+        "mobile_money",
+        "virement",
+        "cheque",
+        "autre",
+      ],
+      finance_op_type: ["social_contribution", "mission_offering"],
       formation_statut: ["inscrit", "en_cours", "complete", "abandonne"],
       formation_type: [
         "discipulat",
