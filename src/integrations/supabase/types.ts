@@ -409,6 +409,119 @@ export type Database = {
           },
         ]
       }
+      finance_montant_changes: {
+        Row: {
+          ancien_montant: number | null
+          changed_by: string | null
+          created_at: string
+          id: string
+          membre_id: string
+          nouveau_montant: number
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+        }
+        Insert: {
+          ancien_montant?: number | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          membre_id: string
+          nouveau_montant: number
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+        }
+        Update: {
+          ancien_montant?: number | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          membre_id?: string
+          nouveau_montant?: number
+          op_type?: Database["public"]["Enums"]["finance_op_type"]
+          temple_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_montant_changes_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_montant_changes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_montant_changes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_montants_membre: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          membre_id: string
+          montant_prevu: number
+          notes: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          membre_id: string
+          montant_prevu?: number
+          notes?: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          membre_id?: string
+          montant_prevu?: number
+          notes?: string | null
+          op_type?: Database["public"]["Enums"]["finance_op_type"]
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_montants_membre_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_montants_membre_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_montants_membre_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_paiements: {
         Row: {
           bareme_id: string | null
@@ -488,6 +601,64 @@ export type Database = {
           },
           {
             foreignKeyName: "finance_paiements_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_reliquats: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          id: string
+          membre_id: string
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          periode: string
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          id?: string
+          membre_id: string
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          periode: string
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          id?: string
+          membre_id?: string
+          op_type?: Database["public"]["Enums"]["finance_op_type"]
+          periode?: string
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_reliquats_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_reliquats_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_reliquats_temple_id_fkey"
             columns: ["temple_id"]
             isOneToOne: false
             referencedRelation: "temples_public"
