@@ -31,7 +31,7 @@ import { formatXof } from "@/lib/audit";
 import { categoryLabel } from "@/lib/constants";
 import * as XLSX from "xlsx";
 import {
-  FREQUENCES, MODES_PAIEMENT, OP_LABELS, STATUT_LABELS, deuxiemeDimanche, echeanceFor, finDePeriode,
+  FREQUENCES, MODES_PAIEMENT, OP_LABELS, STATUT_LABELS, echeanceFor, finDePeriode,
   periodeCourante, periodeLabel, periodeSuivante, periodesFor, prochainDeuxiemeDimanche, reliquatFor,
   statutMembre, surplusFor,
   type FinanceFrequence, type FinanceOpType, type FinanceStatut,
