@@ -5,7 +5,7 @@
 
 export type FinanceOpType = "social_contribution" | "mission_offering";
 export type FinanceFrequence = "mensuelle" | "trimestrielle" | "annuelle";
-export type FinanceStatut = "a_jour" | "partiel" | "retard" | "non_paye";
+export type FinanceStatut = "a_jour" | "partiel" | "retard" | "non_paye" | "paye_plus";
 
 export const OP_LABELS: Record<FinanceOpType, { titre: string; singulier: string; verse: string; bouton: string }> = {
   social_contribution: {
@@ -38,6 +38,7 @@ export const MODES_PAIEMENT = [
 
 export const STATUT_LABELS: Record<FinanceStatut, string> = {
   a_jour: "À jour",
+  paye_plus: "Payé (surplus)",
   partiel: "Partiellement payé",
   retard: "En retard",
   non_paye: "Non payé",
@@ -103,4 +104,43 @@ export function periodeSuivante(frequence: FinanceFrequence, periode: string): s
   }
   const m = Number(p);
   return m === 12 ? `${Number(y) + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+}
+
+/**
+ * Statut d'un membre selon le montant prévu et le montant réellement versé.
+ * - versé = 0            -> non payé
+ * - 0 < versé < prévu    -> partiellement payé (reliquat + date prévue obligatoire)
+ * - versé = prévu        -> à jour (aucun reliquat)
+ * - versé > prévu        -> payé, surplus affiché, jamais de reliquat
+ */
+export function statutMembre(prevu: number, verse: number): FinanceStatut {
+  if (verse <= 0) return "non_paye";
+  if (prevu <= 0) return "paye_plus";
+  if (verse > prevu) return "paye_plus";
+  if (verse >= prevu) return "a_jour";
+  return "partiel";
+}
+
+export function reliquatFor(prevu: number, verse: number): number {
+  return Math.max(prevu - verse, 0);
+}
+
+export function surplusFor(prevu: number, verse: number): number {
+  return Math.max(verse - prevu, 0);
+}
+
+/** Date du 2e dimanche du mois (moment habituel des offrandes de soutien). */
+export function deuxiemeDimanche(annee: number, mois0: number): Date {
+  const d = new Date(annee, mois0, 1);
+  const shift = (7 - d.getDay()) % 7; // premier dimanche
+  return new Date(annee, mois0, 1 + shift + 7);
+}
+
+/** Prochain 2e dimanche à venir (aujourd'hui inclus). */
+export function prochainDeuxiemeDimanche(now = new Date()): Date {
+  const courant = deuxiemeDimanche(now.getFullYear(), now.getMonth());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (courant >= today) return courant;
+  const m = now.getMonth() + 1;
+  return deuxiemeDimanche(now.getFullYear() + (m > 11 ? 1 : 0), m % 12);
 }
