@@ -409,6 +409,64 @@ export type Database = {
           },
         ]
       }
+      finance_liste_membre: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          inclus: boolean
+          membre_id: string
+          motif: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inclus?: boolean
+          membre_id: string
+          motif?: string | null
+          op_type: Database["public"]["Enums"]["finance_op_type"]
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inclus?: boolean
+          membre_id?: string
+          motif?: string | null
+          op_type?: Database["public"]["Enums"]["finance_op_type"]
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_liste_membre_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_liste_membre_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_liste_membre_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_montant_changes: {
         Row: {
           ancien_montant: number | null
