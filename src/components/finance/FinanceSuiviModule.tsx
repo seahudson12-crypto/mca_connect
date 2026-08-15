@@ -463,6 +463,12 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
           <Button variant="outline" onClick={exportExcel} disabled={filtered.length === 0}>
             <FileDown className="mr-2 h-4 w-4" /> Excel
           </Button>
+          {isMission && (
+            <Button variant="outline" onClick={() => setAjoutOpen(true)} disabled={!activeTempleId}>
+              <UserPlus className="mr-2 h-4 w-4" /> Ajouter une personne
+            </Button>
+          )}
+
           <Button onClick={() => { setPayFor(null); setPayOpen(true); }} disabled={!activeTempleId}>
             <Plus className="mr-2 h-4 w-4" /> {labels.bouton}
           </Button>
