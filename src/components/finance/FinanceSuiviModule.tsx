@@ -726,6 +726,57 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         </div>
       </Card>
 
+      {isMission && (
+        <Card className="border-0 shadow-elegant overflow-hidden">
+          <div className="px-5 py-4 border-b">
+            <h2 className="text-base font-semibold">Personnes exclues ({exclus.length})</h2>
+            <p className="text-xs text-muted-foreground">
+              Ces personnes ne participent pas à cette collecte et n'entrent dans aucun calcul. Elles restent
+              enregistrées dans MCA Connect.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left">Matricule</th>
+                  <th className="px-3 py-2 text-left">Nom et prénoms</th>
+                  <th className="px-3 py-2 text-left">Catégorie</th>
+                  <th className="px-3 py-2 text-left">Motif d'exclusion</th>
+                  <th className="px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {exclus.length === 0 && (
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">Aucune personne exclue</td></tr>
+                )}
+                {exclus.map((e) => (
+                  <tr key={e.membre.id} className="border-t">
+                    <td className="px-3 py-2 font-mono text-xs">{e.membre.matricule ?? "—"}</td>
+                    <td className="px-3 py-2">{e.membre.nom} {e.membre.prenoms}</td>
+                    <td className="px-3 py-2">{categoryLabel(e.membre.categorie)}</td>
+                    <td className="px-3 py-2">
+                      <Badge variant={e.manuel ? "destructive" : "secondary"}>{e.motif}</Badge>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={setInclusion.isPending}
+                        onClick={() => reintegrer(e.membre)}
+                      >
+                        <RotateCcw className="mr-1 h-4 w-4" /> Réintégrer
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+
       <Card className="border-0 shadow-elegant overflow-hidden">
         <div className="px-5 py-4 border-b">
           <h2 className="text-base font-semibold">Synthèse par catégorie — {labels.titre}</h2>
