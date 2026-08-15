@@ -704,6 +704,19 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
                       <Button size="sm" variant="ghost" onClick={() => setHistFor(r.membre)}>
                         <History className="mr-1 h-4 w-4" /> Historique
                       </Button>
+                      {isMission && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive"
+                          disabled={setInclusion.isPending}
+                          onClick={() => retirerDeLaListe(r.membre)}
+                          title="Retirer de la liste des offrandes missionnaires"
+                        >
+                          <UserMinus className="mr-1 h-4 w-4" /> Retirer
+                        </Button>
+                      )}
+
                     </td>
                   </tr>
                 );
