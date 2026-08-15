@@ -24,6 +24,8 @@ import { StatCard } from "@/components/StatCard";
 import { toast } from "sonner";
 import {
   Coins, Users, AlertTriangle, CheckCircle2, FileDown, Plus, Settings2, History, Pencil, CalendarClock,
+  UserPlus, UserMinus, RotateCcw,
+
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
