@@ -108,6 +108,9 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
   const [baremeOpen, setBaremeOpen] = useState(false);
   const [histFor, setHistFor] = useState<Membre | null>(null);
   const [montantFor, setMontantFor] = useState<{ membre: Membre; montant: number } | null>(null);
+  const [ajoutOpen, setAjoutOpen] = useState(false);
+  const [ajoutSearch, setAjoutSearch] = useState("");
+
 
   const keyBase = ["finance-suivi", opType, activeTempleId];
 
