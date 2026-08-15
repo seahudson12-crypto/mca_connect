@@ -320,7 +320,7 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         dateReliquat: reliquats.find((r) => r.membre_id === m.id)?.date_prevue ?? "",
       };
     });
-  }, [membres, paiements, periodeActive, montants, montantDefaut, echeance, reliquats]);
+  }, [membresActifs, paiements, periodeActive, montants, montantDefaut, echeance, reliquats]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
