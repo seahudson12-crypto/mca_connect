@@ -862,7 +862,64 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         montantAttendu={histFor ? montantOf(histFor.id) : montantDefaut}
         periodeActive={periodeActive}
       />
+
+      <Dialog open={ajoutOpen} onOpenChange={(o) => { setAjoutOpen(o); if (!o) setAjoutSearch(""); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Ajouter une personne à la liste</DialogTitle>
+            <DialogDescription>
+              Recherchez un membre de {activeTemple?.nom_temple ?? "ce temple"} par matricule, nom ou prénoms.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={ajoutSearch}
+            onChange={(e) => setAjoutSearch(e.target.value)}
+            placeholder="MCA-CI-TR-0025 ou Jean Kouassi"
+          />
+          <div className="max-h-72 space-y-1 overflow-y-auto">
+            {ajoutSearch.trim().length < 2 && (
+              <p className="py-4 text-center text-sm text-muted-foreground">Saisissez au moins 2 caractères.</p>
+            )}
+            {ajoutSearch.trim().length >= 2 && (() => {
+              const q = ajoutSearch.trim().toLowerCase();
+              const res = membres.filter(
+                (m) =>
+                  `${m.nom} ${m.prenoms}`.toLowerCase().includes(q) ||
+                  (m.matricule ?? "").toLowerCase().includes(q),
+              );
+              if (res.length === 0) {
+                return <p className="py-4 text-center text-sm text-muted-foreground">Aucun membre trouvé dans ce temple.</p>;
+              }
+              return res.slice(0, 30).map((m) => {
+                const deja = estActif(m);
+                return (
+                  <div key={m.id} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{m.nom} {m.prenoms}</p>
+                      <p className="truncate text-xs text-muted-foreground font-mono">
+                        {m.matricule ?? "—"} · {categoryLabel(m.categorie)}
+                      </p>
+                    </div>
+                    {deja ? (
+                      <Badge variant="secondary">Déjà dans la liste</Badge>
+                    ) : (
+                      <Button size="sm" disabled={setInclusion.isPending} onClick={() => ajouterPersonne(m)}>
+                        Ajouter
+                      </Button>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAjoutOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
 
