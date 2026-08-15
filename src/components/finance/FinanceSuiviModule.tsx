@@ -24,6 +24,8 @@ import { StatCard } from "@/components/StatCard";
 import { toast } from "sonner";
 import {
   Coins, Users, AlertTriangle, CheckCircle2, FileDown, Plus, Settings2, History, Pencil, CalendarClock,
+  UserPlus, UserMinus, RotateCcw,
+
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -77,6 +79,10 @@ type Membre = {
 
 type MontantMembre = { id: string; membre_id: string; montant_prevu: number };
 type Reliquat = { id: string; membre_id: string; periode: string; date_prevue: string | null };
+type ListeEntry = { id: string; membre_id: string; inclus: boolean; motif: string | null };
+
+/** Catégorie automatiquement exclue des offrandes missionnaires. */
+const CAT_AUTO_EXCLUE = "nouvelles_ames";
 
 const statutVariant: Record<FinanceStatut, string> = {
   a_jour: "bg-success text-success-foreground",
@@ -85,6 +91,7 @@ const statutVariant: Record<FinanceStatut, string> = {
   retard: "bg-destructive text-destructive-foreground",
   non_paye: "bg-muted text-muted-foreground",
 };
+
 
 export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
   const labels = OP_LABELS[opType];
@@ -103,6 +110,9 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
   const [baremeOpen, setBaremeOpen] = useState(false);
   const [histFor, setHistFor] = useState<Membre | null>(null);
   const [montantFor, setMontantFor] = useState<{ membre: Membre; montant: number } | null>(null);
+  const [ajoutOpen, setAjoutOpen] = useState(false);
+  const [ajoutSearch, setAjoutSearch] = useState("");
+
 
   const keyBase = ["finance-suivi", opType, activeTempleId];
 
@@ -142,6 +152,93 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
       return (data ?? []) as Membre[];
     },
   });
+
+  // Liste des personnes concernées : inclusions / exclusions manuelles (isolées par temple + op_type)
+  const { data: listeEntries = [] } = useQuery({
+    queryKey: [...keyBase, "liste"],
+    enabled: !!activeTempleId && isMission,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("finance_liste_membre")
+        .select("id,membre_id,inclus,motif")
+        .eq("temple_id", activeTempleId!)
+        .eq("op_type", opType);
+      if (error) throw error;
+      return (data ?? []) as unknown as ListeEntry[];
+    },
+  });
+
+  const overrides = useMemo(
+    () => new Map(listeEntries.map((e) => [e.membre_id, e])),
+    [listeEntries],
+  );
+
+  /** Un membre est dans la liste active si aucune exclusion manuelle et catégorie éligible. */
+  const estActif = (m: Membre) => {
+    if (!isMission) return true;
+    const o = overrides.get(m.id);
+    if (o) return o.inclus;
+    return m.categorie !== CAT_AUTO_EXCLUE;
+  };
+
+  const membresActifs = useMemo(() => membres.filter(estActif), [membres, overrides, isMission]);
+
+  const exclus = useMemo(
+    () =>
+      membres
+        .filter((m) => !estActif(m))
+        .map((m) => {
+          const o = overrides.get(m.id);
+          const manuel = !!o && !o.inclus;
+          return {
+            membre: m,
+            manuel,
+            motif: manuel ? (o?.motif ?? "Exclu de cette collecte") : "Nouvelles âmes (automatique)",
+          };
+        }),
+    [membres, overrides, isMission],
+  );
+
+  const exclusAuto = exclus.filter((e) => !e.manuel).length;
+  const exclusManuels = exclus.filter((e) => e.manuel).length;
+
+  const setInclusion = useMutation({
+    mutationFn: async ({ membre, inclus, motif }: { membre: Membre; inclus: boolean; motif?: string }) => {
+      if (!activeTempleId) throw new Error("Aucun temple sélectionné");
+      const { error } = await supabase.from("finance_liste_membre").upsert(
+        {
+          temple_id: activeTempleId,
+          membre_id: membre.id,
+          op_type: opType,
+          inclus,
+          motif: motif ?? (inclus ? null : "Exclu de cette collecte"),
+          created_by: user?.id ?? null,
+        },
+        { onConflict: "membre_id,op_type" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      toast.success(v.inclus ? "Personne ajoutée à la liste" : "Personne retirée de la liste");
+      qc.invalidateQueries({ queryKey: [...keyBase, "liste"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const retirerDeLaListe = (membre: Membre) => setInclusion.mutate({ membre, inclus: false });
+  const reintegrer = (membre: Membre) => setInclusion.mutate({ membre, inclus: true });
+
+  const ajouterPersonne = (membre: Membre) => {
+    if (estActif(membre)) {
+      toast.error("Cette personne est déjà dans la liste.");
+      return;
+    }
+    setInclusion.mutate({ membre, inclus: true });
+    setAjoutOpen(false);
+    setAjoutSearch("");
+  };
+
+
 
   const { data: montants = [] } = useQuery({
     queryKey: [...keyBase, "montants"],
@@ -209,7 +306,7 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
       .filter((p) => p.periode === periodeActive)
       .forEach((p) => byMembre.set(p.membre_id, (byMembre.get(p.membre_id) ?? 0) + Number(p.montant_paye)));
 
-    return membres.map((m) => {
+    return membresActifs.map((m) => {
       const paye = byMembre.get(m.id) ?? 0;
       const prevu = montantOf(m.id);
       const statut = statutMembre(prevu, paye);
@@ -225,7 +322,7 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         dateReliquat: reliquats.find((r) => r.membre_id === m.id)?.date_prevue ?? "",
       };
     });
-  }, [membres, paiements, periodeActive, montants, montantDefaut, echeance, reliquats]);
+  }, [membresActifs, paiements, periodeActive, montants, montantDefaut, echeance, reliquats]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -368,6 +465,12 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
           <Button variant="outline" onClick={exportExcel} disabled={filtered.length === 0}>
             <FileDown className="mr-2 h-4 w-4" /> Excel
           </Button>
+          {isMission && (
+            <Button variant="outline" onClick={() => setAjoutOpen(true)} disabled={!activeTempleId}>
+              <UserPlus className="mr-2 h-4 w-4" /> Ajouter une personne
+            </Button>
+          )}
+
           <Button onClick={() => { setPayFor(null); setPayOpen(true); }} disabled={!activeTempleId}>
             <Plus className="mr-2 h-4 w-4" /> {labels.bouton}
           </Button>
@@ -431,6 +534,39 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
           la fréquence et l'échéance. Le montant reste modifiable membre par membre.
         </Card>
       )}
+
+      {isMission && (
+        <Card className="border-0 shadow-elegant p-4">
+          <h2 className="text-base font-semibold mb-3">Contrôle de la liste — {activeTemple?.nom_temple ?? "—"}</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-sm">
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Membres du temple</p>
+              <p className="text-xl font-bold">{membres.length}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Nouvelles âmes exclues (auto)</p>
+              <p className="text-xl font-bold">{exclusAuto}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Exclusions manuelles</p>
+              <p className="text-xl font-bold">{exclusManuels}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Personnes concernées</p>
+              <p className="text-xl font-bold text-primary">{stats.concernes}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Montant prévu total</p>
+              <p className="text-xl font-bold">{formatXof(stats.attendu)}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Tous les calculs ci-dessous portent uniquement sur la liste active. Retirer une personne ne la supprime
+            jamais de MCA Connect.
+          </p>
+        </Card>
+      )}
+
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Membres concernés" value={stats.concernes} icon={Users} />
@@ -568,6 +704,19 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
                       <Button size="sm" variant="ghost" onClick={() => setHistFor(r.membre)}>
                         <History className="mr-1 h-4 w-4" /> Historique
                       </Button>
+                      {isMission && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive"
+                          disabled={setInclusion.isPending}
+                          onClick={() => retirerDeLaListe(r.membre)}
+                          title="Retirer de la liste des offrandes missionnaires"
+                        >
+                          <UserMinus className="mr-1 h-4 w-4" /> Retirer
+                        </Button>
+                      )}
+
                     </td>
                   </tr>
                 );
@@ -576,6 +725,57 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
           </table>
         </div>
       </Card>
+
+      {isMission && (
+        <Card className="border-0 shadow-elegant overflow-hidden">
+          <div className="px-5 py-4 border-b">
+            <h2 className="text-base font-semibold">Personnes exclues ({exclus.length})</h2>
+            <p className="text-xs text-muted-foreground">
+              Ces personnes ne participent pas à cette collecte et n'entrent dans aucun calcul. Elles restent
+              enregistrées dans MCA Connect.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left">Matricule</th>
+                  <th className="px-3 py-2 text-left">Nom et prénoms</th>
+                  <th className="px-3 py-2 text-left">Catégorie</th>
+                  <th className="px-3 py-2 text-left">Motif d'exclusion</th>
+                  <th className="px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {exclus.length === 0 && (
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">Aucune personne exclue</td></tr>
+                )}
+                {exclus.map((e) => (
+                  <tr key={e.membre.id} className="border-t">
+                    <td className="px-3 py-2 font-mono text-xs">{e.membre.matricule ?? "—"}</td>
+                    <td className="px-3 py-2">{e.membre.nom} {e.membre.prenoms}</td>
+                    <td className="px-3 py-2">{categoryLabel(e.membre.categorie)}</td>
+                    <td className="px-3 py-2">
+                      <Badge variant={e.manuel ? "destructive" : "secondary"}>{e.motif}</Badge>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={setInclusion.isPending}
+                        onClick={() => reintegrer(e.membre)}
+                      >
+                        <RotateCcw className="mr-1 h-4 w-4" /> Réintégrer
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
 
       <Card className="border-0 shadow-elegant overflow-hidden">
         <div className="px-5 py-4 border-b">
@@ -620,7 +820,7 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         open={payOpen}
         onOpenChange={setPayOpen}
         opType={opType}
-        membres={membres}
+        membres={membresActifs}
         membrePreselect={payFor}
         periodes={periodes}
         periodeDefaut={periodeActive}
@@ -662,7 +862,64 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         montantAttendu={histFor ? montantOf(histFor.id) : montantDefaut}
         periodeActive={periodeActive}
       />
+
+      <Dialog open={ajoutOpen} onOpenChange={(o) => { setAjoutOpen(o); if (!o) setAjoutSearch(""); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Ajouter une personne à la liste</DialogTitle>
+            <DialogDescription>
+              Recherchez un membre de {activeTemple?.nom_temple ?? "ce temple"} par matricule, nom ou prénoms.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={ajoutSearch}
+            onChange={(e) => setAjoutSearch(e.target.value)}
+            placeholder="MCA-CI-TR-0025 ou Jean Kouassi"
+          />
+          <div className="max-h-72 space-y-1 overflow-y-auto">
+            {ajoutSearch.trim().length < 2 && (
+              <p className="py-4 text-center text-sm text-muted-foreground">Saisissez au moins 2 caractères.</p>
+            )}
+            {ajoutSearch.trim().length >= 2 && (() => {
+              const q = ajoutSearch.trim().toLowerCase();
+              const res = membres.filter(
+                (m) =>
+                  `${m.nom} ${m.prenoms}`.toLowerCase().includes(q) ||
+                  (m.matricule ?? "").toLowerCase().includes(q),
+              );
+              if (res.length === 0) {
+                return <p className="py-4 text-center text-sm text-muted-foreground">Aucun membre trouvé dans ce temple.</p>;
+              }
+              return res.slice(0, 30).map((m) => {
+                const deja = estActif(m);
+                return (
+                  <div key={m.id} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{m.nom} {m.prenoms}</p>
+                      <p className="truncate text-xs text-muted-foreground font-mono">
+                        {m.matricule ?? "—"} · {categoryLabel(m.categorie)}
+                      </p>
+                    </div>
+                    {deja ? (
+                      <Badge variant="secondary">Déjà dans la liste</Badge>
+                    ) : (
+                      <Button size="sm" disabled={setInclusion.isPending} onClick={() => ajouterPersonne(m)}>
+                        Ajouter
+                      </Button>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAjoutOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
 
