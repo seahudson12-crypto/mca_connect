@@ -304,7 +304,7 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
       .filter((p) => p.periode === periodeActive)
       .forEach((p) => byMembre.set(p.membre_id, (byMembre.get(p.membre_id) ?? 0) + Number(p.montant_paye)));
 
-    return membres.map((m) => {
+    return membresActifs.map((m) => {
       const paye = byMembre.get(m.id) ?? 0;
       const prevu = montantOf(m.id);
       const statut = statutMembre(prevu, paye);
