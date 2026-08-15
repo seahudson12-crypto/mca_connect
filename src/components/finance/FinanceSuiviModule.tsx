@@ -151,6 +151,93 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
     },
   });
 
+  // Liste des personnes concernées : inclusions / exclusions manuelles (isolées par temple + op_type)
+  const { data: listeEntries = [] } = useQuery({
+    queryKey: [...keyBase, "liste"],
+    enabled: !!activeTempleId && isMission,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("finance_liste_membre")
+        .select("id,membre_id,inclus,motif")
+        .eq("temple_id", activeTempleId!)
+        .eq("op_type", opType);
+      if (error) throw error;
+      return (data ?? []) as unknown as ListeEntry[];
+    },
+  });
+
+  const overrides = useMemo(
+    () => new Map(listeEntries.map((e) => [e.membre_id, e])),
+    [listeEntries],
+  );
+
+  /** Un membre est dans la liste active si aucune exclusion manuelle et catégorie éligible. */
+  const estActif = (m: Membre) => {
+    if (!isMission) return true;
+    const o = overrides.get(m.id);
+    if (o) return o.inclus;
+    return m.categorie !== CAT_AUTO_EXCLUE;
+  };
+
+  const membresActifs = useMemo(() => membres.filter(estActif), [membres, overrides, isMission]);
+
+  const exclus = useMemo(
+    () =>
+      membres
+        .filter((m) => !estActif(m))
+        .map((m) => {
+          const o = overrides.get(m.id);
+          const manuel = !!o && !o.inclus;
+          return {
+            membre: m,
+            manuel,
+            motif: manuel ? (o?.motif ?? "Exclu de cette collecte") : "Nouvelles âmes (automatique)",
+          };
+        }),
+    [membres, overrides, isMission],
+  );
+
+  const exclusAuto = exclus.filter((e) => !e.manuel).length;
+  const exclusManuels = exclus.filter((e) => e.manuel).length;
+
+  const setInclusion = useMutation({
+    mutationFn: async ({ membre, inclus, motif }: { membre: Membre; inclus: boolean; motif?: string }) => {
+      if (!activeTempleId) throw new Error("Aucun temple sélectionné");
+      const { error } = await supabase.from("finance_liste_membre").upsert(
+        {
+          temple_id: activeTempleId,
+          membre_id: membre.id,
+          op_type: opType,
+          inclus,
+          motif: motif ?? (inclus ? null : "Exclu de cette collecte"),
+          created_by: user?.id ?? null,
+        },
+        { onConflict: "membre_id,op_type" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      toast.success(v.inclus ? "Personne ajoutée à la liste" : "Personne retirée de la liste");
+      qc.invalidateQueries({ queryKey: [...keyBase, "liste"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const retirerDeLaListe = (membre: Membre) => setInclusion.mutate({ membre, inclus: false });
+  const reintegrer = (membre: Membre) => setInclusion.mutate({ membre, inclus: true });
+
+  const ajouterPersonne = (membre: Membre) => {
+    if (estActif(membre)) {
+      toast.error("Cette personne est déjà dans la liste.");
+      return;
+    }
+    setInclusion.mutate({ membre, inclus: true });
+    setAjoutOpen(false);
+    setAjoutSearch("");
+  };
+
+
+
   const { data: montants = [] } = useQuery({
     queryKey: [...keyBase, "montants"],
     enabled: !!activeTempleId,
