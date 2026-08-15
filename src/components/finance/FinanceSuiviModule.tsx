@@ -77,6 +77,10 @@ type Membre = {
 
 type MontantMembre = { id: string; membre_id: string; montant_prevu: number };
 type Reliquat = { id: string; membre_id: string; periode: string; date_prevue: string | null };
+type ListeEntry = { id: string; membre_id: string; inclus: boolean; motif: string | null };
+
+/** Catégorie automatiquement exclue des offrandes missionnaires. */
+const CAT_AUTO_EXCLUE = "nouvelles_ames";
 
 const statutVariant: Record<FinanceStatut, string> = {
   a_jour: "bg-success text-success-foreground",
@@ -85,6 +89,7 @@ const statutVariant: Record<FinanceStatut, string> = {
   retard: "bg-destructive text-destructive-foreground",
   non_paye: "bg-muted text-muted-foreground",
 };
+
 
 export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
   const labels = OP_LABELS[opType];
