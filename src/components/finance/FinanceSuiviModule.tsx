@@ -535,6 +535,39 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         </Card>
       )}
 
+      {isMission && (
+        <Card className="border-0 shadow-elegant p-4">
+          <h2 className="text-base font-semibold mb-3">Contrôle de la liste — {activeTemple?.nom_temple ?? "—"}</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-sm">
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Membres du temple</p>
+              <p className="text-xl font-bold">{membres.length}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Nouvelles âmes exclues (auto)</p>
+              <p className="text-xl font-bold">{exclusAuto}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Exclusions manuelles</p>
+              <p className="text-xl font-bold">{exclusManuels}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Personnes concernées</p>
+              <p className="text-xl font-bold text-primary">{stats.concernes}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Montant prévu total</p>
+              <p className="text-xl font-bold">{formatXof(stats.attendu)}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Tous les calculs ci-dessous portent uniquement sur la liste active. Retirer une personne ne la supprime
+            jamais de MCA Connect.
+          </p>
+        </Card>
+      )}
+
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Membres concernés" value={stats.concernes} icon={Users} />
         <StatCard label="Payés" value={stats.payes} icon={CheckCircle2} variant="success" hint={`${stats.partiels} partiel(s)`} />
