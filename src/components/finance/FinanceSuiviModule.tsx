@@ -820,7 +820,7 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         open={payOpen}
         onOpenChange={setPayOpen}
         opType={opType}
-        membres={membres}
+        membres={membresActifs}
         membrePreselect={payFor}
         periodes={periodes}
         periodeDefaut={periodeActive}
