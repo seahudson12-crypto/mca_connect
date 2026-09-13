@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       activites_departement: {
         Row: {
+          actions_a_entreprendre: string | null
           avancement: number
           created_at: string
           created_by: string | null
@@ -23,16 +24,21 @@ export type Database = {
           date_realisation: string | null
           departement_id: string
           description: string | null
+          difficultes: string | null
           id: string
+          nb_participants: number | null
+          objectif: string | null
           observations: string | null
           rapport: string | null
           responsable: string | null
+          resultats: string | null
           statut: Database["public"]["Enums"]["activite_dept_statut"]
           temple_id: string
           titre: string
           updated_at: string
         }
         Insert: {
+          actions_a_entreprendre?: string | null
           avancement?: number
           created_at?: string
           created_by?: string | null
@@ -40,16 +46,21 @@ export type Database = {
           date_realisation?: string | null
           departement_id: string
           description?: string | null
+          difficultes?: string | null
           id?: string
+          nb_participants?: number | null
+          objectif?: string | null
           observations?: string | null
           rapport?: string | null
           responsable?: string | null
+          resultats?: string | null
           statut?: Database["public"]["Enums"]["activite_dept_statut"]
           temple_id: string
           titre: string
           updated_at?: string
         }
         Update: {
+          actions_a_entreprendre?: string | null
           avancement?: number
           created_at?: string
           created_by?: string | null
@@ -57,10 +68,14 @@ export type Database = {
           date_realisation?: string | null
           departement_id?: string
           description?: string | null
+          difficultes?: string | null
           id?: string
+          nb_participants?: number | null
+          objectif?: string | null
           observations?: string | null
           rapport?: string | null
           responsable?: string | null
+          resultats?: string | null
           statut?: Database["public"]["Enums"]["activite_dept_statut"]
           temple_id?: string
           titre?: string
@@ -201,6 +216,201 @@ export type Database = {
           },
           {
             foreignKeyName: "cultes_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departement_bureau: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          departement_id: string
+          fonction: string
+          id: string
+          membre_id: string
+          notes: string | null
+          ordre: number
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          departement_id: string
+          fonction: string
+          id?: string
+          membre_id: string
+          notes?: string | null
+          ordre?: number
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          departement_id?: string
+          fonction?: string
+          id?: string
+          membre_id?: string
+          notes?: string | null
+          ordre?: number
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departement_bureau_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_bureau_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_bureau_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_bureau_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_bureau_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departement_fonctions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          nom: string
+          ordre: number
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom: string
+          ordre?: number
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom?: string
+          ordre?: number
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departement_fonctions_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_fonctions_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departement_membres: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_ajout: string
+          departement_id: string
+          id: string
+          membre_id: string
+          notes: string | null
+          temple_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_ajout?: string
+          departement_id: string
+          id?: string
+          membre_id: string
+          notes?: string | null
+          temple_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_ajout?: string
+          departement_id?: string
+          id?: string
+          membre_id?: string
+          notes?: string | null
+          temple_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departement_membres_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_membres_departement_id_fkey"
+            columns: ["departement_id"]
+            isOneToOne: false
+            referencedRelation: "departements_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_membres_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_membres_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departement_membres_temple_id_fkey"
             columns: ["temple_id"]
             isOneToOne: false
             referencedRelation: "temples_public"
