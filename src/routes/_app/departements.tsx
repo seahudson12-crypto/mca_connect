@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -12,46 +12,33 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Network, Plus, Pencil, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ACTIVITE_STATUTS, DEPARTEMENTS_SUGGERES, activiteStatutLabel } from "@/lib/constants";
+import { type Activite, type ActiviteStatut, type Departement, enRetard, logDept } from "@/lib/departement";
+import { DeptDashboard } from "@/components/departement/DeptDashboard";
+import { DeptMembres } from "@/components/departement/DeptMembres";
+import { DeptBureau } from "@/components/departement/DeptBureau";
+import { DeptRapport } from "@/components/departement/DeptRapport";
 
 export const Route = createFileRoute("/_app/departements")({
   component: DepartementsPage,
   head: () => ({
     meta: [
       { title: "Départements — MCA Connect" },
-      { name: "description", content: "Suivi des départements et de leurs activités par temple." },
+      { name: "description", content: "Espace de gestion des départements : membres, bureau, activités et rapports." },
       { property: "og:title", content: "Départements — MCA Connect" },
-      { property: "og:description", content: "Suivi des départements et de leurs activités par temple." },
+      { property: "og:description", content: "Espace de gestion des départements : membres, bureau, activités et rapports." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
 });
-
-type Departement = { id: string; nom: string; description: string | null; actif: boolean; temple_id: string };
-type ActiviteStatut = "a_faire" | "en_cours" | "realise" | "reporte" | "annule";
-type Activite = {
-  id: string;
-  departement_id: string;
-  temple_id: string;
-  titre: string;
-  description: string | null;
-  responsable: string | null;
-  date_prevue: string | null;
-  date_realisation: string | null;
-  statut: ActiviteStatut;
-  avancement: number;
-  rapport: string | null;
-  observations: string | null;
-};
 
 const statutColor = (s: ActiviteStatut) =>
   s === "realise" ? "bg-primary text-primary-foreground"
@@ -63,8 +50,9 @@ function DepartementsPage() {
   const qc = useQueryClient();
   const { isAdmin, isDepartementLead, departementIds, user } = useAuth();
   const { activeTempleId, activeTemple } = useActiveTemple();
+  const [selectedId, setSelectedId] = useState<string>("");
   const [deptDialog, setDeptDialog] = useState<{ open: boolean; dept: Departement | null }>({ open: false, dept: null });
-  const [actDialog, setActDialog] = useState<{ open: boolean; act: Activite | null; deptId: string | null }>({ open: false, act: null, deptId: null });
+  const [actDialog, setActDialog] = useState<{ open: boolean; act: Activite | null }>({ open: false, act: null });
   const [statutFilter, setStatutFilter] = useState<string>("all");
 
   const { data: departements = [] } = useQuery({
@@ -81,20 +69,27 @@ function DepartementsPage() {
     },
   });
 
-  // Un responsable ne voit que son/ses départements
+  // Un responsable ne voit que ses départements validés
   const visibleDepts = useMemo(
     () => (isAdmin ? departements : departements.filter((d) => departementIds.includes(d.id))),
     [departements, isAdmin, departementIds],
   );
 
+  useEffect(() => {
+    if (visibleDepts.length === 0) { setSelectedId(""); return; }
+    if (!visibleDepts.some((d) => d.id === selectedId)) setSelectedId(visibleDepts[0].id);
+  }, [visibleDepts, selectedId]);
+
+  const dept = visibleDepts.find((d) => d.id === selectedId) ?? null;
+
   const { data: activites = [] } = useQuery({
-    queryKey: ["activites-dept", activeTempleId],
-    enabled: !!activeTempleId,
+    queryKey: ["activites-dept", selectedId],
+    enabled: !!selectedId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("activites_departement")
         .select("*")
-        .eq("temple_id", activeTempleId!)
+        .eq("departement_id", selectedId)
         .order("date_prevue", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Activite[];
@@ -129,17 +124,22 @@ function DepartementsPage() {
   });
 
   const saveActivite = useMutation({
-    mutationFn: async (form: Omit<Activite, "id" | "temple_id"> & { id?: string }) => {
+    mutationFn: async (form: ActiviteForm & { id?: string }) => {
       const payload = {
-        departement_id: form.departement_id,
+        departement_id: selectedId,
         temple_id: activeTempleId!,
         titre: form.titre,
         description: form.description || null,
+        objectif: form.objectif || null,
         responsable: form.responsable || null,
         date_prevue: form.date_prevue || null,
         date_realisation: form.date_realisation || null,
         statut: form.statut,
         avancement: form.avancement,
+        nb_participants: form.nb_participants === "" ? null : Number(form.nb_participants),
+        resultats: form.resultats || null,
+        difficultes: form.difficultes || null,
+        actions_a_entreprendre: form.actions_a_entreprendre || null,
         rapport: form.rapport || null,
         observations: form.observations || null,
       };
@@ -152,14 +152,26 @@ function DepartementsPage() {
           .insert({ ...payload, created_by: user?.id ?? null });
         if (error) throw error;
       }
+      await logDept({
+        userId: user?.id,
+        table: "activites_departement",
+        recordId: form.id ?? null,
+        action: form.id ? "update" : "create",
+        after: { titre: form.titre, statut: form.statut, avancement: form.avancement },
+        description: `${form.id ? "Modification" : "Création"} de l'activité « ${form.titre} » (${dept?.nom ?? ""})`,
+        templeId: activeTempleId,
+      });
     },
     onSuccess: () => {
       toast.success("Activité enregistrée");
-      setActDialog({ open: false, act: null, deptId: null });
+      setActDialog({ open: false, act: null });
       qc.invalidateQueries({ queryKey: ["activites-dept"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const acts = activites.filter((a) => statutFilter === "all" || a.statut === statutFilter);
+  const canEditDept = isAdmin || (isDepartementLead && !!dept && departementIds.includes(dept.id));
 
   return (
     <div className="space-y-6">
@@ -167,10 +179,10 @@ function DepartementsPage() {
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold flex items-center gap-2">
             <Network className="h-7 w-7 text-primary" />
-            {isDepartementLead ? "Mon département" : "Départements"}
+            {isDepartementLead ? "Mes départements" : "Départements"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {activeTemple?.nom_temple ?? "Temple"} — suivi des activités et rapports par département
+            {activeTemple?.nom_temple ?? "Temple"} — membres, bureau, activités et rapports
           </p>
         </div>
         {isAdmin && (
@@ -183,116 +195,136 @@ function DepartementsPage() {
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Select value={statutFilter} onValueChange={setStatutFilter}>
-          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            {ACTIVITE_STATUTS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {visibleDepts.length === 0 && (
+      {visibleDepts.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground border-0 shadow-elegant">
           Aucun département {isAdmin ? "créé pour ce temple" : "ne vous est attribué"}.
         </Card>
-      )}
-
-      {visibleDepts.map((d) => {
-        const acts = activites
-          .filter((a) => a.departement_id === d.id)
-          .filter((a) => statutFilter === "all" || a.statut === statutFilter);
-        const moyenne = acts.length
-          ? Math.round(acts.reduce((s, a) => s + Number(a.avancement), 0) / acts.length)
-          : 0;
-        return (
-          <Card key={d.id} className="p-4 border-0 shadow-elegant space-y-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold">{d.nom}</h2>
-                  {!d.actif && <Badge variant="secondary">Inactif</Badge>}
-                  <Badge variant="secondary">{acts.length} activité(s)</Badge>
-                </div>
-                {d.description && <p className="text-sm text-muted-foreground">{d.description}</p>}
-                <div className="mt-2 max-w-xs">
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Avancement moyen</span><span>{moyenne}%</span>
-                  </div>
-                  <Progress value={moyenne} />
-                </div>
+      ) : (
+        <>
+          <Card className="p-4 border-0 shadow-elegant">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1.5 min-w-[240px]">
+                <Label>Département à gérer</Label>
+                <Select value={selectedId} onValueChange={setSelectedId}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                  <SelectContent>
+                    {visibleDepts.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>{d.nom}{!d.actif ? " (inactif)" : ""}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex gap-2">
-                {isAdmin && (
-                  <Button variant="outline" size="sm" onClick={() => setDeptDialog({ open: true, dept: d })}>
-                    <Pencil className="mr-1.5 h-3.5 w-3.5" /> Modifier
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  className="gradient-brand text-primary-foreground border-0"
-                  onClick={() => setActDialog({ open: true, act: null, deptId: d.id })}
-                >
-                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Activité
+              {isAdmin && dept && (
+                <Button variant="outline" onClick={() => setDeptDialog({ open: true, dept })}>
+                  <Pencil className="mr-1.5 h-4 w-4" /> Modifier le département
                 </Button>
-              </div>
+              )}
             </div>
-
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Activité</TableHead>
-                    <TableHead>Responsable</TableHead>
-                    <TableHead>Date prévue</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Avancement</TableHead>
-                    <TableHead className="w-[100px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {acts.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                        Aucune activité enregistrée
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {acts.map((a) => (
-                    <TableRow key={a.id}>
-                      <TableCell className="font-medium">
-                        {a.titre}
-                        {a.rapport && <div className="text-xs text-muted-foreground line-clamp-1">{a.rapport}</div>}
-                      </TableCell>
-                      <TableCell className="text-sm">{a.responsable ?? "—"}</TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
-                        {a.date_prevue ? format(new Date(a.date_prevue), "d MMM yyyy", { locale: fr }) : "—"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={statutColor(a.statut)} variant={statutColor(a.statut) ? undefined : "secondary"}>
-                          {activiteStatutLabel(a.statut)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="w-[140px]">
-                        <div className="flex items-center gap-2">
-                          <Progress value={Number(a.avancement)} className="h-2" />
-                          <span className="text-xs text-muted-foreground">{a.avancement}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => setActDialog({ open: true, act: a, deptId: d.id })}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            {dept?.description && <p className="mt-3 text-sm text-muted-foreground">{dept.description}</p>}
           </Card>
-        );
-      })}
+
+          {dept && (
+            <Tabs defaultValue="dashboard" className="space-y-4">
+              <TabsList className="flex-wrap h-auto">
+                <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
+                <TabsTrigger value="activites">Activités</TabsTrigger>
+                <TabsTrigger value="membres">Membres</TabsTrigger>
+                <TabsTrigger value="bureau">Bureau</TabsTrigger>
+                <TabsTrigger value="rapports">Rapports</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="dashboard">
+                <DeptDashboard dept={dept} activites={activites} />
+              </TabsContent>
+
+              <TabsContent value="activites" className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <Select value={statutFilter} onValueChange={setStatutFilter}>
+                    <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      {ACTIVITE_STATUTS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {canEditDept && (
+                    <Button
+                      className="gradient-brand text-primary-foreground border-0"
+                      onClick={() => setActDialog({ open: true, act: null })}
+                    >
+                      <Plus className="mr-1.5 h-4 w-4" /> Nouvelle activité
+                    </Button>
+                  )}
+                </div>
+
+                <Card className="p-0 border-0 shadow-elegant overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Activité</TableHead>
+                        <TableHead>Responsable</TableHead>
+                        <TableHead>Date prévue</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Avancement</TableHead>
+                        <TableHead className="w-[80px]" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {acts.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                            Aucune activité enregistrée
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {acts.map((a) => (
+                        <TableRow key={a.id}>
+                          <TableCell className="font-medium">
+                            {a.titre}
+                            {a.objectif && <div className="text-xs text-muted-foreground line-clamp-1">{a.objectif}</div>}
+                          </TableCell>
+                          <TableCell className="text-sm">{a.responsable ?? "—"}</TableCell>
+                          <TableCell className="text-sm whitespace-nowrap">
+                            {a.date_prevue ? format(new Date(a.date_prevue), "d MMM yyyy", { locale: fr }) : "—"}
+                            {enRetard(a) && <Badge variant="outline" className="ml-2 text-warning">En retard</Badge>}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={statutColor(a.statut)} variant={statutColor(a.statut) ? undefined : "secondary"}>
+                              {activiteStatutLabel(a.statut)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="w-[140px]">
+                            <div className="flex items-center gap-2">
+                              <Progress value={Number(a.avancement)} className="h-2" />
+                              <span className="text-xs text-muted-foreground">{a.avancement}%</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm" onClick={() => setActDialog({ open: true, act: a })}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="membres">
+                <DeptMembres dept={dept} canEdit={canEditDept} />
+              </TabsContent>
+
+              <TabsContent value="bureau">
+                <DeptBureau dept={dept} canEdit={canEditDept} />
+              </TabsContent>
+
+              <TabsContent value="rapports">
+                <DeptRapport dept={dept} activites={activites} templeNom={activeTemple?.nom_temple ?? ""} />
+              </TabsContent>
+            </Tabs>
+          )}
+        </>
+      )}
 
       <DeptDialog
         state={deptDialog}
@@ -302,8 +334,7 @@ function DepartementsPage() {
       />
       <ActiviteDialog
         state={actDialog}
-        departements={visibleDepts}
-        onClose={() => setActDialog({ open: false, act: null, deptId: null })}
+        onClose={() => setActDialog({ open: false, act: null })}
         onSave={(f) => saveActivite.mutate(f)}
         saving={saveActivite.isPending}
       />
@@ -324,7 +355,6 @@ function DeptDialog({
   const [description, setDescription] = useState(d?.description ?? "");
   const [actif, setActif] = useState(d?.actif ?? true);
 
-  // Réinitialiser à l'ouverture
   const key = `${state.open}-${d?.id ?? "new"}`;
   const [lastKey, setLastKey] = useState(key);
   if (key !== lastKey) {
@@ -376,53 +406,67 @@ function DeptDialog({
   );
 }
 
+type ActiviteForm = {
+  titre: string;
+  description: string;
+  objectif: string;
+  responsable: string;
+  date_prevue: string;
+  date_realisation: string;
+  statut: ActiviteStatut;
+  avancement: number;
+  nb_participants: string;
+  resultats: string;
+  difficultes: string;
+  actions_a_entreprendre: string;
+  rapport: string;
+  observations: string;
+};
+
+const blankForm: ActiviteForm = {
+  titre: "", description: "", objectif: "", responsable: "", date_prevue: "", date_realisation: "",
+  statut: "a_faire", avancement: 0, nb_participants: "", resultats: "", difficultes: "",
+  actions_a_entreprendre: "", rapport: "", observations: "",
+};
+
 function ActiviteDialog({
-  state, departements, onClose, onSave, saving,
+  state, onClose, onSave, saving,
 }: {
-  state: { open: boolean; act: Activite | null; deptId: string | null };
-  departements: Departement[];
+  state: { open: boolean; act: Activite | null };
   onClose: () => void;
-  onSave: (f: Omit<Activite, "id" | "temple_id"> & { id?: string }) => void;
+  onSave: (f: ActiviteForm & { id?: string }) => void;
   saving: boolean;
 }) {
   const a = state.act;
-  const blank = {
-    departement_id: state.deptId ?? departements[0]?.id ?? "",
-    titre: "",
-    description: "",
-    responsable: "",
-    date_prevue: "",
-    date_realisation: "",
-    statut: "a_faire" as ActiviteStatut,
-    avancement: 0,
-    rapport: "",
-    observations: "",
-  };
-  const [form, setForm] = useState(blank);
+  const [form, setForm] = useState<ActiviteForm>(blankForm);
 
-  const key = `${state.open}-${a?.id ?? state.deptId ?? "new"}`;
+  const key = `${state.open}-${a?.id ?? "new"}`;
   const [lastKey, setLastKey] = useState(key);
   if (key !== lastKey) {
     setLastKey(key);
     setForm(
       a
         ? {
-            departement_id: a.departement_id,
             titre: a.titre,
             description: a.description ?? "",
+            objectif: a.objectif ?? "",
             responsable: a.responsable ?? "",
             date_prevue: a.date_prevue ?? "",
             date_realisation: a.date_realisation ?? "",
             statut: a.statut,
             avancement: Number(a.avancement),
+            nb_participants: a.nb_participants == null ? "" : String(a.nb_participants),
+            resultats: a.resultats ?? "",
+            difficultes: a.difficultes ?? "",
+            actions_a_entreprendre: a.actions_a_entreprendre ?? "",
             rapport: a.rapport ?? "",
             observations: a.observations ?? "",
           }
-        : blank,
+        : blankForm,
     );
   }
 
-  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof ActiviteForm>(k: K, v: ActiviteForm[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   return (
     <Dialog open={state.open} onOpenChange={(o) => !o && onClose()}>
@@ -435,17 +479,12 @@ function ActiviteDialog({
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           <div className="space-y-1.5">
-            <Label>Département</Label>
-            <Select value={form.departement_id} onValueChange={(v) => set("departement_id", v)}>
-              <SelectTrigger><SelectValue placeholder="Département" /></SelectTrigger>
-              <SelectContent>
-                {departements.map((d) => <SelectItem key={d.id} value={d.id}>{d.nom}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
             <Label>Titre de l'activité</Label>
             <Input value={form.titre} onChange={(e) => set("titre", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Objectif</Label>
+            <Textarea value={form.objectif} onChange={(e) => set("objectif", e.target.value)} rows={2} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
@@ -466,37 +505,59 @@ function ActiviteDialog({
               <Input type="date" value={form.date_prevue} onChange={(e) => set("date_prevue", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>Date de réalisation</Label>
+              <Label>Date réelle de réalisation</Label>
               <Input type="date" value={form.date_realisation} onChange={(e) => set("date_realisation", e.target.value)} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label>Avancement : {form.avancement}%</Label>
-            <input
-              type="range" min={0} max={100} step={5}
-              value={form.avancement}
-              onChange={(e) => set("avancement", Number(e.target.value))}
-              className="w-full accent-[hsl(var(--primary))]"
-            />
+            <Label>Niveau d'avancement</Label>
+            <Select value={String(form.avancement)} onValueChange={(v) => set("avancement", Number(v))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[0, 25, 50, 75, 100].map((v) => <SelectItem key={v} value={String(v)}>{v} %</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Description</Label>
             <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} />
           </div>
-          <div className="space-y-1.5">
-            <Label>Rapport d'activité</Label>
-            <Textarea value={form.rapport} onChange={(e) => set("rapport", e.target.value)} rows={4} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Observations</Label>
-            <Textarea value={form.observations} onChange={(e) => set("observations", e.target.value)} rows={2} />
+
+          <div className="rounded-lg border p-4 space-y-4">
+            <div className="text-sm font-semibold">Rapport d'activité</div>
+            <div className="space-y-1.5">
+              <Label>Nombre de participants</Label>
+              <Input type="number" min={0} value={form.nb_participants}
+                onChange={(e) => set("nb_participants", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Résultats obtenus</Label>
+              <Textarea value={form.resultats} onChange={(e) => set("resultats", e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Difficultés rencontrées</Label>
+              <Textarea value={form.difficultes} onChange={(e) => set("difficultes", e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Actions à entreprendre</Label>
+              <Textarea value={form.actions_a_entreprendre}
+                onChange={(e) => set("actions_a_entreprendre", e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Rapport / compte rendu</Label>
+              <Textarea value={form.rapport} onChange={(e) => set("rapport", e.target.value)} rows={4} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Observations</Label>
+              <Textarea value={form.observations} onChange={(e) => set("observations", e.target.value)} rows={2} />
+            </div>
           </div>
         </div>
         <DialogFooter className="px-6 py-4 border-t">
           <Button variant="outline" onClick={onClose}>Annuler</Button>
           <Button
             className="gradient-brand text-primary-foreground border-0"
-            disabled={!form.titre.trim() || !form.departement_id || saving}
+            disabled={!form.titre.trim() || saving}
             onClick={() => onSave({ ...form, id: a?.id })}
           >
             Enregistrer
