@@ -25,6 +25,7 @@ import { DeptDashboard } from "@/components/departement/DeptDashboard";
 import { DeptMembres } from "@/components/departement/DeptMembres";
 import { DeptBureau } from "@/components/departement/DeptBureau";
 import { DeptRapport } from "@/components/departement/DeptRapport";
+import { DeptVueGlobale } from "@/components/departement/DeptVueGlobale";
 
 export const Route = createFileRoute("/_app/departements")({
   component: DepartementsPage,
@@ -194,6 +195,8 @@ function DepartementsPage() {
           </Button>
         )}
       </div>
+
+      {isSuperAdmin && <DeptVueGlobale />}
 
       {visibleDepts.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground border-0 shadow-elegant">
