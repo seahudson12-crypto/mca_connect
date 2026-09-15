@@ -49,7 +49,7 @@ const statutColor = (s: ActiviteStatut) =>
 
 function DepartementsPage() {
   const qc = useQueryClient();
-  const { isAdmin, isDepartementLead, departementIds, user } = useAuth();
+  const { isAdmin, isSuperAdmin, isDepartementLead, departementIds, user } = useAuth();
   const { activeTempleId, activeTemple } = useActiveTemple();
   const [selectedId, setSelectedId] = useState<string>("");
   const [deptDialog, setDeptDialog] = useState<{ open: boolean; dept: Departement | null }>({ open: false, dept: null });
