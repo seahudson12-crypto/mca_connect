@@ -25,6 +25,7 @@ import { DeptDashboard } from "@/components/departement/DeptDashboard";
 import { DeptMembres } from "@/components/departement/DeptMembres";
 import { DeptBureau } from "@/components/departement/DeptBureau";
 import { DeptRapport } from "@/components/departement/DeptRapport";
+import { DeptVueGlobale } from "@/components/departement/DeptVueGlobale";
 
 export const Route = createFileRoute("/_app/departements")({
   component: DepartementsPage,
@@ -48,7 +49,7 @@ const statutColor = (s: ActiviteStatut) =>
 
 function DepartementsPage() {
   const qc = useQueryClient();
-  const { isAdmin, isDepartementLead, departementIds, user } = useAuth();
+  const { isAdmin, isSuperAdmin, isDepartementLead, departementIds, user } = useAuth();
   const { activeTempleId, activeTemple } = useActiveTemple();
   const [selectedId, setSelectedId] = useState<string>("");
   const [deptDialog, setDeptDialog] = useState<{ open: boolean; dept: Departement | null }>({ open: false, dept: null });
@@ -194,6 +195,8 @@ function DepartementsPage() {
           </Button>
         )}
       </div>
+
+      {isSuperAdmin && <DeptVueGlobale />}
 
       {visibleDepts.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground border-0 shadow-elegant">
