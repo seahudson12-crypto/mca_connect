@@ -103,13 +103,36 @@ function TempleDashboard() {
     },
   });
 
+  const safe = {
+    totalMembres: data?.totalMembres ?? 0,
+    nouvellesAmes: data?.nouvellesAmes ?? 0,
+    presentToday: data?.presentToday ?? 0,
+    absentToday: data?.absentToday ?? 0,
+    taux: data?.taux ?? 0,
+    chartData: data?.chartData ?? [],
+    cultesRecents: data?.cultesRecents ?? [],
+  };
+  const pending = isLoading || (isFetching && !data);
+
+  if (isError) {
+    return (
+      <Card className="p-6 border-0 shadow-elegant text-center space-y-3">
+        <p className="font-semibold">Impossible de charger le tableau de bord</p>
+        <p className="text-sm text-muted-foreground">
+          {error instanceof Error ? error.message : "Erreur de connexion aux données."}
+        </p>
+        <Button onClick={() => refetch()} className="gradient-brand text-primary-foreground border-0">Réessayer</Button>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Membres actifs" value={isLoading ? "—" : data!.totalMembres} icon={Users} />
-        <StatCard label="Présents aujourd'hui" value={isLoading ? "—" : data!.presentToday} icon={UserCheck} variant="success" />
-        <StatCard label="Absents aujourd'hui" value={isLoading ? "—" : data!.absentToday} icon={UserX} variant="warning" />
-        <StatCard label="Taux de présence (30j)" value={isLoading ? "—" : `${data!.taux}%`} icon={TrendingUp} variant="gold" />
+        <StatCard label="Membres actifs" value={pending ? "—" : safe.totalMembres} icon={Users} />
+        <StatCard label="Présents aujourd'hui" value={pending ? "—" : safe.presentToday} icon={UserCheck} variant="success" />
+        <StatCard label="Absents aujourd'hui" value={pending ? "—" : safe.absentToday} icon={UserX} variant="warning" />
+        <StatCard label="Taux de présence (30j)" value={pending ? "—" : `${safe.taux}%`} icon={TrendingUp} variant="gold" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
