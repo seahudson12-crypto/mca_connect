@@ -52,7 +52,7 @@ function Dashboard() {
 
 function TempleDashboard() {
   const { activeTempleId } = useActiveTemple();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["dashboard", activeTempleId],
     enabled: !!activeTempleId,
     queryFn: async () => {
