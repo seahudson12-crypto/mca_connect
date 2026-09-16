@@ -116,7 +116,9 @@ export function DeptDashboard({ dept, activites }: { dept: Departement; activite
 
       <Card className="p-5 border-0 shadow-elegant">
         <h3 className="mb-3 font-semibold">Aperçu des membres</h3>
-        {membres.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Chargement des membres…</p>
+        ) : membres.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aucun membre encore rattaché à ce département.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
