@@ -1,0 +1,11 @@
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_super(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_principal(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_restricted_role(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_finances(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_access_temple(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_access_departement(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.super_admin_scope_count(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.current_user_temple_id() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.temple_matricule_prefix(uuid) TO authenticated;
