@@ -69,10 +69,11 @@ export const enRetard = (a: Activite) =>
   a.statut !== "realise" &&
   a.statut !== "annule";
 
-export function statsActivites(acts: Activite[]) {
+export function statsActivites(input?: Activite[] | null) {
+  const acts = Array.isArray(input) ? input : [];
   const count = (s: ActiviteStatut) => acts.filter((a) => a.statut === s).length;
   const avancement = acts.length
-    ? Math.round(acts.reduce((s, a) => s + Number(a.avancement), 0) / acts.length)
+    ? Math.round(acts.reduce((s, a) => s + (Number(a.avancement) || 0), 0) / acts.length)
     : 0;
   return {
     total: acts.length,

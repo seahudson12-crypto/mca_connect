@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { StatCard } from "@/components/StatCard";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +11,8 @@ import { fr } from "date-fns/locale";
 import { type Activite, type Departement, type DeptMembre, enRetard, fullName, statsActivites } from "@/lib/departement";
 import { activiteStatutLabel } from "@/lib/constants";
 
-export function DeptDashboard({ dept, activites }: { dept: Departement; activites: Activite[] }) {
-  const { data: membres = [] } = useQuery({
+export function DeptDashboard({ dept, activites }: { dept: Departement; activites?: Activite[] | null }) {
+  const membresQuery = useQuery({
     queryKey: ["dept-membres", dept.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -23,7 +24,7 @@ export function DeptDashboard({ dept, activites }: { dept: Departement; activite
     },
   });
 
-  const { data: bureauCount = 0 } = useQuery({
+  const bureauQuery = useQuery({
     queryKey: ["dept-bureau-count", dept.id],
     queryFn: async () => {
       const { count, error } = await supabase
@@ -35,9 +36,31 @@ export function DeptDashboard({ dept, activites }: { dept: Departement; activite
     },
   });
 
-  const s = statsActivites(activites);
+  const membres: DeptMembre[] = membresQuery.data ?? [];
+  const bureauCount = bureauQuery.data ?? 0;
+  const acts: Activite[] = Array.isArray(activites) ? activites : [];
+  const loading = membresQuery.isLoading || bureauQuery.isLoading;
+  const failed = membresQuery.isError || bureauQuery.isError;
+
+  const s = statsActivites(acts);
   const actifs = membres.filter((m) => m.membres?.actif).length;
-  const retards = activites.filter(enRetard);
+  const retards = acts.filter(enRetard);
+
+  if (failed) {
+    return (
+      <Card className="p-6 border-0 shadow-elegant text-center space-y-3">
+        <p className="font-semibold">Impossible de charger les données du département</p>
+        <p className="text-sm text-muted-foreground">Vérifiez votre connexion, puis réessayez.</p>
+        <Button
+          className="gradient-brand text-primary-foreground border-0"
+          onClick={() => { membresQuery.refetch(); bureauQuery.refetch(); }}
+        >
+          Réessayer
+        </Button>
+      </Card>
+    );
+  }
+
 
   return (
     <div className="space-y-6">
@@ -93,7 +116,9 @@ export function DeptDashboard({ dept, activites }: { dept: Departement; activite
 
       <Card className="p-5 border-0 shadow-elegant">
         <h3 className="mb-3 font-semibold">Aperçu des membres</h3>
-        {membres.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Chargement des membres…</p>
+        ) : membres.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aucun membre encore rattaché à ce département.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
