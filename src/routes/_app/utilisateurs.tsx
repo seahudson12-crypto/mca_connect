@@ -215,12 +215,14 @@ function UtilisateursPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Rôle actuel</TableHead>
                 <TableHead>Temple</TableHead>
-                <TableHead className="w-[260px]">Action</TableHead>
+                <TableHead>Accès</TableHead>
+                <TableHead className="w-[260px]">Rôle</TableHead>
+                <TableHead className="w-[200px]">Compte</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Aucun utilisateur</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucun utilisateur</TableCell></TableRow>
               )}
               {filtered.map((p) => {
                 const userRoles = rolesByUser.get(p.id) ?? [];
