@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayout() {
-  const { user, loading, canAccessPath, defaultRoute } = useAuth();
+  const { user, profile, loading, canAccessPath, defaultRoute, signOut } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
