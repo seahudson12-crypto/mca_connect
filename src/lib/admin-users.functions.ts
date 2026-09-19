@@ -5,11 +5,19 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const activeSchema = z.object({ userId: z.string().uuid(), actif: z.boolean() });
 const deleteSchema = z.object({ userId: z.string().uuid() });
 
-/** Vérifie que l'appelant est administrateur (via RLS/fonctions de la base). */
-async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("is_admin", { _user_id: userId });
+/** Vérifie que l'appelant est administrateur (lecture faite avec ses propres droits). */
+async function assertAdmin(
+  supabase: { from: (t: "user_roles") => any },
+  userId: string,
+) {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Accès réservé aux administrateurs");
+  const roles = ((data ?? []) as Array<{ role: string }>).map((r) => r.role);
+  const ok = roles.some((r) => r === "super_admin_principal" || r === "super_admin" || r === "admin_temple");
+  if (!ok) throw new Error("Accès réservé aux administrateurs");
 }
 
 /** Active ou suspend l'accès d'un utilisateur à la plateforme. */
