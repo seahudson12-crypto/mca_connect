@@ -257,6 +257,13 @@ function UtilisateursPage() {
                     </TableCell>
                     <TableCell className="text-sm">{templeName}</TableCell>
                     <TableCell>
+                      {p.actif === false ? (
+                        <Badge variant="destructive">Suspendu</Badge>
+                      ) : (
+                        <Badge variant="secondary">Actif</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <RoleEditor
                         currentRole={current}
                         currentTempleId={currentTempleId}
