@@ -275,6 +275,49 @@ function UtilisateursPage() {
                         onApply={(role, tId, deptId) => setRole(p.id, role, tId, current, deptId)}
                       />
                     </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {p.actif === false ? (
+                          <Button size="sm" variant="outline" disabled={busyId === p.id} onClick={() => onToggleActive(p.id, true)}>
+                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Valider
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busyId === p.id || p.id === user?.id || current === "super_admin_principal"}
+                            onClick={() => onToggleActive(p.id, false)}
+                          >
+                            <Ban className="mr-1.5 h-3.5 w-3.5" /> Suspendre
+                          </Button>
+                        )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              disabled={busyId === p.id || p.id === user?.id || current === "super_admin_principal"}
+                            >
+                              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Effacer
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Effacer cet utilisateur ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Le compte de {p.nom || p.email || "cet utilisateur"} sera définitivement supprimé et n'aura
+                                plus accès à la plateforme. Les fiches membres, matricules et données du temple ne sont
+                                pas concernés.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => onDelete(p.id)}>Effacer définitivement</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}
