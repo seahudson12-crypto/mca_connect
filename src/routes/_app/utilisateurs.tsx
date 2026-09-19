@@ -7,9 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShieldCheck, ShieldOff, UserCog, History, ArrowRight } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Search, ShieldCheck, ShieldOff, UserCog, History, ArrowRight, CheckCircle2, Ban, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { setUserActive, deleteUserAccount } from "@/lib/admin-users.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -42,8 +48,38 @@ export const Route = createFileRoute("/_app/utilisateurs")({ component: Utilisat
 function UtilisateursPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { isSuperAdmin, isAdmin, isAdminTemple, templeId, loading } = useAuth();
+  const { isSuperAdmin, isAdmin, isAdminTemple, templeId, loading, user } = useAuth();
   const [search, setSearch] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const toggleActive = useServerFn(setUserActive);
+  const removeUser = useServerFn(deleteUserAccount);
+
+  const onToggleActive = async (userId: string, actif: boolean) => {
+    setBusyId(userId);
+    try {
+      await toggleActive({ data: { userId, actif } });
+      toast.success(actif ? "Accès validé" : "Accès suspendu");
+      qc.invalidateQueries({ queryKey: ["all-profiles"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Action impossible");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const onDelete = async (userId: string) => {
+    setBusyId(userId);
+    try {
+      await removeUser({ data: { userId } });
+      toast.success("Utilisateur supprimé");
+      qc.invalidateQueries({ queryKey: ["all-profiles"] });
+      qc.invalidateQueries({ queryKey: ["all-roles"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Suppression impossible");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -179,12 +215,14 @@ function UtilisateursPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Rôle actuel</TableHead>
                 <TableHead>Temple</TableHead>
-                <TableHead className="w-[260px]">Action</TableHead>
+                <TableHead>Accès</TableHead>
+                <TableHead className="w-[260px]">Rôle</TableHead>
+                <TableHead className="w-[200px]">Compte</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Aucun utilisateur</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucun utilisateur</TableCell></TableRow>
               )}
               {filtered.map((p) => {
                 const userRoles = rolesByUser.get(p.id) ?? [];
@@ -219,6 +257,13 @@ function UtilisateursPage() {
                     </TableCell>
                     <TableCell className="text-sm">{templeName}</TableCell>
                     <TableCell>
+                      {p.actif === false ? (
+                        <Badge variant="destructive">Suspendu</Badge>
+                      ) : (
+                        <Badge variant="secondary">Actif</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <RoleEditor
                         currentRole={current}
                         currentTempleId={currentTempleId}
@@ -229,6 +274,49 @@ function UtilisateursPage() {
                         lockedTempleId={isAdminTemple && !isSuperAdmin ? templeId : null}
                         onApply={(role, tId, deptId) => setRole(p.id, role, tId, current, deptId)}
                       />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {p.actif === false ? (
+                          <Button size="sm" variant="outline" disabled={busyId === p.id} onClick={() => onToggleActive(p.id, true)}>
+                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Valider
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busyId === p.id || p.id === user?.id || current === "super_admin_principal"}
+                            onClick={() => onToggleActive(p.id, false)}
+                          >
+                            <Ban className="mr-1.5 h-3.5 w-3.5" /> Suspendre
+                          </Button>
+                        )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              disabled={busyId === p.id || p.id === user?.id || current === "super_admin_principal"}
+                            >
+                              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Effacer
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Effacer cet utilisateur ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Le compte de {p.nom || p.email || "cet utilisateur"} sera définitivement supprimé et n'aura
+                                plus accès à la plateforme. Les fiches membres, matricules et données du temple ne sont
+                                pas concernés.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => onDelete(p.id)}>Effacer définitivement</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
