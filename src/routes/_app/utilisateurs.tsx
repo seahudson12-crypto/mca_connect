@@ -48,8 +48,38 @@ export const Route = createFileRoute("/_app/utilisateurs")({ component: Utilisat
 function UtilisateursPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { isSuperAdmin, isAdmin, isAdminTemple, templeId, loading } = useAuth();
+  const { isSuperAdmin, isAdmin, isAdminTemple, templeId, loading, user } = useAuth();
   const [search, setSearch] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const toggleActive = useServerFn(setUserActive);
+  const removeUser = useServerFn(deleteUserAccount);
+
+  const onToggleActive = async (userId: string, actif: boolean) => {
+    setBusyId(userId);
+    try {
+      await toggleActive({ data: { userId, actif } });
+      toast.success(actif ? "Accès validé" : "Accès suspendu");
+      qc.invalidateQueries({ queryKey: ["all-profiles"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Action impossible");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const onDelete = async (userId: string) => {
+    setBusyId(userId);
+    try {
+      await removeUser({ data: { userId } });
+      toast.success("Utilisateur supprimé");
+      qc.invalidateQueries({ queryKey: ["all-profiles"] });
+      qc.invalidateQueries({ queryKey: ["all-roles"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Suppression impossible");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
