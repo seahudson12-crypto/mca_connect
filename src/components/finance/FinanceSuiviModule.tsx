@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { formatXof } from "@/lib/audit";
+import { formatXof, logChange } from "@/lib/audit";
 import { categoryLabel } from "@/lib/constants";
 import * as XLSX from "xlsx";
 import {
@@ -861,6 +861,8 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         joursGrace={bareme?.jours_grace ?? 0}
         montantAttendu={histFor ? montantOf(histFor.id) : montantDefaut}
         periodeActive={periodeActive}
+        userId={user?.id ?? null}
+        onSaved={refreshAll}
       />
 
       <Dialog open={ajoutOpen} onOpenChange={(o) => { setAjoutOpen(o); if (!o) setAjoutSearch(""); }}>
