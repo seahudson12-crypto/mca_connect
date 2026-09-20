@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { formatXof } from "@/lib/audit";
+import { formatXof, logChange } from "@/lib/audit";
 import { categoryLabel } from "@/lib/constants";
 import * as XLSX from "xlsx";
 import {
@@ -861,6 +861,8 @@ export function FinanceSuiviModule({ opType }: { opType: FinanceOpType }) {
         joursGrace={bareme?.jours_grace ?? 0}
         montantAttendu={histFor ? montantOf(histFor.id) : montantDefaut}
         periodeActive={periodeActive}
+        userId={user?.id ?? null}
+        onSaved={refreshAll}
       />
 
       <Dialog open={ajoutOpen} onOpenChange={(o) => { setAjoutOpen(o); if (!o) setAjoutSearch(""); }}>
@@ -1324,7 +1326,7 @@ function BaremeDialog({
 }
 
 function HistoriqueDialog({
-  membre, onClose, opType, paiements, frequence, joursGrace, montantAttendu, periodeActive,
+  membre, onClose, opType, paiements, frequence, joursGrace, montantAttendu, periodeActive, userId, onSaved,
 }: {
   membre: Membre | null;
   onClose: () => void;
@@ -1334,8 +1336,11 @@ function HistoriqueDialog({
   joursGrace: number;
   montantAttendu: number;
   periodeActive: string;
+  userId: string | null;
+  onSaved: () => void;
 }) {
   const labels = OP_LABELS[opType];
+  const [editFor, setEditFor] = useState<Paiement | null>(null);
   const groupes = useMemo(() => {
     const map = new Map<string, { paye: number; attendu: number; lignes: Paiement[] }>();
     paiements.forEach((p) => {
@@ -1387,7 +1392,18 @@ function HistoriqueDialog({
                 {g.lignes.map((l) => (
                   <div key={l.id} className="flex items-center justify-between gap-3 px-3 py-2">
                     <span>{format(new Date(l.date_paiement), "dd/MM/yyyy")}</span>
-                    <span className="font-medium">{formatXof(Number(l.montant_paye))}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium">{formatXof(Number(l.montant_paye))}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        title="Modifier ce versement"
+                        onClick={() => setEditFor(l)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -1396,6 +1412,140 @@ function HistoriqueDialog({
         </div>
         <DialogFooter className="border-t px-6 py-4">
           <Button variant="outline" onClick={onClose}>Fermer</Button>
+        </DialogFooter>
+      </DialogContent>
+      <EditPaiementDialog
+        paiement={editFor}
+        onClose={() => setEditFor(null)}
+        opType={opType}
+        userId={userId}
+        onSaved={onSaved}
+      />
+    </Dialog>
+  );
+}
+
+/** Modification d'un versement déjà enregistré (montant, date, mode, référence, observation). */
+function EditPaiementDialog({
+  paiement, onClose, opType, userId, onSaved,
+}: {
+  paiement: Paiement | null;
+  onClose: () => void;
+  opType: FinanceOpType;
+  userId: string | null;
+  onSaved: () => void;
+}) {
+  const labels = OP_LABELS[opType];
+  const [montant, setMontant] = useState("");
+  const [datePaiement, setDatePaiement] = useState("");
+  const [mode, setMode] = useState<string>("especes");
+  const [reference, setReference] = useState("");
+  const [observation, setObservation] = useState("");
+  const [syncedFor, setSyncedFor] = useState<string | null>(null);
+
+  if (paiement && syncedFor !== paiement.id) {
+    setSyncedFor(paiement.id);
+    setMontant(String(Number(paiement.montant_paye)));
+    setDatePaiement(paiement.date_paiement);
+    setMode(paiement.mode_paiement);
+    setReference(paiement.reference ?? "");
+    setObservation(paiement.observation ?? "");
+  }
+  if (!paiement && syncedFor) setSyncedFor(null);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!paiement) return;
+      const val = Number(montant);
+      if (!Number.isFinite(val) || val <= 0) throw new Error("Montant versé invalide");
+      const after = {
+        montant_paye: val,
+        date_paiement: datePaiement,
+        mode_paiement: mode,
+        reference: reference || null,
+        observation: observation || null,
+      };
+      const { error } = await supabase
+        .from("finance_paiements")
+        .update(after as never)
+        .eq("id", paiement.id);
+      if (error) throw error;
+      if (userId) {
+        await logChange({
+          userId,
+          table: "finance_paiements",
+          recordId: paiement.id,
+          action: "update",
+          before: paiement as unknown as Record<string, unknown>,
+          after: after as Record<string, unknown>,
+        });
+      }
+    },
+    onSuccess: () => {
+      toast.success("Versement modifié");
+      onSaved();
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={!!paiement} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="w-[95vw] max-w-md">
+        <DialogHeader>
+          <DialogTitle>Modifier le versement</DialogTitle>
+          <DialogDescription>
+            Correction d'un montant déjà versé ({labels.singulier}). Chaque modification est tracée dans l'historique.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Montant versé (FCFA)</Label>
+              <Input
+                type="number"
+                min={1}
+                autoFocus
+                value={montant}
+                onChange={(e) => setMontant(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Date du paiement</Label>
+              <Input
+                type="date"
+                value={datePaiement}
+                onChange={(e) => setDatePaiement(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Mode de paiement</Label>
+            <Select value={mode} onValueChange={setMode}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {MODES_PAIEMENT.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Référence (facultatif)</Label>
+            <Input value={reference} onChange={(e) => setReference(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Observation (facultatif)</Label>
+            <Textarea value={observation} onChange={(e) => setObservation(e.target.value)} rows={2} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button
+            className="gradient-brand text-primary-foreground border-0"
+            disabled={save.isPending}
+            onClick={() => save.mutate()}
+          >
+            {save.isPending ? "Enregistrement…" : "Enregistrer"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
