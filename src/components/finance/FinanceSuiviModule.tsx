@@ -1326,7 +1326,7 @@ function BaremeDialog({
 }
 
 function HistoriqueDialog({
-  membre, onClose, opType, paiements, frequence, joursGrace, montantAttendu, periodeActive,
+  membre, onClose, opType, paiements, frequence, joursGrace, montantAttendu, periodeActive, userId, onSaved,
 }: {
   membre: Membre | null;
   onClose: () => void;
@@ -1336,8 +1336,11 @@ function HistoriqueDialog({
   joursGrace: number;
   montantAttendu: number;
   periodeActive: string;
+  userId: string | null;
+  onSaved: () => void;
 }) {
   const labels = OP_LABELS[opType];
+  const [editFor, setEditFor] = useState<Paiement | null>(null);
   const groupes = useMemo(() => {
     const map = new Map<string, { paye: number; attendu: number; lignes: Paiement[] }>();
     paiements.forEach((p) => {
@@ -1389,7 +1392,18 @@ function HistoriqueDialog({
                 {g.lignes.map((l) => (
                   <div key={l.id} className="flex items-center justify-between gap-3 px-3 py-2">
                     <span>{format(new Date(l.date_paiement), "dd/MM/yyyy")}</span>
-                    <span className="font-medium">{formatXof(Number(l.montant_paye))}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium">{formatXof(Number(l.montant_paye))}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        title="Modifier ce versement"
+                        onClick={() => setEditFor(l)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </span>
                   </div>
                 ))}
               </div>
