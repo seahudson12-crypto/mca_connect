@@ -1471,12 +1471,14 @@ function EditPaiementDialog({
         .eq("id", paiement.id);
       if (error) throw error;
       if (userId) {
+        const src = paiement as unknown as Record<string, unknown>;
+        const before = Object.fromEntries(Object.keys(after).map((k) => [k, src[k] ?? null]));
         await logChange({
           userId,
           table: "finance_paiements",
           recordId: paiement.id,
           action: "update",
-          before: paiement as unknown as Record<string, unknown>,
+          before,
           after: after as Record<string, unknown>,
         });
       }
