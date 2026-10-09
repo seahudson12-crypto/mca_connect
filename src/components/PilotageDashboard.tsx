@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { useSuspenseQuery, queryOptions, QueryErrorResetBoundary } from "@tanstack/react-query";
-import { ErrorBoundary } from "react-error-boundary";
+import { PilotageErrorBoundary } from "@/components/PilotageErrorBoundary";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Building2, Users, Sparkles, UserCheck, Network, GraduationCap, RefreshCw, ArrowUpRight, Bell, Target, History, Globe2, Search } from "lucide-react";
@@ -16,16 +16,18 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { PERIODS, type PilotagePeriod } from "@/lib/pilotage";
 import { getPilotage } from "@/lib/pilotage.functions";
 import { useActiveTemple } from "@/hooks/use-active-temple";
+import { useAuth } from "@/hooks/use-auth";
 
 export type PilotageSearch = { period: PilotagePeriod; scope: string; q: string };
 
 export function PilotageDashboard({ search }: { search: PilotageSearch }) {
-  return <QueryErrorResetBoundary>{({ reset }) => <ErrorBoundary onReset={reset} resetKeys={[search.period,search.scope]} fallbackRender={({ resetErrorBoundary }) => <div role="alert" className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-6"><h2 className="font-semibold">Impossible de charger le Centre de Pilotage MCA</h2><p className="text-sm text-muted-foreground">Les données ne sont pas disponibles pour le moment. Aucun chiffre n’a été remplacé par zéro.</p><Button onClick={resetErrorBoundary}><RefreshCw className="mr-2 h-4 w-4"/>Réessayer</Button></div>}><Suspense fallback={<div role="status" className="space-y-4"><h1 className="text-2xl font-bold">CENTRE DE PILOTAGE MCA</h1><p className="text-muted-foreground">Chargement des données autorisées…</p><div className="grid grid-cols-2 gap-4 lg:grid-cols-3">{Array.from({length:6},(_,i)=><div key={i} className="h-32 animate-pulse rounded-lg bg-muted"/>)}</div></div>}><PilotageContent search={search}/></Suspense></ErrorBoundary>}</QueryErrorResetBoundary>;
+  return <QueryErrorResetBoundary>{({ reset }) => <PilotageErrorBoundary key={`${search.period}:${search.scope}`} onReset={reset}><Suspense fallback={<div role="status" className="space-y-4"><h1 className="text-2xl font-bold">CENTRE DE PILOTAGE MCA</h1><p className="text-muted-foreground">Chargement des données autorisées…</p><div className="grid grid-cols-2 gap-4 lg:grid-cols-3">{Array.from({length:6},(_,i)=><div key={i} className="h-32 animate-pulse rounded-lg bg-muted"/>)}</div></div>}><PilotageContent search={search}/></Suspense></PilotageErrorBoundary>}</QueryErrorResetBoundary>;
 }
 
 function PilotageContent({ search }: { search: PilotageSearch }) {
   const fetchPilotage = useServerFn(getPilotage);
-  const options = queryOptions({queryKey:["pilotage",search.period,search.scope],queryFn:()=>fetchPilotage({data:{period:search.period,scope:search.scope}}),staleTime:60000,retry:1});
+  const { user } = useAuth();
+  const options = queryOptions({queryKey:["pilotage",user?.id,search.period,search.scope],queryFn:()=>fetchPilotage({data:{period:search.period,scope:search.scope}}),staleTime:60000,retry:1});
   const { data, refetch, isFetching, isRefetchError } = useSuspenseQuery(options);
   const navigate = useNavigate();
   const { setActiveTempleId } = useActiveTemple();

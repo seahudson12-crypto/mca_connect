@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate, useSearch } from "@tanstack/react-router";
 import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network, Inbox, Clock, HandCoins } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
@@ -18,7 +18,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   } = useAuth();
   const { activeTemple, allTemples, setActiveTempleId, canSwitch } = useActiveTemple();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const templeDisplay = activeTemple?.nom_temple ?? "MCA Connect";
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false });
+  const pilotage = isPrincipal && path === "/dashboard";
+  const pilotageScope = typeof search.scope === "string" ? search.scope : "global";
+  const countries = [...new Set(allTemples.map(t => t.pays).filter((p): p is string => !!p))].sort();
+  const templeDisplay = pilotage ? pilotageScope === "global" ? "MCA GLOBAL" : pilotageScope.startsWith("country:") ? pilotageScope.slice(8) : allTemples.find(t=>t.id===pilotageScope)?.nom_temple ?? "MCA Connect" : activeTemple?.nom_temple ?? "MCA Connect";
+  const switchScope = (value: string) => {
+    if (pilotage) {
+      if (value !== "global" && !value.startsWith("country:")) setActiveTempleId(value);
+      void navigate({to:"/dashboard",search:prev=>({...prev,scope:value,q:""})});
+    } else setActiveTempleId(value);
+  };
 
   const linkCls = (active: boolean) =>
     `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
@@ -151,7 +162,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-card/80 backdrop-blur px-4 py-3 lg:px-8">
+        <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-border bg-card/80 backdrop-blur px-4 py-3 lg:px-8">
           <button onClick={() => setOpen(true)} className="lg:hidden text-foreground"><Menu className="h-5 w-5" /></button>
           <Logo size={36} className="lg:hidden" />
           <div className="min-w-0 flex-1">
@@ -161,14 +172,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="hidden text-xs text-muted-foreground lg:block">{APP_TAGLINE}</div>
           </div>
-          {canSwitch && allTemples.length > 1 && (
-            <div className="flex items-center gap-2">
+          {(pilotage || (canSwitch && allTemples.length > 1)) && (
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <ArrowLeftRight className="hidden sm:block h-4 w-4 text-muted-foreground" />
-              <Select value={activeTemple?.id ?? ""} onValueChange={setActiveTempleId}>
-                <SelectTrigger className="w-[180px] sm:w-[240px] h-9 text-xs">
-                  <SelectValue placeholder="Switch temple" />
+              <Select value={pilotage ? pilotageScope : activeTemple?.id ?? ""} onValueChange={switchScope}>
+                <SelectTrigger aria-label="Périmètre consulté" className="h-9 w-full min-w-0 text-xs sm:w-60">
+                  <SelectValue placeholder="Choisir un temple" />
                 </SelectTrigger>
                 <SelectContent>
+                  {pilotage && <SelectItem value="global">MCA GLOBAL</SelectItem>}
+                  {pilotage && countries.map(country=><SelectItem key={country} value={`country:${country}`}>{country}</SelectItem>)}
                   {allTemples.map((t) => (
                     <SelectItem key={t.id} value={t.id} className="text-xs">
                       {t.nom_temple}
