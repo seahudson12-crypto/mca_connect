@@ -69,8 +69,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "MCA Connect — Gestion globale de la MCA Internationale" },
       { name: "twitter:description", content: "MCA CONNECT : plateforme intelligente de gestion des temples MCA, centralisant membres, présences, finances, rapports, statistiques et suivi pastoral." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/69e7b7fd-f72a-4fa7-ac83-45af3048f834" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/69e7b7fd-f72a-4fa7-ac83-45af3048f834" },
       { name: "theme-color", content: "#1e40af" },
       { name: "application-name", content: "MCA CONNECT" },
       { name: "apple-mobile-web-app-capable", content: "yes" },

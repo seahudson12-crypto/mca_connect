@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, type FormEvent, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 type SearchParams = { space?: "super" | "admin" | "user" };
 
 export const Route = createFileRoute("/login")({
+  head: () => pageHead("Connexion MCA", "Connexion MCA : espace MCA CONNECT, Mission de Christ en Action."),
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     space: (s.space as SearchParams["space"]) ?? undefined,
   }),

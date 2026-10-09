@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -11,7 +12,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export const Route = createFileRoute("/_app/activites")({ component: ActivitesPage });
+export const Route = createFileRoute("/_app/activites")({
+  head: () => pageHead("Activités", "Activités : espace MCA CONNECT, Mission de Christ en Action."), component: ActivitesPage });
 
 type Row = {
   id: string;

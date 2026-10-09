@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -20,7 +21,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useActiveTemple } from "@/hooks/use-active-temple";
 
-export const Route = createFileRoute("/_app/familles")({ component: FamillesPage });
+export const Route = createFileRoute("/_app/familles")({
+  head: () => pageHead("Familles", "Familles : espace MCA CONNECT, Mission de Christ en Action."), component: FamillesPage });
 
 type RoleFamille = "chef" | "conjoint" | "enfant" | "autre";
 

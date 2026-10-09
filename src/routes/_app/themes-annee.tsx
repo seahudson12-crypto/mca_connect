@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useActiveTemple } from "@/hooks/use-active-temple";
 
-export const Route = createFileRoute("/_app/themes-annee")({ component: ThemesAnneePage });
+export const Route = createFileRoute("/_app/themes-annee")({
+  head: () => pageHead("Thèmes annuels", "Thèmes annuels : espace MCA CONNECT, Mission de Christ en Action."), component: ThemesAnneePage });
 
 type Theme = {
   id: string; temple_id: string | null; annee: number; titre: string;

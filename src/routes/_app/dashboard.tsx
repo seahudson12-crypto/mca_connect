@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, type SearchSchemaInput } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { StatCard } from "@/components/StatCard";
@@ -13,13 +13,32 @@ import { culteTypeLabel } from "@/lib/constants";
 import { useActiveTemple } from "@/hooks/use-active-temple";
 import { useAuth } from "@/hooks/use-auth";
 import { formatXof } from "@/lib/audit";
+import { PilotageDashboard } from "@/components/PilotageDashboard";
+import { PERIODS, type PilotagePeriod } from "@/lib/pilotage";
 
 export const Route = createFileRoute("/_app/dashboard")({
+  validateSearch: (search: { period?: unknown; scope?: unknown; q?: unknown } & SearchSchemaInput) => ({
+    period: (PERIODS.some(p => p.value === search.period) ? search.period : "30d") as PilotagePeriod,
+    scope: typeof search.scope === "string" ? search.scope.slice(0,200) : "global",
+    q: typeof search.q === "string" ? search.q.slice(0,200) : "",
+  }),
+  head: () => ({ meta: [
+    { title: "Centre de Pilotage MCA — MCA Connect" },
+    { name: "description", content: "Pilotage des temples, membres, présences, activités et objectifs MCA selon votre périmètre autorisé." },
+    { property: "og:title", content: "Centre de Pilotage MCA — MCA Connect" },
+    { property: "og:description", content: "Indicateurs et suivi de la Mission de Christ en Action." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, isPrincipal, isDepartementLead, isFinances } = useAuth();
+  const search = Route.useSearch();
+
+  if (isPrincipal) return <PilotageDashboard search={search} />;
+  // Restricted roles never request general member statistics or other departments.
+  if (isDepartementLead || isFinances) return <div className="space-y-4"><h1 className="text-2xl font-bold">Tableau de bord</h1><p className="text-sm text-muted-foreground">{isFinances ? "Votre espace finances" : "Vos départements autorisés"}</p><Button asChild><Link to={isFinances ? "/finances" : "/departements"}>Ouvrir {isFinances ? "les finances" : "mes départements"}</Link></Button></div>;
 
   if (isSuperAdmin) {
     return (

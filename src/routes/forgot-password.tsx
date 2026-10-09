@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/forgot-password")({ component: ForgotPasswordPage });
+export const Route = createFileRoute("/forgot-password")({
+  head: () => pageHead("Mot de passe oublié", "Mot de passe oublié : espace MCA CONNECT, Mission de Christ en Action."), component: ForgotPasswordPage });
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

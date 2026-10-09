@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -21,7 +22,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useActiveTemple } from "@/hooks/use-active-temple";
 
-export const Route = createFileRoute("/_app/calendrier")({ component: CalendrierPage });
+export const Route = createFileRoute("/_app/calendrier")({
+  head: () => pageHead("Calendrier MCA", "Calendrier MCA : espace MCA CONNECT, Mission de Christ en Action."), component: CalendrierPage });
 
 type EvtType = "culte" | "formation" | "reunion" | "priere" | "sortie" | "autre";
 

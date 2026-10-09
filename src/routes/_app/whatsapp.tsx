@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
-export const Route = createFileRoute("/_app/whatsapp")({ component: WhatsAppPage });
+export const Route = createFileRoute("/_app/whatsapp")({
+  head: () => pageHead("WhatsApp MCA", "WhatsApp MCA : espace MCA CONNECT, Mission de Christ en Action."), component: WhatsAppPage });
 
 /**
  * Normalise et valide un numéro au format international (E.164 sans le +).

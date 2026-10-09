@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { APP_TAGLINE } from "@/lib/constants";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
+  head: () => pageHead("Choisir son espace MCA", "Choisir son espace MCA : espace MCA CONNECT, Mission de Christ en Action."),
   component: ChooseSpace,
 });
 

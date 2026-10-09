@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +15,8 @@ import { useActiveTemple } from "@/hooks/use-active-temple";
 import { categoryLabel, culteTypeLabel } from "@/lib/constants";
 import * as XLSX from "xlsx";
 
-export const Route = createFileRoute("/_app/exports")({ component: ExportsPage });
+export const Route = createFileRoute("/_app/exports")({
+  head: () => pageHead("Exports avancés", "Exports avancés : espace MCA CONNECT, Mission de Christ en Action."), component: ExportsPage });
 
 type Entity = "membres" | "cultes" | "presences" | "finances" | "nouvelles_ames";
 type Fmt = "xlsx" | "csv";
