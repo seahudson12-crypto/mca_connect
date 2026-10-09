@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, type SearchSchemaInput } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { StatCard } from "@/components/StatCard";
@@ -17,7 +17,7 @@ import { PilotageDashboard } from "@/components/PilotageDashboard";
 import { PERIODS, type PilotagePeriod } from "@/lib/pilotage";
 
 export const Route = createFileRoute("/_app/dashboard")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: { period?: unknown; scope?: unknown; q?: unknown } & SearchSchemaInput) => ({
     period: (PERIODS.some(p => p.value === search.period) ? search.period : "30d") as PilotagePeriod,
     scope: typeof search.scope === "string" ? search.scope.slice(0,200) : "global",
     q: typeof search.q === "string" ? search.q.slice(0,200) : "",
@@ -38,7 +38,7 @@ function Dashboard() {
 
   if (isPrincipal) return <PilotageDashboard search={search} />;
   // Restricted roles never request general member statistics or other departments.
-  if (isDepartementLead || isFinances) return <div className="space-y-4"><h1 className="text-2xl font-bold">Tableau de bord</h1><p className="text-sm text-muted-foreground">{isFinances ? "Votre espace finances" : "Vos départements autorisés"}</p><Button onClick={() => { window.location.href = isFinances ? "/finances" : "/departements"; }}>Ouvrir {isFinances ? "les finances" : "mes départements"}</Button></div>;
+  if (isDepartementLead || isFinances) return <div className="space-y-4"><h1 className="text-2xl font-bold">Tableau de bord</h1><p className="text-sm text-muted-foreground">{isFinances ? "Votre espace finances" : "Vos départements autorisés"}</p><Button asChild><Link to={isFinances ? "/finances" : "/departements"}>Ouvrir {isFinances ? "les finances" : "mes départements"}</Link></Button></div>;
 
   if (isSuperAdmin) {
     return (

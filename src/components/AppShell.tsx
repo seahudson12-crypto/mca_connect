@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const switchScope = (value: string) => {
     if (pilotage) {
       if (value !== "global" && !value.startsWith("country:")) setActiveTempleId(value);
-      void navigate({to:"/dashboard",search:prev=>({...prev,scope:value,q:""})});
+      void navigate({to:"/dashboard",search:prev=>({...prev,period:prev.period ?? "30d",scope:value,q:""})});
     } else setActiveTempleId(value);
   };
 

@@ -31,7 +31,7 @@ function PilotageContent({ search }: { search: PilotageSearch }) {
   const { data, refetch, isFetching, isRefetchError } = useSuspenseQuery(options);
   const navigate = useNavigate();
   const { setActiveTempleId } = useActiveTemple();
-  const update = (value:Partial<PilotageSearch>) => navigate({to:"/dashboard",search:prev=>({...prev,...value})});
+  const update = (value:Partial<PilotageSearch>) => navigate({to:"/dashboard",search:prev=>({period:prev.period ?? "30d",scope:prev.scope ?? "global",q:prev.q ?? "",...value})});
   const scopeLabel = search.scope === "global" ? "MCA GLOBAL" : search.scope.startsWith("country:") ? search.scope.slice(8) : data.temples[0]?.nom_temple ?? "—";
   const delta = (value:number|null,unit="") => value === null ? "Comparaison non disponible" : `${value>0?"+":""}${value}${unit} vs période précédente`;
   const filtered = data.temples.filter(t=>`${t.nom_temple} ${t.pays ?? ""}`.toLocaleLowerCase("fr").includes(search.q.toLocaleLowerCase("fr")));

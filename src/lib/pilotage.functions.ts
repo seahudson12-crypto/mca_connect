@@ -48,14 +48,12 @@ export const getPilotage = createServerFn({ method: "POST" })
     ]);
     const serviceIds = services.map(s => s.id);
     const programIds = programs.filter(p => p.actif).map(p => p.id);
-    const [attendance, enrollments, finances, payments, overrides, exclusions, tariffs, audit] = await Promise.all([
+    const [attendance, enrollments, finances, payments, reliquats, audit] = await Promise.all([
       serviceIds.length ? allRows((a,b) => db.from("presences").select("id,culte_id,membre_id,statut").in("culte_id",serviceIds).order("id").range(a,b)) : [],
       programIds.length ? allRows((a,b) => db.from("inscriptions_formation").select("id,membre_id,statut").in("programme_id",programIds).in("statut",["inscrit","en_cours"]).order("id").range(a,b)) : [],
       serviceIds.length ? allRows((a,b) => db.from("finances_culte").select("id,culte_id,offrande,dime").in("culte_id",serviceIds).order("id").range(a,b)) : [],
-      empty ? [] : allRows((a,b) => db.from("finance_paiements").select("id,temple_id,membre_id,op_type,periode,montant_paye,date_paiement").in("temple_id",ids).gte("date_paiement",bounds.start).lte("date_paiement",bounds.end).order("id").range(a,b)),
-      empty ? [] : allRows((a,b) => db.from("finance_montants_membre").select("id,temple_id,membre_id,op_type,montant_prevu").in("temple_id",ids).order("id").range(a,b)),
-      empty ? [] : allRows((a,b) => db.from("finance_liste_membre").select("id,membre_id,op_type,inclus").in("temple_id",ids).order("id").range(a,b)),
-      empty ? [] : allRows((a,b) => db.from("finance_baremes").select("id,temple_id,op_type,actif").in("temple_id",ids).order("id").range(a,b)),
+      empty ? [] : allRows((a,b) => db.from("finance_paiements").select("id,temple_id,membre_id,op_type,periode,montant_paye,montant_attendu,date_paiement").in("temple_id",ids).lte("date_paiement",bounds.end).order("id").range(a,b)),
+      empty ? [] : allRows((a,b) => db.from("finance_reliquats").select("id,temple_id,membre_id,op_type,periode,date_prevue").in("temple_id",ids).gte("date_prevue",bounds.start).lt("date_prevue",bounds.end).order("id").range(a,b)),
       // Existing history has no temple column: only correlate visible entity IDs, never guess scope.
       allRows((a,b) => db.from("historique_modifications").select("id,table_modifiee,enregistrement_id,action,utilisateur_id,date_modification").gte("date_modification",bounds.start).lte("date_modification",`${bounds.end}T23:59:59.999Z`).order("id").range(a,b)),
     ]);
@@ -92,9 +90,14 @@ export const getPilotage = createServerFn({ method: "POST" })
       return m.actif && last.length === 3 && last.every(s => filteredAttendance.some(p => p.culte_id === s.id && p.membre_id === m.id && p.statut === "absent"));
     }).length;
     const financeAlerts = (["social_contribution","mission_offering"] as const).map(op => {
-      // Reuse the explicit member commitments, not invented arrears for missing expectations.
-      const commitments = overrides.filter(o => o.op_type === op && Number(o.montant_prevu)>0 && memberMap.get(o.membre_id)?.actif && memberMap.get(o.membre_id)?.categorie !== "nouvelles_ames" && !exclusions.some(e => e.op_type === op && e.membre_id === o.membre_id && !e.inclus));
-      return { op, count:commitments.filter(o => payments.filter(p => p.op_type === op && p.membre_id === o.membre_id && p.temple_id === o.temple_id).reduce((sum,p)=>sum+Number(p.montant_paye),0) < Number(o.montant_prevu)).length, available: commitments.length>0, configured:tariffs.some(t=>t.op_type===op && t.actif) };
+      // An existing dated reliquat is the source of truth; never infer debts from a filter.
+      const overdue = reliquats.filter(r => r.op_type === op && memberMap.get(r.membre_id)?.actif && memberMap.get(r.membre_id)?.categorie !== "nouvelles_ames");
+      const unresolved = overdue.filter(r => {
+        const paid = payments.filter(p => p.op_type === op && p.membre_id === r.membre_id && p.temple_id === r.temple_id && p.periode === r.periode);
+        const expected = Math.max(0,...paid.map(p=>Number(p.montant_attendu)));
+        return paid.length === 0 || expected > paid.reduce((sum,p)=>sum+Number(p.montant_paye),0);
+      });
+      return { op, count:new Set(unresolved.map(r=>`${r.temple_id}:${r.membre_id}:${r.periode}`)).size };
     });
     const entities = new Map([...members.map(m=>[m.id,m.temple_id] as const),...services.map(s=>[s.id,s.temple_id] as const),...departments.map(d=>[d.id,d.temple_id] as const),...selected.map(t=>[t.id,t.id] as const),...payments.map(p=>[p.id,p.temple_id] as const),...goals.map(g=>[g.id,g.temple_id] as const)]);
     const recent = [...logs.map(l=>({id:l.id,date:l.created_at,action:l.type_action,userId:l.utilisateur_id,templeId:l.temple_id})),...audit.filter(a=>a.enregistrement_id && entities.has(a.enregistrement_id)).map(a=>({id:a.id,date:a.date_modification,action:`${a.action} · ${a.table_modifiee}`,userId:a.utilisateur_id,templeId:a.enregistrement_id ? entities.get(a.enregistrement_id) ?? null : null}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
