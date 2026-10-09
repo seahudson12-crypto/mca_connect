@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,7 +19,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { GraduationCap, Plus, Trash2, UserPlus, BookOpen, Award } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/formations")({ component: FormationsPage });
+export const Route = createFileRoute("/_app/formations")({
+  head: () => pageHead("Formation et discipulat", "Formation et discipulat : espace MCA CONNECT, Mission de Christ en Action."), component: FormationsPage });
 
 type FormationType = "discipulat" | "formation_biblique" | "formation_ministerielle" | "seminaire" | "ecole_dimanche" | "autre";
 type Trimestre = "T1" | "T2" | "T3" | "T4" | "annuel";

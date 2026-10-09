@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +44,8 @@ const roleLabel = (r: Role | null) =>
   : r === "responsable_departement" ? "Responsable de département"
   : r === "utilisateur" ? "Utilisateur" : "—";
 
-export const Route = createFileRoute("/_app/utilisateurs")({ component: UtilisateursPage });
+export const Route = createFileRoute("/_app/utilisateurs")({
+  head: () => pageHead("Équipe et rôles", "Équipe et rôles : espace MCA CONNECT, Mission de Christ en Action."), component: UtilisateursPage });
 
 function UtilisateursPage() {
   const qc = useQueryClient();

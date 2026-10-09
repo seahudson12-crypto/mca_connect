@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,7 +43,8 @@ type Orateur = {
   nom: string; fonction: string | null; theme: string | null; versets: string | null; ordre: number;
 };
 
-export const Route = createFileRoute("/_app/cultes")({ component: CultesPage });
+export const Route = createFileRoute("/_app/cultes")({
+  head: () => pageHead("Cultes", "Cultes : espace MCA CONNECT, Mission de Christ en Action."), component: CultesPage });
 
 const STATUT_BADGE: Record<CulteStatut, { label: string; cls: string; Icon: typeof Lock }> = {
   brouillon: { label: "Brouillon", cls: "bg-muted text-foreground", Icon: Pencil },

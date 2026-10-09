@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -10,7 +11,8 @@ import { Sparkles, Send, Loader2, RefreshCw, Bot, User } from "lucide-react";
 import { toast } from "sonner";
 import { chatAssistant } from "@/lib/assistant.functions";
 
-export const Route = createFileRoute("/_app/assistant")({ component: AssistantPage });
+export const Route = createFileRoute("/_app/assistant")({
+  head: () => pageHead("Assistant MCA", "Assistant MCA : espace MCA CONNECT, Mission de Christ en Action."), component: AssistantPage });
 
 type Msg = { role: "user" | "assistant"; content: string };
 

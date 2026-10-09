@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +31,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
-export const Route = createFileRoute("/_app/temples")({ component: TemplesPage });
+export const Route = createFileRoute("/_app/temples")({
+  head: () => pageHead("Temples MCA", "Temples MCA : espace MCA CONNECT, Mission de Christ en Action."), component: TemplesPage });
 
 type Temple = {
   id: string;

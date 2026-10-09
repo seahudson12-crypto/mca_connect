@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState, useMemo } from "react";
 
-export const Route = createFileRoute("/_app/historique")({ component: HistoriquePage });
+export const Route = createFileRoute("/_app/historique")({
+  head: () => pageHead("Historique des modifications", "Historique des modifications : espace MCA CONNECT, Mission de Christ en Action."), component: HistoriquePage });
 
 type HistRow = {
   id: string;

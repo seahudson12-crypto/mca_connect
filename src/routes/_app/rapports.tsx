@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -18,7 +19,8 @@ import { CULTE_TYPES, culteTypeLabel, CATEGORIES, categoryLabel } from "@/lib/co
 import { formatXof } from "@/lib/audit";
 import { generateRapportPdf } from "@/lib/pdf-rapport";
 
-export const Route = createFileRoute("/_app/rapports")({ component: RapportsPage });
+export const Route = createFileRoute("/_app/rapports")({
+  head: () => pageHead("Rapports des temples", "Rapports des temples : espace MCA CONNECT, Mission de Christ en Action."), component: RapportsPage });
 
 type CulteRow = {
   id: string; date: string; type_culte: string; statut: string;

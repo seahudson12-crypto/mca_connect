@@ -1,8 +1,10 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { FinanceSuiviModule } from "@/components/finance/FinanceSuiviModule";
 
-export const Route = createFileRoute("/_app/finances/missions")({ component: MissionsPage });
+export const Route = createFileRoute("/_app/finances/missions")({
+  head: () => pageHead("Offrandes missionnaires", "Offrandes missionnaires : espace MCA CONNECT, Mission de Christ en Action."), component: MissionsPage });
 
 function MissionsPage() {
   const { canSeeFinances, loading, defaultRoute } = useAuth();

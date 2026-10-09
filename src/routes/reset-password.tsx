@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,8 @@ import { Logo } from "@/components/Logo";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/reset-password")({ component: ResetPasswordPage });
+export const Route = createFileRoute("/reset-password")({
+  head: () => pageHead("Nouveau mot de passe", "Nouveau mot de passe : espace MCA CONNECT, Mission de Christ en Action."), component: ResetPasswordPage });
 
 function ResetPasswordPage() {
   const navigate = useNavigate();

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +12,8 @@ import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createFileRoute("/_app/parametres")({ component: ParametresPage });
+export const Route = createFileRoute("/_app/parametres")({
+  head: () => pageHead("Paramètres", "Paramètres : espace MCA CONNECT, Mission de Christ en Action."), component: ParametresPage });
 
 function ParametresPage() {
   const { isSuperAdmin, isAdmin, loading } = useAuth();

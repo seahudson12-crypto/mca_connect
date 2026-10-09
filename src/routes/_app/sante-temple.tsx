@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -12,7 +13,8 @@ import { useActiveTemple } from "@/hooks/use-active-temple";
 import { differenceInDays, parseISO, subDays } from "date-fns";
 import { isEcodimAllowed, ECODIM_CATEGORY } from "@/lib/constants";
 
-export const Route = createFileRoute("/_app/sante-temple")({ component: SanteTemplePage });
+export const Route = createFileRoute("/_app/sante-temple")({
+  head: () => pageHead("Santé du temple", "Santé du temple : espace MCA CONNECT, Mission de Christ en Action."), component: SanteTemplePage });
 
 type Temple = { id: string; nom_temple: string; ville: string | null; pays: string | null };
 

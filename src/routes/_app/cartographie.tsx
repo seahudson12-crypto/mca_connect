@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -11,7 +12,8 @@ import { Building2, MapPin, Users, Globe2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Navigate } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_app/cartographie")({ component: CartographiePage });
+export const Route = createFileRoute("/_app/cartographie")({
+  head: () => pageHead("Cartographie MCA", "Cartographie MCA : espace MCA CONNECT, Mission de Christ en Action."), component: CartographiePage });
 
 type Temple = {
   id: string;

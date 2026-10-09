@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,8 @@ import { culteTypeLabel } from "@/lib/constants";
 
 import { useActiveTemple } from "@/hooks/use-active-temple";
 
-export const Route = createFileRoute("/_app/presences/")({ component: PresencesIndex });
+export const Route = createFileRoute("/_app/presences/")({
+  head: () => pageHead("Présences", "Présences : espace MCA CONNECT, Mission de Christ en Action."), component: PresencesIndex });
 
 function PresencesIndex() {
   const { activeTempleId } = useActiveTemple();

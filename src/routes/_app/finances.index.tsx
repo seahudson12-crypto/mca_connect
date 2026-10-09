@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,8 @@ import { CULTE_TYPES, culteTypeLabel } from "@/lib/constants";
 import { formatXof } from "@/lib/audit";
 import * as XLSX from "xlsx";
 
-export const Route = createFileRoute("/_app/finances/")({ component: FinancesPage });
+export const Route = createFileRoute("/_app/finances/")({
+  head: () => pageHead("Finances des cultes", "Finances des cultes : espace MCA CONNECT, Mission de Christ en Action."), component: FinancesPage });
 
 type FinanceRow = {
   id: string;

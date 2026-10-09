@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +44,7 @@ type Membre = {
 };
 
 export const Route = createFileRoute("/_app/membres/")({
+  head: () => pageHead("Membres", "Membres : espace MCA CONNECT, Mission de Christ en Action."),
   component: MembresPage,
 });
 

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +13,8 @@ import { categoryLabel, culteTypeLabel } from "@/lib/constants";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export const Route = createFileRoute("/_app/alertes")({ component: AlertesPage });
+export const Route = createFileRoute("/_app/alertes")({
+  head: () => pageHead("Alertes pastorales", "Alertes pastorales : espace MCA CONNECT, Mission de Christ en Action."), component: AlertesPage });
 
 type Niveau = "info" | "attention" | "critique";
 type Alerte = {
