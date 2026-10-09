@@ -24,7 +24,7 @@ export const getPilotage = createServerFn({ method: "POST" })
       db.from("profiles").select("actif").eq("id", context.userId).maybeSingle(),
     ]);
     if (roles.error || profile.error) throw new Error("Impossible de vérifier votre accès.");
-    if (!roles.data?.some(r => r.role === "super_admin_principal") || profile.data?.actif === false) throw new Error("Accès non autorisé au Centre de Pilotage MCA.");
+    if (!roles.data?.some(r => r.role === "super_admin_principal") || profile.data?.actif !== true) throw new Error("Accès non autorisé au Centre de Pilotage MCA.");
     const bounds = periodBounds(data.period);
     const visible = await allRows((from, to) => db.from("temples").select("id,nom_temple,pays,actif").order("id").range(from, to));
     // The temples policy also has a super-admin manage policy: verify each temple explicitly.
@@ -37,7 +37,7 @@ export const getPilotage = createServerFn({ method: "POST" })
     const empty = ids.length === 0;
     const [members, services, departments, programs, goals, activities, requests, logs] = await Promise.all([
       empty ? [] : allRows((a,b) => db.from("membres").select("id,temple_id,actif,categorie,date_ajout").in("temple_id",ids).order("id").range(a,b)),
-      empty ? [] : allRows((a,b) => db.from("cultes").select("id,temple_id,date,type_culte,statut").in("temple_id",ids).gte("date",`${bounds.year-1}-01-01`).lte("date",bounds.end).order("id").range(a,b)),
+      empty ? [] : allRows((a,b) => db.from("cultes").select("id,temple_id,date,type_culte,statut").in("temple_id",ids).gte("date",bounds.previousStart < `${bounds.year}-01-01` ? bounds.previousStart : `${bounds.year}-01-01`).lte("date",bounds.end).order("id").range(a,b)),
       empty ? [] : allRows((a,b) => db.from("departements").select("id,temple_id,actif").in("temple_id",ids).order("id").range(a,b)),
       empty ? [] : allRows((a,b) => db.from("programmes_formation").select("id,temple_id,actif").in("temple_id",ids).order("id").range(a,b)),
       empty ? [] : allRows((a,b) => db.from("objectifs_temple").select("id,temple_id,libelle,type_objectif,valeur_cible,annee").in("temple_id",ids).eq("annee",bounds.year).order("id").range(a,b)),
@@ -48,14 +48,12 @@ export const getPilotage = createServerFn({ method: "POST" })
     ]);
     const serviceIds = services.map(s => s.id);
     const programIds = programs.filter(p => p.actif).map(p => p.id);
-    const [attendance, enrollments, finances, payments, reliquats, audit] = await Promise.all([
+    const [attendance, enrollments, finances, payments, reliquats] = await Promise.all([
       serviceIds.length ? allRows((a,b) => db.from("presences").select("id,culte_id,membre_id,statut").in("culte_id",serviceIds).order("id").range(a,b)) : [],
       programIds.length ? allRows((a,b) => db.from("inscriptions_formation").select("id,membre_id,statut").in("programme_id",programIds).in("statut",["inscrit","en_cours"]).order("id").range(a,b)) : [],
       serviceIds.length ? allRows((a,b) => db.from("finances_culte").select("id,culte_id,offrande,dime").in("culte_id",serviceIds).order("id").range(a,b)) : [],
       empty ? [] : allRows((a,b) => db.from("finance_paiements").select("id,temple_id,membre_id,op_type,periode,montant_paye,montant_attendu,date_paiement").in("temple_id",ids).lte("date_paiement",bounds.end).order("id").range(a,b)),
       empty ? [] : allRows((a,b) => db.from("finance_reliquats").select("id,temple_id,membre_id,op_type,periode,date_prevue").in("temple_id",ids).gte("date_prevue",bounds.start).lt("date_prevue",bounds.end).order("id").range(a,b)),
-      // Existing history has no temple column: only correlate visible entity IDs, never guess scope.
-      allRows((a,b) => db.from("historique_modifications").select("id,table_modifiee,enregistrement_id,action,utilisateur_id,date_modification").gte("date_modification",bounds.start).lte("date_modification",`${bounds.end}T23:59:59.999Z`).order("id").range(a,b)),
     ]);
     const memberMap = new Map(members.map(m => [m.id,m]));
     const serviceMap = new Map(services.map(s => [s.id,s]));
@@ -72,8 +70,19 @@ export const getPilotage = createServerFn({ method: "POST" })
     const souls = members.filter(m => m.categorie === "nouvelles_ames" && m.date_ajout >= bounds.start && m.date_ajout <= bounds.end).length;
     const previousSouls = members.filter(m => m.categorie === "nouvelles_ames" && m.date_ajout >= bounds.previousStart && m.date_ajout <= bounds.previousEnd).length;
     const newMembers = members.filter(m => m.date_ajout >= bounds.start && m.date_ajout <= bounds.end).length;
-    const dates = [...new Set([...currentServices.map(s => s.date), ...members.filter(m => m.date_ajout >= bounds.start && m.date_ajout <= bounds.end).map(m => m.date_ajout)])].sort();
-    const chart = dates.map(date => ({ date, presents: currentPresence.filter(p => serviceMap.get(p.culte_id)?.date === date).length, inscriptions: members.filter(m => m.date_ajout === date).length, nouvelles: members.filter(m => m.date_ajout === date && m.categorie === "nouvelles_ames").length }));
+    const byDate = new Map<string,{date:string;presents:number|null;inscriptions:number;nouvelles:number}>();
+    for(const s of currentServices) if(!byDate.has(s.date)) byDate.set(s.date,{date:s.date,presents:null,inscriptions:0,nouvelles:0});
+    for(const m of members) {
+      if(m.date_ajout < bounds.start || m.date_ajout > bounds.end) continue;
+      const row=byDate.get(m.date_ajout) ?? {date:m.date_ajout,presents:null,inscriptions:0,nouvelles:0};
+      row.inscriptions++; if(m.categorie==="nouvelles_ames") row.nouvelles++; byDate.set(m.date_ajout,row);
+    }
+    for(const p of currentPresence) {
+      const date=serviceMap.get(p.culte_id)?.date; if(!date) continue;
+      const row=byDate.get(date); if(!row) continue;
+      if(row.presents===null) row.presents=0; if(p.statut==="present") row.presents++;
+    }
+    const chart=[...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));
     const temples = selected.map(t => {
       const ts = currentServices.filter(s => s.temple_id === t.id); const set = new Set(ts.map(s => s.id));
       return { ...t, members: members.filter(m => m.temple_id === t.id).length, activeMembers: members.filter(m => m.temple_id === t.id && m.actif).length, presence: presenceRate(currentPresence.filter(p => set.has(p.culte_id))).rate, activities: activities.filter(a => a.temple_id === t.id && ((a.date_realisation ?? a.date_prevue ?? "") >= bounds.start) && ((a.date_realisation ?? a.date_prevue ?? "") <= bounds.end)).length, reports: ts.filter(s => s.statut !== "brouillon").length, totalReports: ts.length };
@@ -100,6 +109,8 @@ export const getPilotage = createServerFn({ method: "POST" })
       return { op, count:new Set(unresolved.map(r=>`${r.temple_id}:${r.membre_id}:${r.periode}`)).size };
     });
     const entities = new Map([...members.map(m=>[m.id,m.temple_id] as const),...services.map(s=>[s.id,s.temple_id] as const),...departments.map(d=>[d.id,d.temple_id] as const),...selected.map(t=>[t.id,t.id] as const),...payments.map(p=>[p.id,p.temple_id] as const),...goals.map(g=>[g.id,g.temple_id] as const)]);
+    const entityIds=[...entities.keys()];
+    const audit = entityIds.length ? await allRows((a,b)=>db.from("historique_modifications").select("id,table_modifiee,enregistrement_id,action,utilisateur_id,date_modification").in("enregistrement_id",entityIds).gte("date_modification",bounds.start).lte("date_modification",`${bounds.end}T23:59:59.999Z`).order("id").range(a,b)) : [];
     const recent = [...logs.map(l=>({id:l.id,date:l.created_at,action:l.type_action,userId:l.utilisateur_id,templeId:l.temple_id})),...audit.filter(a=>a.enregistrement_id && entities.has(a.enregistrement_id)).map(a=>({id:a.id,date:a.date_modification,action:`${a.action} · ${a.table_modifiee}`,userId:a.utilisateur_id,templeId:a.enregistrement_id ? entities.get(a.enregistrement_id) ?? null : null}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
     const userIds = [...new Set(recent.map(r=>r.userId).filter((id): id is string => !!id))];
     const names = userIds.length ? await db.from("profiles").select("id,nom").in("id",userIds) : {data:[],error:null};
