@@ -22,7 +22,17 @@ import { StatCard } from "@/components/StatCard";
 import { Lock } from "lucide-react";
 import { formatXof } from "@/lib/audit";
 
-export const Route = createFileRoute("/_app/presences/$culteId")({ component: PointagePage });
+export const Route = createFileRoute("/_app/presences/$culteId")({
+  head: () => ({ meta: [
+    { title: "Pointage du culte — MCA Connect" },
+    { name: "description", content: "Pointage des présences au culte dans le temple autorisé." },
+    { property: "og:title", content: "Pointage du culte — MCA Connect" },
+    { property: "og:description", content: "Pointage des présences au culte dans le temple autorisé." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: PointagePage,
+});
 
 type Membre = { id: string; nom: string; prenoms: string; categorie: string; whatsapp: string | null; telephone: string | null; matricule: string | null };
 
