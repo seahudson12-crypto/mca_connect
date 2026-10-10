@@ -1,5 +1,6 @@
 # Centre de Pilotage MCA
-- [ ] Ajouter la lecture agrégée autorisée, sans mutation ni migration.
-- [ ] Enrichir le tableau de bord principal et le sélecteur existant.
-- [ ] Vérifier données, filtres, accès, erreurs et affichage mobile.
-- [ ] Appliquer la mise à jour de sécurité requise et vérifier l’application.
+- [x] Ajouter la lecture agrégée autorisée, sans mutation ni migration.
+- [x] Enrichir le tableau de bord principal et le sélecteur existant.
+- [x] Vérifier données, filtres, refus de périmètre invalide, erreurs et affichage mobile avec le compte principal.
+- [x] Appliquer la mise à jour de sécurité requise et vérifier l’application.
+- [ ] Vérifier chaque autre rôle en session réelle — nécessite une session de test autorisée pour ces comptes ; contrôles serveur examinés, droits existants inchangés.
