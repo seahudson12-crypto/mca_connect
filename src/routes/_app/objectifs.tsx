@@ -22,7 +22,17 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Cell,
 } from "recharts";
 
-export const Route = createFileRoute("/_app/objectifs")({ component: ObjectifsPage });
+export const Route = createFileRoute("/_app/objectifs")({
+  head: () => ({ meta: [
+    { title: "Objectifs MCA — MCA Connect" },
+    { name: "description", content: "Suivi des objectifs enregistrés et de leur progression par temple MCA." },
+    { property: "og:title", content: "Objectifs MCA — MCA Connect" },
+    { property: "og:description", content: "Suivi des objectifs enregistrés et de leur progression par temple MCA." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: ObjectifsPage,
+});
 
 const TYPES = [
   { value: "membres", label: "Membres", unit: "personnes" },
