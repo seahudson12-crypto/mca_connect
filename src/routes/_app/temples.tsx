@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app/temples")({
+  validateSearch: (s: Record<string, unknown>): { ajout?: string } => (typeof s.ajout === "string" ? { ajout: s.ajout } : {}),
   head: () => pageHead("Temples MCA", "Temples MCA : espace MCA CONNECT, Mission de Christ en Action."), component: TemplesPage });
 
 type Temple = {
@@ -40,6 +42,8 @@ type Temple = {
   ville: string | null;
   commune: string | null;
   pays: string | null;
+  pays_id: string | null;
+  date_ouverture: string | null;
   pasteur_responsable: string | null;
   pasteur_adjoint: string | null;
   telephone: string | null;
@@ -55,6 +59,20 @@ function TemplesPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Temple | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Temple | null>(null);
+  const [paysId, setPaysId] = useState("");
+  const [actifForm, setActifForm] = useState(true);
+  const [newPays, setNewPays] = useState<string | null>(null);
+  const [pendingSave, setPendingSave] = useState<Record<string, unknown> | null>(null);
+  const { ajout } = Route.useSearch();
+
+  const { data: paysList = [] } = useQuery({
+    queryKey: ["pays"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("pays").select("id,nom").order("nom");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   useEffect(() => {
     if (!loading && !isAdmin) navigate({ to: "/dashboard" });
@@ -72,45 +90,38 @@ function TemplesPage() {
     },
   });
 
-  const resetAndOpen = (t: Temple | null) => {
+  const resetAndOpen = (t: Temple | null, pays?: string) => {
     setEditing(t);
+    setPaysId(t?.pays_id ?? pays ?? "");
+    setActifForm(t?.actif ?? true);
+    setNewPays(null);
     setOpen(true);
   };
 
-  const handleSave = async (form: FormData) => {
-    const nom = String(form.get("nom_temple") || "").trim();
-    if (!nom) return toast.error("Nom du temple requis");
-    if (nom.length > 120) return toast.error("Nom trop long");
-
-    const payload = {
-      nom_temple: nom,
-      ville: (form.get("ville") as string)?.trim() || null,
-      commune: (form.get("commune") as string)?.trim() || null,
-      pays: (form.get("pays") as string)?.trim() || "Côte d'Ivoire",
-      pasteur_responsable: (form.get("pasteur") as string)?.trim() || null,
-      pasteur_adjoint: (form.get("pasteur_adjoint") as string)?.trim() || null,
-      telephone: (form.get("telephone") as string)?.trim() || null,
-      email: (form.get("email") as string)?.trim() || null,
-      couleur_primaire: (form.get("couleur") as string) || "#1e40af",
-    };
-
-    const { data, error } = editing
-      ? await supabase.from("temples").update(payload).eq("id", editing.id).select("id")
-      : await supabase.from("temples").insert(payload).select("id");
-
-    if (error) return toast.error(error.message);
-    if (!data || data.length === 0) {
-      return toast.error(
-        "Aucune modification enregistrée : vous n'avez pas les droits nécessaires sur ce temple.",
-      );
+  useEffect(() => {
+    if (ajout && isSuperAdmin && paysList.some((p) => p.id === ajout)) {
+      resetAndOpen(null, ajout);
+      navigate({ to: "/temples", search: {}, replace: true });
     }
-    toast.success(editing ? "Temple modifié avec succès" : "Temple créé");
-    setOpen(false);
-    setEditing(null);
-    await Promise.all([
-      qc.invalidateQueries({ queryKey: ["temples"] }),
-      qc.invalidateQueries({ queryKey: ["temples", "all"] }),
-    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ajout, isSuperAdmin, paysList]);
+
+  const addPays = async () => {
+    const nom = (newPays ?? "").trim();
+    if (nom.length < 2 || nom.length > 80) return toast.error("Nom de pays invalide");
+    if (paysList.some((p) => p.nom.trim().toLocaleLowerCase("fr") === nom.toLocaleLowerCase("fr")))
+      return toast.error("Ce pays existe déjà");
+    const { data, error } = await supabase.from("pays").insert({ nom }).select("id").single();
+    if (error) return toast.error(error.code === "23505" ? "Ce pays existe déjà" : error.message);
+    await qc.invalidateQueries({ queryKey: ["pays"] });
+    setPaysId(data.id);
+    setNewPays(null);
+    toast.success("Pays ajouté");
+  };
+
+  const persist = async (payload: Record<string, unknown>) => {
+    if (editing && editing.pays_id && editing.pays_id !== paysId) return setPendingSave(payload);
+    await persist(payload);
   };
 
   const toggleActif = async (t: Temple) => {
@@ -148,7 +159,7 @@ function TemplesPage() {
             onClick={() => resetAndOpen(null)}
             className="gradient-brand text-primary-foreground border-0"
           >
-            <Plus className="mr-2 h-4 w-4" /> Nouveau temple
+            <Plus className="mr-2 h-4 w-4" /> Ajouter un temple
           </Button>
         )}
       </div>
@@ -252,7 +263,7 @@ function TemplesPage() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? "Modifier le temple" : "Nouveau temple"}</DialogTitle>
+            <DialogTitle>{editing ? "Modifier le temple" : "Ajouter un temple"}</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -285,12 +296,35 @@ function TemplesPage() {
               </div>
             </div>
             <div>
-              <Label>Pays</Label>
-              <Input
-                name="pays"
-                maxLength={80}
-                defaultValue={editing?.pays ?? "Côte d'Ivoire"}
-              />
+              <Label>Pays d'origine *</Label>
+              <Select value={paysId} onValueChange={setPaysId}>
+                <SelectTrigger aria-label="Pays d'origine"><SelectValue placeholder="Choisir un pays" /></SelectTrigger>
+                <SelectContent>
+                  {paysList.map((p) => <SelectItem key={p.id} value={p.id}>{p.nom}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {newPays === null ? (
+                <Button type="button" variant="link" className="h-auto px-0 text-xs" onClick={() => setNewPays("")}>+ Ajouter un pays</Button>
+              ) : (
+                <div className="mt-2 flex gap-2">
+                  <Input aria-label="Nouveau pays" placeholder="Nom du pays" maxLength={80} value={newPays} onChange={(e) => setNewPays(e.target.value)} />
+                  <Button type="button" variant="outline" onClick={addPays}>Ajouter</Button>
+                  <Button type="button" variant="ghost" onClick={() => setNewPays(null)}>Annuler</Button>
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Date d'ouverture</Label>
+                <Input name="date_ouverture" type="date" defaultValue={editing?.date_ouverture ?? ""} />
+              </div>
+              <div>
+                <Label>Statut</Label>
+                <div className="flex h-10 items-center gap-2">
+                  <Switch checked={actifForm} onCheckedChange={setActifForm} aria-label="Temple actif" />
+                  <span className="text-sm">{actifForm ? "Actif" : "Inactif"}</span>
+                </div>
+              </div>
             </div>
             <div>
               <Label>Pasteur responsable</Label>
@@ -352,6 +386,22 @@ function TemplesPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!pendingSave} onOpenChange={(o) => !o && setPendingSave(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Changer le pays de ce temple ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Les statistiques par pays du Centre de Pilotage seront recalculées. Les membres, présences, finances,
+              départements et historiques restent rattachés au temple et ne sont pas supprimés. Les matricules existants ne changent pas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={() => pendingSave && persist(pendingSave)}>Confirmer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={!!confirmDelete}
