@@ -1244,6 +1244,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pays: {
+        Row: {
+          code: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          nom: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       presences: {
         Row: {
           created_at: string
@@ -1618,6 +1645,7 @@ export type Database = {
           commune: string | null
           couleur_primaire: string | null
           created_at: string
+          date_ouverture: string | null
           email: string | null
           id: string
           logo: string | null
@@ -1625,6 +1653,7 @@ export type Database = {
           pasteur_adjoint: string | null
           pasteur_responsable: string | null
           pays: string | null
+          pays_id: string | null
           telephone: string | null
           updated_at: string
           ville: string | null
@@ -1636,6 +1665,7 @@ export type Database = {
           commune?: string | null
           couleur_primaire?: string | null
           created_at?: string
+          date_ouverture?: string | null
           email?: string | null
           id?: string
           logo?: string | null
@@ -1643,6 +1673,7 @@ export type Database = {
           pasteur_adjoint?: string | null
           pasteur_responsable?: string | null
           pays?: string | null
+          pays_id?: string | null
           telephone?: string | null
           updated_at?: string
           ville?: string | null
@@ -1654,6 +1685,7 @@ export type Database = {
           commune?: string | null
           couleur_primaire?: string | null
           created_at?: string
+          date_ouverture?: string | null
           email?: string | null
           id?: string
           logo?: string | null
@@ -1661,11 +1693,20 @@ export type Database = {
           pasteur_adjoint?: string | null
           pasteur_responsable?: string | null
           pays?: string | null
+          pays_id?: string | null
           telephone?: string | null
           updated_at?: string
           ville?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "temples_pays_id_fkey"
+            columns: ["pays_id"]
+            isOneToOne: false
+            referencedRelation: "pays"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       themes_annee: {
         Row: {
