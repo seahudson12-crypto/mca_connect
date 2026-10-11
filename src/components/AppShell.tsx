@@ -1,6 +1,8 @@
 import { Link, useRouterState, useNavigate, useSearch } from "@tanstack/react-router";
 import { LayoutDashboard, Users, CalendarCheck, ClipboardCheck, MessageCircle, Settings, LogOut, Menu, X, Building2, UserCog, Wallet, History, Activity, ShieldCheck, ArrowLeftRight, FileText, Download, Target, GraduationCap, BookOpen, Bell, Users2, CalendarDays, Globe2, HeartPulse, Sparkles, Network, Inbox, Clock, HandCoins } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "./Logo";
 import { InstallMenuItem } from "@/components/InstallMenuItem";
 import { Button } from "@/components/ui/button";
@@ -22,8 +24,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const search = useSearch({ strict: false });
   const pilotage = isPrincipal && path === "/dashboard";
   const pilotageScope = typeof search.scope === "string" ? search.scope : "global";
-  const countries = [...new Set(allTemples.map(t => t.pays).filter((p): p is string => !!p))].sort();
-  const templeDisplay = pilotage ? pilotageScope === "global" ? "MCA GLOBAL" : pilotageScope.startsWith("country:") ? pilotageScope.slice(8) : allTemples.find(t=>t.id===pilotageScope)?.nom_temple ?? "MCA Connect" : activeTemple?.nom_temple ?? "MCA Connect";
+  const { data: countries = [] } = useQuery({
+    queryKey: ["pays"], enabled: pilotage,
+    queryFn: async () => { const { data, error } = await supabase.from("pays").select("id,nom").order("nom"); if (error) throw error; return data ?? []; },
+  });
+  const { data: templeCountry = {} } = useQuery({
+    queryKey: ["temples", "pays-map"], enabled: pilotage,
+    queryFn: async () => { const { data, error } = await supabase.from("temples").select("id,pays_id").eq("actif", true); if (error) throw error; return Object.fromEntries((data ?? []).map(t => [t.id, t.pays_id])) as Record<string, string | null>; },
+  });
+  const orphanTemples = allTemples.filter(t => !templeCountry[t.id] || !countries.some(c => c.id === templeCountry[t.id]));
+  const templeDisplay = pilotage ? pilotageScope === "global" ? "MCA GLOBAL" : pilotageScope.startsWith("country:") ? countries.find(c => c.id === pilotageScope.slice(8))?.nom ?? pilotageScope.slice(8) : allTemples.find(t=>t.id===pilotageScope)?.nom_temple ?? "MCA Connect" : activeTemple?.nom_temple ?? "MCA Connect";
   const switchScope = (value: string) => {
     if (pilotage) {
       if (value !== "global" && !value.startsWith("country:")) setActiveTempleId(value);
@@ -181,8 +191,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </SelectTrigger>
                 <SelectContent>
                   {pilotage && <SelectItem value="global">MCA GLOBAL</SelectItem>}
-                  {pilotage && countries.map(country=><SelectItem key={country} value={`country:${country}`}>{country}</SelectItem>)}
-                  {allTemples.map((t) => (
+                  {pilotage && countries.map(c => [
+                    <SelectItem key={c.id} value={`country:${c.id}`} className="font-semibold">{c.nom}</SelectItem>,
+                    ...allTemples.filter(t => templeCountry[t.id] === c.id).map(t => <SelectItem key={t.id} value={t.id} className="pl-10 text-xs">{t.nom_temple}</SelectItem>),
+                  ])}
+                  {(pilotage ? orphanTemples : allTemples).map((t) => (
                     <SelectItem key={t.id} value={t.id} className="text-xs">
                       {t.nom_temple}
                     </SelectItem>
