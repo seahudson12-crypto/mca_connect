@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791678150858,
+      "tag": "0000_pays_temples_relation",
+      "breakpoints": true
+    }
+  ]
+}
