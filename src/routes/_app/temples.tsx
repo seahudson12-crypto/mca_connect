@@ -120,6 +120,43 @@ function TemplesPage() {
   };
 
   const persist = async (payload: Record<string, unknown>) => {
+    const { data, error } = editing
+      ? await supabase.from("temples").update(payload).eq("id", editing.id).select("id")
+      : await supabase.from("temples").insert(payload as never).select("id");
+    if (error) return toast.error(error.code === "23505" ? "Un temple portant ce nom existe déjà dans ce pays." : error.message);
+    if (!data || data.length === 0) {
+      return toast.error("Aucune modification enregistrée : vous n'avez pas les droits nécessaires sur ce temple.");
+    }
+    toast.success(editing ? "Temple modifié avec succès" : "Temple créé");
+    setOpen(false);
+    setEditing(null);
+    setPendingSave(null);
+    await qc.invalidateQueries({ queryKey: ["temples"] });
+    await qc.invalidateQueries({ queryKey: ["pilotage"] });
+  };
+
+  const handleSave = async (form: FormData) => {
+    const nom = String(form.get("nom_temple") || "").trim();
+    if (!nom) return toast.error("Nom du temple requis");
+    if (nom.length > 120) return toast.error("Nom trop long");
+    if (!paysId) return toast.error("Le pays d'origine est obligatoire");
+    const dup = temples.some(
+      (t) => t.id !== editing?.id && t.pays_id === paysId && t.nom_temple.trim().toLocaleLowerCase("fr") === nom.toLocaleLowerCase("fr"),
+    );
+    if (dup) return toast.error("Un temple portant ce nom existe déjà dans ce pays.");
+    const payload = {
+      nom_temple: nom,
+      pays_id: paysId,
+      actif: actifForm,
+      date_ouverture: (form.get("date_ouverture") as string) || null,
+      ville: (form.get("ville") as string)?.trim() || null,
+      commune: (form.get("commune") as string)?.trim() || null,
+      pasteur_responsable: (form.get("pasteur") as string)?.trim() || null,
+      pasteur_adjoint: (form.get("pasteur_adjoint") as string)?.trim() || null,
+      telephone: (form.get("telephone") as string)?.trim() || null,
+      email: (form.get("email") as string)?.trim() || null,
+      couleur_primaire: (form.get("couleur") as string) || "#1e40af",
+    };
     if (editing && editing.pays_id && editing.pays_id !== paysId) return setPendingSave(payload);
     await persist(payload);
   };
