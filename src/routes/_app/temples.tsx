@@ -1,4 +1,5 @@
 import { pageHead } from "@/lib/page-head";
+import type { TablesInsert } from "@/integrations/supabase/types";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +63,7 @@ function TemplesPage() {
   const [paysId, setPaysId] = useState("");
   const [actifForm, setActifForm] = useState(true);
   const [newPays, setNewPays] = useState<string | null>(null);
-  const [pendingSave, setPendingSave] = useState<Record<string, unknown> | null>(null);
+  const [pendingSave, setPendingSave] = useState<TablesInsert<"temples"> | null>(null);
   const { ajout } = Route.useSearch();
 
   const { data: paysList = [] } = useQuery({
@@ -119,10 +120,10 @@ function TemplesPage() {
     toast.success("Pays ajouté");
   };
 
-  const persist = async (payload: Record<string, unknown>) => {
+  const persist = async (payload: TablesInsert<"temples">) => {
     const { data, error } = editing
       ? await supabase.from("temples").update(payload).eq("id", editing.id).select("id")
-      : await supabase.from("temples").insert(payload as never).select("id");
+      : await supabase.from("temples").insert(payload).select("id");
     if (error) return toast.error(error.code === "23505" ? "Un temple portant ce nom existe déjà dans ce pays." : error.message);
     if (!data || data.length === 0) {
       return toast.error("Aucune modification enregistrée : vous n'avez pas les droits nécessaires sur ce temple.");
