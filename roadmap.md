@@ -4,3 +4,9 @@
 - [x] Vérifier données, filtres, refus de périmètre invalide, erreurs et affichage mobile avec le compte principal.
 - [x] Appliquer la mise à jour de sécurité requise et vérifier l’application.
 - [ ] Vérifier chaque autre rôle en session réelle — nécessite une session de test autorisée pour ces comptes ; contrôles serveur examinés, droits existants inchangés.
+
+# École du Ministère
+- [ ] Ajouter neuf rubriques EM avec années, classes, inscriptions et mentors.
+- [ ] Appliquer les accès EM séparés, limités au temple ou aux classes attribuées, et historiser les changements.
+- [ ] Créer les trois rapports officiels, tours de garde et validations verrouillées.
+- [ ] Ajouter statistiques filtrées, archives, impression PDF et tests de sécurité et de conservation.
