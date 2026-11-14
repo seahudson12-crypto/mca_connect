@@ -466,6 +466,251 @@ export type Database = {
           },
         ]
       }
+      em_assignments: {
+        Row: {
+          actif: boolean
+          classe: string
+          id: string
+          user_id: string
+          year_id: string
+        }
+        Insert: {
+          actif?: boolean
+          classe: string
+          id?: string
+          user_id: string
+          year_id: string
+        }
+        Update: {
+          actif?: boolean
+          classe?: string
+          id?: string
+          user_id?: string
+          year_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "em_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "em_mentors"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "em_assignments_year_id_fkey"
+            columns: ["year_id"]
+            isOneToOne: false
+            referencedRelation: "em_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      em_audit: {
+        Row: {
+          acteur_id: string | null
+          action: string
+          apres: Json | null
+          avant: Json | null
+          created_at: string
+          entity: string
+          entity_id: string
+          id: string
+        }
+        Insert: {
+          acteur_id?: string | null
+          action: string
+          apres?: Json | null
+          avant?: Json | null
+          created_at?: string
+          entity: string
+          entity_id: string
+          id?: string
+        }
+        Update: {
+          acteur_id?: string | null
+          action?: string
+          apres?: Json | null
+          avant?: Json | null
+          created_at?: string
+          entity?: string
+          entity_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      em_enrollments: {
+        Row: {
+          admission: string
+          classe: string
+          created_at: string
+          id: string
+          membre_id: string
+          notes: string
+          statut: string
+          year_id: string
+        }
+        Insert: {
+          admission?: string
+          classe: string
+          created_at?: string
+          id?: string
+          membre_id: string
+          notes?: string
+          statut?: string
+          year_id: string
+        }
+        Update: {
+          admission?: string
+          classe?: string
+          created_at?: string
+          id?: string
+          membre_id?: string
+          notes?: string
+          statut?: string
+          year_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "em_enrollments_membre_id_fkey"
+            columns: ["membre_id"]
+            isOneToOne: false
+            referencedRelation: "membres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "em_enrollments_year_id_fkey"
+            columns: ["year_id"]
+            isOneToOne: false
+            referencedRelation: "em_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      em_mentors: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      em_reports: {
+        Row: {
+          auteur_id: string
+          classe: string
+          contenu: Json
+          created_at: string
+          enrollment_id: string | null
+          id: string
+          identification: Json
+          observations: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          statut: string
+          submitted_at: string | null
+          temple_id: string | null
+          type: string
+          year_id: string
+        }
+        Insert: {
+          auteur_id?: string
+          classe: string
+          contenu?: Json
+          created_at?: string
+          enrollment_id?: string | null
+          id?: string
+          identification?: Json
+          observations?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          statut?: string
+          submitted_at?: string | null
+          temple_id?: string | null
+          type: string
+          year_id: string
+        }
+        Update: {
+          auteur_id?: string
+          classe?: string
+          contenu?: Json
+          created_at?: string
+          enrollment_id?: string | null
+          id?: string
+          identification?: Json
+          observations?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          statut?: string
+          submitted_at?: string | null
+          temple_id?: string | null
+          type?: string
+          year_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "em_reports_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "em_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "em_reports_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "em_reports_temple_id_fkey"
+            columns: ["temple_id"]
+            isOneToOne: false
+            referencedRelation: "temples_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "em_reports_year_id_fkey"
+            columns: ["year_id"]
+            isOneToOne: false
+            referencedRelation: "em_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      em_years: {
+        Row: {
+          actif: boolean
+          archive: boolean
+          debut: string
+          fin: string
+          id: string
+          nom: string
+        }
+        Insert: {
+          actif?: boolean
+          archive?: boolean
+          debut: string
+          fin: string
+          id?: string
+          nom: string
+        }
+        Update: {
+          actif?: boolean
+          archive?: boolean
+          debut?: string
+          fin?: string
+          id?: string
+          nom?: string
+        }
+        Relationships: []
+      }
       evenements: {
         Row: {
           all_day: boolean
@@ -2225,6 +2470,15 @@ export type Database = {
         Returns: boolean
       }
       current_user_temple_id: { Args: never; Returns: string }
+      em_access: { Args: never; Returns: boolean }
+      em_activate_year: { Args: { _id: string }; Returns: undefined }
+      em_class: { Args: { _classe: string; _year: string }; Returns: boolean }
+      em_directory: { Args: { _year?: string }; Returns: Json }
+      em_local: { Args: { _temple: string }; Returns: boolean }
+      em_principal: { Args: never; Returns: boolean }
+      em_read_enrollment: { Args: { _id: string }; Returns: boolean }
+      em_read_report: { Args: { _id: string }; Returns: boolean }
+      em_users: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
