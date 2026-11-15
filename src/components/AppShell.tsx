@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const {
     profile, role, signOut, isAdmin, isSuperAdmin, isPrincipal,
-    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath, pendingRequest,
+    canSeeFinances, canSeeMembres, isDepartementLead, canAccessPath, canAccessEM, pendingRequest,
   } = useAuth();
   const { activeTemple, allTemples, setActiveTempleId, canSwitch } = useActiveTemple();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -62,6 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/calendrier", label: "Calendrier MCA", icon: CalendarDays },
     { to: "/objectifs", label: "Objectifs", icon: Target },
     { to: "/formations", label: "Formation & Discipulat", icon: GraduationCap },
+    { to: "/ecole-ministere", label: "École du Ministère", icon: BookOpen, show: canAccessEM },
     { to: "/themes-annee", label: "Thème de l'année", icon: BookOpen },
     { to: "/assistant", label: "Assistant IA", icon: Sparkles },
   ];

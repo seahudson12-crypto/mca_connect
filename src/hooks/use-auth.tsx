@@ -48,6 +48,7 @@ interface AuthCtx {
   canSeeFinances: boolean;
   canSeeMembres: boolean;
   canManageUsers: boolean;
+  canAccessEM: boolean;
   allowedPaths: string[] | null;
   canAccessPath: (path: string) => boolean;
   defaultRoute: string;
@@ -65,8 +66,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [deptGrants, setDeptGrants] = useState<string[]>([]);
   const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emAccess, setEmAccess] = useState(false);
 
   const loadUserData = async (userId: string) => {
+    const { data: emAllowed } = await supabase.rpc("em_access");
+    setEmAccess(emAllowed === true);
     const [{ data: prof }, { data: r }, { data: ud }, { data: req }] = await Promise.all([
       supabase.from("profiles").select("id,nom,email,temple_id,actif").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role,temple_id,departement_id").eq("user_id", userId),
@@ -110,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }, 0);
       } else {
+        setEmAccess(false);
         setProfile(null);
         setRoleRows([]);
         setDeptGrants([]);
@@ -188,8 +193,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         canSeeFinances: isAdmin || isFinances,
         canSeeMembres: isAdmin || (!isFinances && !isDepartementLead),
         canManageUsers: isAdmin,
+        canAccessEM: emAccess,
         allowedPaths: allowedPaths(role),
-        canAccessPath: (path: string) => canAccessPath(role, path),
+        canAccessPath: (path: string) => path === "/ecole-ministere" || path.startsWith("/ecole-ministere/") ? emAccess : canAccessPath(role, path),
         defaultRoute: defaultRoute(role),
         signOut,
         refresh,

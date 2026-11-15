@@ -2475,6 +2475,7 @@ export type Database = {
       em_class: { Args: { _classe: string; _year: string }; Returns: boolean }
       em_directory: { Args: { _year?: string }; Returns: Json }
       em_local: { Args: { _temple: string }; Returns: boolean }
+      em_member_local: { Args: { _member: string }; Returns: boolean }
       em_principal: { Args: never; Returns: boolean }
       em_read_enrollment: { Args: { _id: string }; Returns: boolean }
       em_read_report: { Args: { _id: string }; Returns: boolean }

@@ -1,9 +1,86 @@
-export const CLASSES = ['CPEM','P1','P2','P3','P4','P5'] as const;
-export const CLASS_NAMES: Record<string,string> = {CPEM:"Classe Préparatoire pour l’École du Ministère",P1:'Pastorale 1',P2:'Pastorale 2',P3:'Pastorale 3',P4:'Pastorale 4',P5:'Pastorale 5'};
-export const REPORT_NAMES: Record<string,string> = {priere:'Participation à la vie de prière collective',cellule:"Implantation et développement d’une cellule de prière",garde:'Suivi de la participation à la tour de garde hebdomadaire'};
-export const STATUS_NAMES: Record<string,string> = {brouillon:'Brouillon',soumis:'Soumis',examen:"En cours d’examen",complement:'Complément demandé',reserve:'Validé sous réserve',valide:'Validé',rejete:'Non validé'};
-export interface Student {id:string;membre_id:string;nom:string;prenoms:string;telephone:string|null;matricule:string|null;year_id:string;classe:string;admission:string;statut:string;notes:string;temple_id:string;temple:string;pays_id:string|null;pays:string;ville:string|null;pasteur:string|null;contact:string|null}
-export interface Attendance {id:string;nom:string;presence:'P'|'A'|'J';ponctuel:boolean;participation:'active'|'moyenne'|'faible'}
-export function attendanceStats(rows:Attendance[]) { const presents=rows.filter(r=>r.presence==='P'); return {presents:presents.length,absents:rows.filter(r=>r.presence==='A').length,justifies:rows.filter(r=>r.presence==='J').length,retards:presents.filter(r=>!r.ponctuel).length,taux:rows.length?Math.round(presents.length/rows.length*100):null,active:presents.filter(r=>r.participation==='active').length,moyenne:presents.filter(r=>r.participation==='moyenne').length,faible:presents.filter(r=>r.participation==='faible').length}; }
-export function filterStudents(rows:Student[],filters:{year?:string;country?:string;temple?:string;classe?:string;query?:string}) {return rows.filter(s=>(!filters.year||s.year_id===filters.year)&&(!filters.country||s.pays_id===filters.country)&&(!filters.temple||s.temple_id===filters.temple)&&(!filters.classe||s.classe===filters.classe)&&(!filters.query||`${s.nom} ${s.prenoms} ${s.matricule}`.toLocaleLowerCase().includes(filters.query.toLocaleLowerCase())));}
-export function canEditReport(principal:boolean,author:boolean,status:string,type:string) {return !principal&&author&&(status==='brouillon'||(status==='complement'&&type!=='garde'));}
+export const CLASSES = ["CPEM", "P1", "P2", "P3", "P4", "P5"] as const;
+export const CLASS_NAMES: Record<string, string> = {
+  CPEM: "Classe Préparatoire pour l’École du Ministère",
+  P1: "Pastorale 1",
+  P2: "Pastorale 2",
+  P3: "Pastorale 3",
+  P4: "Pastorale 4",
+  P5: "Pastorale 5",
+};
+export const REPORT_NAMES: Record<string, string> = {
+  priere: "Participation à la vie de prière collective",
+  cellule: "Implantation et développement d’une cellule de prière",
+  garde: "Suivi de la participation à la tour de garde hebdomadaire",
+};
+export const STATUS_NAMES: Record<string, string> = {
+  brouillon: "Brouillon",
+  soumis: "Soumis",
+  examen: "En cours d’examen",
+  complement: "Complément demandé",
+  reserve: "Validé sous réserve",
+  valide: "Validé",
+  rejete: "Non validé",
+};
+export interface Student {
+  id: string;
+  membre_id: string;
+  nom: string;
+  prenoms: string;
+  telephone: string | null;
+  matricule: string | null;
+  year_id: string;
+  classe: string;
+  admission: string;
+  statut: string;
+  notes: string;
+  temple_id: string;
+  temple: string;
+  pays_id: string | null;
+  pays: string;
+  ville: string | null;
+  pasteur: string | null;
+  contact: string | null;
+}
+export interface Attendance {
+  id: string;
+  nom: string;
+  presence: "P" | "A" | "J";
+  ponctuel: boolean;
+  participation: "active" | "moyenne" | "faible";
+}
+export function attendanceStats(rows: Attendance[]) {
+  const presents = rows.filter((r) => r.presence === "P");
+  return {
+    presents: presents.length,
+    absents: rows.filter((r) => r.presence === "A").length,
+    justifies: rows.filter((r) => r.presence === "J").length,
+    retards: presents.filter((r) => !r.ponctuel).length,
+    taux: rows.length ? Math.round((presents.length / rows.length) * 100) : null,
+    active: presents.filter((r) => r.participation === "active").length,
+    moyenne: presents.filter((r) => r.participation === "moyenne").length,
+    faible: presents.filter((r) => r.participation === "faible").length,
+  };
+}
+export function filterStudents(
+  rows: Student[],
+  filters: { year?: string; country?: string; temple?: string; classe?: string; query?: string },
+) {
+  return rows.filter(
+    (s) =>
+      (!filters.year || s.year_id === filters.year) &&
+      (!filters.country || s.pays_id === filters.country) &&
+      (!filters.temple || s.temple_id === filters.temple) &&
+      (!filters.classe || s.classe === filters.classe) &&
+      (!filters.query ||
+        `${s.nom} ${s.prenoms} ${s.matricule}`
+          .toLocaleLowerCase()
+          .includes(filters.query.toLocaleLowerCase())),
+  );
+}
+export function canEditReport(principal: boolean, author: boolean, status: string, type: string) {
+  return (
+    !principal &&
+    author &&
+    (status === "brouillon" || (status === "complement" && type !== "garde"))
+  );
+}

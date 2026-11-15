@@ -36,6 +36,15 @@ import { Route as AppTemplesRouteImport } from './routes/_app/temples'
 import { Route as AppThemesAnneeRouteImport } from './routes/_app/themes-annee'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
+import { Route as AppEcoleMinistereIndexRouteImport } from './routes/_app/ecole-ministere.index'
+import { Route as AppEcoleMinistereAnneesRouteImport } from './routes/_app/ecole-ministere.annees'
+import { Route as AppEcoleMinistereCellulesRouteImport } from './routes/_app/ecole-ministere.cellules'
+import { Route as AppEcoleMinistereClassesRouteImport } from './routes/_app/ecole-ministere.classes'
+import { Route as AppEcoleMinistereEtudiantsRouteImport } from './routes/_app/ecole-ministere.etudiants'
+import { Route as AppEcoleMinistereMentorsRouteImport } from './routes/_app/ecole-ministere.mentors'
+import { Route as AppEcoleMinisterePriereRouteImport } from './routes/_app/ecole-ministere.priere'
+import { Route as AppEcoleMinistereRapportsRouteImport } from './routes/_app/ecole-ministere.rapports'
+import { Route as AppEcoleMinistereToursGardeRouteImport } from './routes/_app/ecole-ministere.tours-garde'
 import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances.index'
 import { Route as AppFinancesCotisationsRouteImport } from './routes/_app/finances.cotisations'
 import { Route as AppFinancesMissionsRouteImport } from './routes/_app/finances.missions'
@@ -178,6 +187,57 @@ const AppWhatsappRoute = AppWhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEcoleMinistereIndexRoute = AppEcoleMinistereIndexRouteImport.update({
+  id: '/ecole-ministere/',
+  path: '/ecole-ministere/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEcoleMinistereAnneesRoute = AppEcoleMinistereAnneesRouteImport.update({
+  id: '/ecole-ministere/annees',
+  path: '/ecole-ministere/annees',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEcoleMinistereCellulesRoute =
+  AppEcoleMinistereCellulesRouteImport.update({
+    id: '/ecole-ministere/cellules',
+    path: '/ecole-ministere/cellules',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEcoleMinistereClassesRoute =
+  AppEcoleMinistereClassesRouteImport.update({
+    id: '/ecole-ministere/classes',
+    path: '/ecole-ministere/classes',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEcoleMinistereEtudiantsRoute =
+  AppEcoleMinistereEtudiantsRouteImport.update({
+    id: '/ecole-ministere/etudiants',
+    path: '/ecole-ministere/etudiants',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEcoleMinistereMentorsRoute =
+  AppEcoleMinistereMentorsRouteImport.update({
+    id: '/ecole-ministere/mentors',
+    path: '/ecole-ministere/mentors',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEcoleMinisterePriereRoute = AppEcoleMinisterePriereRouteImport.update({
+  id: '/ecole-ministere/priere',
+  path: '/ecole-ministere/priere',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEcoleMinistereRapportsRoute =
+  AppEcoleMinistereRapportsRouteImport.update({
+    id: '/ecole-ministere/rapports',
+    path: '/ecole-ministere/rapports',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEcoleMinistereToursGardeRoute =
+  AppEcoleMinistereToursGardeRouteImport.update({
+    id: '/ecole-ministere/tours-garde',
+    path: '/ecole-ministere/tours-garde',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppFinancesIndexRoute = AppFinancesIndexRouteImport.update({
   id: '/finances/',
   path: '/finances/',
@@ -241,10 +301,19 @@ export interface FileRoutesByFullPath {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/ecole-ministere/annees': typeof AppEcoleMinistereAnneesRoute
+  '/ecole-ministere/cellules': typeof AppEcoleMinistereCellulesRoute
+  '/ecole-ministere/classes': typeof AppEcoleMinistereClassesRoute
+  '/ecole-ministere/etudiants': typeof AppEcoleMinistereEtudiantsRoute
+  '/ecole-ministere/mentors': typeof AppEcoleMinistereMentorsRoute
+  '/ecole-ministere/priere': typeof AppEcoleMinisterePriereRoute
+  '/ecole-ministere/rapports': typeof AppEcoleMinistereRapportsRoute
+  '/ecole-ministere/tours-garde': typeof AppEcoleMinistereToursGardeRoute
   '/finances/cotisations': typeof AppFinancesCotisationsRoute
   '/finances/missions': typeof AppFinancesMissionsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/ecole-ministere/': typeof AppEcoleMinistereIndexRoute
   '/finances/': typeof AppFinancesIndexRoute
   '/membres/': typeof AppMembresIndexRoute
   '/presences/': typeof AppPresencesIndexRoute
@@ -276,10 +345,19 @@ export interface FileRoutesByTo {
   '/themes-annee': typeof AppThemesAnneeRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/ecole-ministere/annees': typeof AppEcoleMinistereAnneesRoute
+  '/ecole-ministere/cellules': typeof AppEcoleMinistereCellulesRoute
+  '/ecole-ministere/classes': typeof AppEcoleMinistereClassesRoute
+  '/ecole-ministere/etudiants': typeof AppEcoleMinistereEtudiantsRoute
+  '/ecole-ministere/mentors': typeof AppEcoleMinistereMentorsRoute
+  '/ecole-ministere/priere': typeof AppEcoleMinisterePriereRoute
+  '/ecole-ministere/rapports': typeof AppEcoleMinistereRapportsRoute
+  '/ecole-ministere/tours-garde': typeof AppEcoleMinistereToursGardeRoute
   '/finances/cotisations': typeof AppFinancesCotisationsRoute
   '/finances/missions': typeof AppFinancesMissionsRoute
   '/membres/$membreId': typeof AppMembresMembreIdRoute
   '/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/ecole-ministere': typeof AppEcoleMinistereIndexRoute
   '/finances': typeof AppFinancesIndexRoute
   '/membres': typeof AppMembresIndexRoute
   '/presences': typeof AppPresencesIndexRoute
@@ -313,10 +391,19 @@ export interface FileRoutesById {
   '/_app/themes-annee': typeof AppThemesAnneeRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
+  '/_app/ecole-ministere/annees': typeof AppEcoleMinistereAnneesRoute
+  '/_app/ecole-ministere/cellules': typeof AppEcoleMinistereCellulesRoute
+  '/_app/ecole-ministere/classes': typeof AppEcoleMinistereClassesRoute
+  '/_app/ecole-ministere/etudiants': typeof AppEcoleMinistereEtudiantsRoute
+  '/_app/ecole-ministere/mentors': typeof AppEcoleMinistereMentorsRoute
+  '/_app/ecole-ministere/priere': typeof AppEcoleMinisterePriereRoute
+  '/_app/ecole-ministere/rapports': typeof AppEcoleMinistereRapportsRoute
+  '/_app/ecole-ministere/tours-garde': typeof AppEcoleMinistereToursGardeRoute
   '/_app/finances/cotisations': typeof AppFinancesCotisationsRoute
   '/_app/finances/missions': typeof AppFinancesMissionsRoute
   '/_app/membres/$membreId': typeof AppMembresMembreIdRoute
   '/_app/presences/$culteId': typeof AppPresencesCulteIdRoute
+  '/_app/ecole-ministere/': typeof AppEcoleMinistereIndexRoute
   '/_app/finances/': typeof AppFinancesIndexRoute
   '/_app/membres/': typeof AppMembresIndexRoute
   '/_app/presences/': typeof AppPresencesIndexRoute
@@ -350,10 +437,19 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/ecole-ministere/annees'
+    | '/ecole-ministere/cellules'
+    | '/ecole-ministere/classes'
+    | '/ecole-ministere/etudiants'
+    | '/ecole-ministere/mentors'
+    | '/ecole-ministere/priere'
+    | '/ecole-ministere/rapports'
+    | '/ecole-ministere/tours-garde'
     | '/finances/cotisations'
     | '/finances/missions'
     | '/membres/$membreId'
     | '/presences/$culteId'
+    | '/ecole-ministere/'
     | '/finances/'
     | '/membres/'
     | '/presences/'
@@ -385,10 +481,19 @@ export interface FileRouteTypes {
     | '/themes-annee'
     | '/utilisateurs'
     | '/whatsapp'
+    | '/ecole-ministere/annees'
+    | '/ecole-ministere/cellules'
+    | '/ecole-ministere/classes'
+    | '/ecole-ministere/etudiants'
+    | '/ecole-ministere/mentors'
+    | '/ecole-ministere/priere'
+    | '/ecole-ministere/rapports'
+    | '/ecole-ministere/tours-garde'
     | '/finances/cotisations'
     | '/finances/missions'
     | '/membres/$membreId'
     | '/presences/$culteId'
+    | '/ecole-ministere'
     | '/finances'
     | '/membres'
     | '/presences'
@@ -421,10 +526,19 @@ export interface FileRouteTypes {
     | '/_app/themes-annee'
     | '/_app/utilisateurs'
     | '/_app/whatsapp'
+    | '/_app/ecole-ministere/annees'
+    | '/_app/ecole-ministere/cellules'
+    | '/_app/ecole-ministere/classes'
+    | '/_app/ecole-ministere/etudiants'
+    | '/_app/ecole-ministere/mentors'
+    | '/_app/ecole-ministere/priere'
+    | '/_app/ecole-ministere/rapports'
+    | '/_app/ecole-ministere/tours-garde'
     | '/_app/finances/cotisations'
     | '/_app/finances/missions'
     | '/_app/membres/$membreId'
     | '/_app/presences/$culteId'
+    | '/_app/ecole-ministere/'
     | '/_app/finances/'
     | '/_app/membres/'
     | '/_app/presences/'
@@ -630,6 +744,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWhatsappRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ecole-ministere/': {
+      id: '/_app/ecole-ministere/'
+      path: '/ecole-ministere'
+      fullPath: '/ecole-ministere/'
+      preLoaderRoute: typeof AppEcoleMinistereIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/annees': {
+      id: '/_app/ecole-ministere/annees'
+      path: '/ecole-ministere/annees'
+      fullPath: '/ecole-ministere/annees'
+      preLoaderRoute: typeof AppEcoleMinistereAnneesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/cellules': {
+      id: '/_app/ecole-ministere/cellules'
+      path: '/ecole-ministere/cellules'
+      fullPath: '/ecole-ministere/cellules'
+      preLoaderRoute: typeof AppEcoleMinistereCellulesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/classes': {
+      id: '/_app/ecole-ministere/classes'
+      path: '/ecole-ministere/classes'
+      fullPath: '/ecole-ministere/classes'
+      preLoaderRoute: typeof AppEcoleMinistereClassesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/etudiants': {
+      id: '/_app/ecole-ministere/etudiants'
+      path: '/ecole-ministere/etudiants'
+      fullPath: '/ecole-ministere/etudiants'
+      preLoaderRoute: typeof AppEcoleMinistereEtudiantsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/mentors': {
+      id: '/_app/ecole-ministere/mentors'
+      path: '/ecole-ministere/mentors'
+      fullPath: '/ecole-ministere/mentors'
+      preLoaderRoute: typeof AppEcoleMinistereMentorsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/priere': {
+      id: '/_app/ecole-ministere/priere'
+      path: '/ecole-ministere/priere'
+      fullPath: '/ecole-ministere/priere'
+      preLoaderRoute: typeof AppEcoleMinisterePriereRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/rapports': {
+      id: '/_app/ecole-ministere/rapports'
+      path: '/ecole-ministere/rapports'
+      fullPath: '/ecole-ministere/rapports'
+      preLoaderRoute: typeof AppEcoleMinistereRapportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecole-ministere/tours-garde': {
+      id: '/_app/ecole-ministere/tours-garde'
+      path: '/ecole-ministere/tours-garde'
+      fullPath: '/ecole-ministere/tours-garde'
+      preLoaderRoute: typeof AppEcoleMinistereToursGardeRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/finances/': {
       id: '/_app/finances/'
       path: '/finances'
@@ -704,10 +881,19 @@ interface AppRouteChildren {
   AppThemesAnneeRoute: typeof AppThemesAnneeRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
+  AppEcoleMinistereAnneesRoute: typeof AppEcoleMinistereAnneesRoute
+  AppEcoleMinistereCellulesRoute: typeof AppEcoleMinistereCellulesRoute
+  AppEcoleMinistereClassesRoute: typeof AppEcoleMinistereClassesRoute
+  AppEcoleMinistereEtudiantsRoute: typeof AppEcoleMinistereEtudiantsRoute
+  AppEcoleMinistereMentorsRoute: typeof AppEcoleMinistereMentorsRoute
+  AppEcoleMinisterePriereRoute: typeof AppEcoleMinisterePriereRoute
+  AppEcoleMinistereRapportsRoute: typeof AppEcoleMinistereRapportsRoute
+  AppEcoleMinistereToursGardeRoute: typeof AppEcoleMinistereToursGardeRoute
   AppFinancesCotisationsRoute: typeof AppFinancesCotisationsRoute
   AppFinancesMissionsRoute: typeof AppFinancesMissionsRoute
   AppMembresMembreIdRoute: typeof AppMembresMembreIdRoute
   AppPresencesCulteIdRoute: typeof AppPresencesCulteIdRoute
+  AppEcoleMinistereIndexRoute: typeof AppEcoleMinistereIndexRoute
   AppFinancesIndexRoute: typeof AppFinancesIndexRoute
   AppMembresIndexRoute: typeof AppMembresIndexRoute
   AppPresencesIndexRoute: typeof AppPresencesIndexRoute
@@ -735,10 +921,19 @@ const AppRouteChildren: AppRouteChildren = {
   AppThemesAnneeRoute: AppThemesAnneeRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppWhatsappRoute: AppWhatsappRoute,
+  AppEcoleMinistereAnneesRoute: AppEcoleMinistereAnneesRoute,
+  AppEcoleMinistereCellulesRoute: AppEcoleMinistereCellulesRoute,
+  AppEcoleMinistereClassesRoute: AppEcoleMinistereClassesRoute,
+  AppEcoleMinistereEtudiantsRoute: AppEcoleMinistereEtudiantsRoute,
+  AppEcoleMinistereMentorsRoute: AppEcoleMinistereMentorsRoute,
+  AppEcoleMinisterePriereRoute: AppEcoleMinisterePriereRoute,
+  AppEcoleMinistereRapportsRoute: AppEcoleMinistereRapportsRoute,
+  AppEcoleMinistereToursGardeRoute: AppEcoleMinistereToursGardeRoute,
   AppFinancesCotisationsRoute: AppFinancesCotisationsRoute,
   AppFinancesMissionsRoute: AppFinancesMissionsRoute,
   AppMembresMembreIdRoute: AppMembresMembreIdRoute,
   AppPresencesCulteIdRoute: AppPresencesCulteIdRoute,
+  AppEcoleMinistereIndexRoute: AppEcoleMinistereIndexRoute,
   AppFinancesIndexRoute: AppFinancesIndexRoute,
   AppMembresIndexRoute: AppMembresIndexRoute,
   AppPresencesIndexRoute: AppPresencesIndexRoute,
