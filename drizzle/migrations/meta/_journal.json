@@ -36,6 +36,13 @@
       "when": 1794789703486,
       "tag": "0004_em_transfer_audit_permission",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794841518875,
+      "tag": "0005_em_eligible_categories",
+      "breakpoints": true
     }
   ]
 }

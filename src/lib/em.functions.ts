@@ -95,6 +95,7 @@ export const emCandidates = createServerFn({ method: "POST" })
       .from("membres")
       .select("id,nom,prenoms,matricule,temple_id")
       .eq("temple_id", data.temple)
+      .in("categorie", ["appeles", "serviteurs_de_dieu"])
       .order("nom")
       .limit(100);
     const term = data.q.replace(/[^\p{L}\p{N}\s-]/gu, "").trim();
