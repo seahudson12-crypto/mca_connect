@@ -2479,6 +2479,17 @@ export type Database = {
       em_principal: { Args: never; Returns: boolean }
       em_read_enrollment: { Args: { _id: string }; Returns: boolean }
       em_read_report: { Args: { _id: string }; Returns: boolean }
+      em_transfer_year: {
+        Args: {
+          _admission: string
+          _classe: string
+          _id: string
+          _notes: string
+          _statut: string
+          _year: string
+        }
+        Returns: string
+      }
       em_users: { Args: never; Returns: Json }
       has_role: {
         Args: {

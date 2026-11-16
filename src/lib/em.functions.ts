@@ -152,6 +152,18 @@ export const emSaveEnrollment = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await authorize(context.supabase, true);
     const { id, ...row } = data;
+    if (id) {
+      const previous = await context.supabase.from("em_enrollments").select("membre_id,year_id").eq("id", id).single();
+      check(previous.error);
+      if (!previous.data || previous.data.membre_id !== row.membre_id) throw new Error("La fiche membre liée ne peut pas être remplacée.");
+      if (previous.data.year_id !== row.year_id) {
+        const transfer = await context.supabase.rpc("em_transfer_year", {_id:id,_year:row.year_id,_classe:row.classe,_admission:row.admission,_statut:row.statut,_notes:row.notes});
+        check(transfer.error);
+        const enrolled = await context.supabase.from("em_enrollments").select().eq("id", transfer.data ?? "").single();
+        check(enrolled.error);
+        return enrolled.data;
+      }
+    }
     const r = id
       ? await context.supabase.from("em_enrollments").update(row).eq("id", id).select().single()
       : await context.supabase.from("em_enrollments").insert(row).select().single();

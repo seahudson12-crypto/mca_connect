@@ -244,12 +244,13 @@ export function ReportEditor({
       toast.error("Autorisez l’ouverture de la fenêtre d’impression.");
       return;
     }
+    w.opener = null;
     w.document.write(
       "<html><head><title>Rapport de mentorat MCA — EM</title><style>body{font:12px serif;margin:25mm}h1,h2{text-align:center}section{break-inside:avoid;border-top:1px solid;padding:12px 0}input,textarea{border:0;width:100%;color:inherit}button{display:none}table{border-collapse:collapse;width:100%}th,td{border:1px solid;padding:6px}[role=checkbox]{display:inline-block}p{line-height:1.5}</style></head><body></body></html>",
     );
     const copy = content.cloneNode(true) as HTMLElement;
     copy.querySelectorAll("input,textarea").forEach((el) => {
-      const src = content.querySelector(`[id="${el.id}"]`) as HTMLInputElement | null;
+      const src = Array.from(content.querySelectorAll("input,textarea")).find(input => input.id === el.id) as HTMLInputElement | undefined;
       if (src) {
         const p = w.document.createElement("p");
         p.textContent = src.value;

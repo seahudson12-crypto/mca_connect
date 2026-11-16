@@ -1,0 +1,1 @@
+ALTER FUNCTION public.em_transfer_year(uuid,uuid,text,date,text,text) SECURITY DEFINER;
