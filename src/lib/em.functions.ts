@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import type { Student } from "./em";
+import { canCreateReportForClass, type Student } from "./em";
 const cls = z.enum(["CPEM", "P1", "P2", "P3", "P4", "P5"]);
 async function authorize(db: SupabaseClient<Database>, principal = false) {
   const { data, error } = await db.rpc(principal ? "em_principal" : "em_access");
@@ -154,13 +154,29 @@ export const emSaveEnrollment = createServerFn({ method: "POST" })
     await authorize(context.supabase, true);
     const { id, ...row } = data;
     if (id) {
-      const previous = await context.supabase.from("em_enrollments").select("membre_id,year_id").eq("id", id).single();
+      const previous = await context.supabase
+        .from("em_enrollments")
+        .select("membre_id,year_id")
+        .eq("id", id)
+        .single();
       check(previous.error);
-      if (!previous.data || previous.data.membre_id !== row.membre_id) throw new Error("La fiche membre liée ne peut pas être remplacée.");
+      if (!previous.data || previous.data.membre_id !== row.membre_id)
+        throw new Error("La fiche membre liée ne peut pas être remplacée.");
       if (previous.data.year_id !== row.year_id) {
-        const transfer = await context.supabase.rpc("em_transfer_year", {_id:id,_year:row.year_id,_classe:row.classe,_admission:row.admission,_statut:row.statut,_notes:row.notes});
+        const transfer = await context.supabase.rpc("em_transfer_year", {
+          _id: id,
+          _year: row.year_id,
+          _classe: row.classe,
+          _admission: row.admission,
+          _statut: row.statut,
+          _notes: row.notes,
+        });
         check(transfer.error);
-        const enrolled = await context.supabase.from("em_enrollments").select().eq("id", transfer.data ?? "").single();
+        const enrolled = await context.supabase
+          .from("em_enrollments")
+          .select()
+          .eq("id", transfer.data ?? "")
+          .single();
         check(enrolled.error);
         return enrolled.data;
       }
@@ -225,6 +241,9 @@ export const emSaveReport = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await authorize(context.supabase);
     const { id, ...row } = data;
+    if (!id && !canCreateReportForClass(row.type, row.classe)) {
+      throw new Error("Le rapport de cellule est réservé aux classes P3, P4 et P5.");
+    }
     const contenu = row.contenu as Database["public"]["Tables"]["em_reports"]["Insert"]["contenu"];
     const r = id
       ? await context.supabase

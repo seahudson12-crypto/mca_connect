@@ -29,9 +29,15 @@ import {
   CLASSES,
   CLASS_NAMES,
   REPORT_NAMES,
+  REPORT_CREATE_NAMES,
   STATUS_NAMES,
   filterStudents,
   attendanceStats,
+  canCreateReportForClass,
+  canEditReport,
+  reportLocations,
+  reportMatchesLocation,
+  reportPeriod,
   type Student,
   type Attendance,
 } from "@/lib/em";
@@ -93,6 +99,8 @@ export function SchoolPage({ view }: { view: string }) {
     [classe, setClasse] = useState("all"),
     [mentor, setMentor] = useState("all"),
     [status, setStatus] = useState("all"),
+    [studentFilter, setStudentFilter] = useState("all"),
+    [reportKind, setReportKind] = useState("all"),
     [query, setQuery] = useState("");
   const [enrollment, setEnrollment] = useState<Student | "new" | null>(null),
     [yearOpen, setYearOpen] = useState(false),
@@ -128,31 +136,58 @@ export function SchoolPage({ view }: { view: string }) {
     classe: classe === "all" ? undefined : classe,
     query,
   }).filter((e) => mentor === "all" || assignedClasses.includes(e.classe));
-  const countries = Array.from(
-    new Map(rows.filter((s) => s.pays_id).map((s) => [s.pays_id as string, s.pays])).entries(),
-  ).map(([value, label]) => ({ value, label }));
-  const temples = Array.from(
-    new Map(
-      rows
-        .filter((s) => country === "all" || s.pays_id === country)
-        .map((s) => [s.temple_id, s.temple]),
-    ).entries(),
-  ).map(([value, label]) => ({ value, label }));
-  const filteredIds = new Set(filtered.map((s) => s.id));
+  const locations = (r.data ?? []).flatMap((report) => reportLocations(report, rows));
+  const countryMap = new Map<string, string>();
+  rows.forEach((student) => {
+    if (student.pays_id) countryMap.set(student.pays_id, student.pays);
+  });
+  locations.forEach((location) => {
+    if (location.countryId) countryMap.set(location.countryId, location.country);
+  });
+  const countries = Array.from(countryMap, ([value, label]) => ({ value, label }));
+  const templeMap = new Map<string, string>();
+  rows
+    .filter((student) => country === "all" || student.pays_id === country)
+    .forEach((student) => templeMap.set(student.temple_id, student.temple));
+  locations
+    .filter((location) => country === "all" || location.countryId === country)
+    .forEach((location) => {
+      if (location.templeId) templeMap.set(location.templeId, location.temple);
+    });
+  const temples = Array.from(templeMap, ([value, label]) => ({ value, label }));
+  const studentMap = new Map<string, string>();
+  rows
+    .filter(
+      (student) =>
+        (country === "all" || student.pays_id === country) &&
+        (temple === "all" || student.temple_id === temple),
+    )
+    .forEach((student) => studentMap.set(student.id, `${student.nom} ${student.prenoms}`));
+  locations
+    .filter(
+      (location) =>
+        (country === "all" || location.countryId === country) &&
+        (temple === "all" || location.templeId === temple),
+    )
+    .forEach((location) => {
+      if (location.studentId) studentMap.set(location.studentId, location.name);
+    });
+  const studentOptions = Array.from(studentMap, ([value, label]) => ({ value, label }));
   const reports = (r.data ?? []).filter(
     (report) =>
-      (view === "priere" || view === "cellule" || view === "garde" ? report.type === view : true) &&
+      (["priere", "cellule", "garde"].includes(view)
+        ? report.type === view
+        : reportKind === "all" || report.type === reportKind) &&
       (classe === "all" || report.classe === classe) &&
       (status === "all" || report.statut === status) &&
       (mentor === "all" || report.auteur_id === mentor) &&
-      ((country === "all" && temple === "all") ||
-        (report.enrollment_id
-          ? filteredIds.has(report.enrollment_id)
-          : (
-              (report.contenu as Record<string, unknown>).attendance as Attendance[] | undefined
-            )?.some((a) => filteredIds.has(a.id)))) &&
+      reportMatchesLocation(report, rows, {
+        country: country === "all" ? undefined : country,
+        temple: temple === "all" ? undefined : temple,
+        student: studentFilter === "all" ? undefined : studentFilter,
+      }) &&
       (!query ||
-        `${REPORT_NAMES[report.type]} ${JSON.stringify(report.identification)} ${report.classe}`
+        `${REPORT_NAMES[report.type]} ${JSON.stringify(report.identification)} ${JSON.stringify(report.contenu)} ${report.classe}`
           .toLowerCase()
           .includes(query.toLowerCase())),
   );
@@ -172,6 +207,14 @@ export function SchoolPage({ view }: { view: string }) {
           (a) => a.year_id === year?.id && a.user_id === context.userId && a.actif,
         )
       : context.local;
+  const creationStudents = filtered.filter(
+    (student) =>
+      student.statut === "actif" &&
+      !!reportType &&
+      canCreateReportForClass(reportType, student.classe),
+  );
+  const creationStudent =
+    dossier && creationStudents.some((student) => student.id === dossier.id) ? dossier : undefined;
   const chart = (title: string, data: { name: string; total: number }[]) => (
     <section className="min-w-0 space-y-3 border-t pt-5">
       <h2 className="font-semibold">{title}</h2>
@@ -236,6 +279,9 @@ export function SchoolPage({ view }: { view: string }) {
               setCountry("all");
               setTemple("all");
               setClasse("all");
+              setStudentFilter("all");
+              setReportKind("all");
+              setDossier(null);
             }}
             options={context.years.map((y) => ({
               value: y.id,
@@ -250,19 +296,29 @@ export function SchoolPage({ view }: { view: string }) {
                 onChange={(v) => {
                   setCountry(v);
                   setTemple("all");
+                  setStudentFilter("all");
+                  setDossier(null);
                 }}
                 options={[{ value: "all", label: "Tous les pays" }, ...countries]}
               />
               <Choice
                 label="Temple"
                 value={temple}
-                onChange={setTemple}
+                onChange={(value) => {
+                  setTemple(value);
+                  setStudentFilter("all");
+                  setDossier(null);
+                }}
                 options={[{ value: "all", label: "Tous les temples autorisés" }, ...temples]}
               />
               <Choice
                 label="Classe"
                 value={classe}
-                onChange={setClasse}
+                onChange={(value) => {
+                  setClasse(value);
+                  setStudentFilter("all");
+                  setDossier(null);
+                }}
                 options={[
                   { value: "all", label: "Toutes les classes autorisées" },
                   ...options(classAllowed),
@@ -290,6 +346,25 @@ export function SchoolPage({ view }: { view: string }) {
                   ...Object.entries(STATUS_NAMES).map(([value, label]) => ({ value, label })),
                 ]}
               />
+              {view === "rapports" && (
+                <>
+                  <Choice
+                    label="Type de rapport"
+                    value={reportKind}
+                    onChange={setReportKind}
+                    options={[
+                      { value: "all", label: "Tous les types" },
+                      ...Object.entries(REPORT_NAMES).map(([value, label]) => ({ value, label })),
+                    ]}
+                  />
+                  <Choice
+                    label="Étudiant"
+                    value={studentFilter}
+                    onChange={setStudentFilter}
+                    options={[{ value: "all", label: "Tous les étudiants" }, ...studentOptions]}
+                  />
+                </>
+              )}
             </>
           )}
         </div>
@@ -607,50 +682,59 @@ export function SchoolPage({ view }: { view: string }) {
             onChange={(e) => setQuery(e.target.value)}
           />
           {reportType && canCreate && !year.archive && (
-            <div className="flex flex-wrap gap-3 items-end">
-              {reportType === "garde" ? (
-                <Choice
-                  label="Classe du tour de garde"
-                  value={classe === "all" ? "" : classe}
-                  onChange={setClasse}
-                  options={options(
-                    CLASSES.filter((k) =>
-                      context.assignments.some(
-                        (a) =>
-                          a.year_id === year.id &&
-                          a.user_id === context.userId &&
-                          a.classe === k &&
-                          a.actif,
-                      ),
-                    ),
-                  )}
-                />
-              ) : (
-                <Choice
-                  label="Étudiant du temple"
-                  value={dossier?.id ?? ""}
-                  onChange={(v) => setDossier(rows.find((e) => e.id === v) ?? null)}
-                  options={filtered.map((e) => ({
-                    value: e.id,
-                    label: `${e.nom} ${e.prenoms} · ${e.classe}`,
-                  }))}
-                />
+            <div className="space-y-3 rounded-md border bg-muted/20 p-4">
+              {reportType === "cellule" && (
+                <p className="text-sm text-muted-foreground">
+                  Ce rapport est proposé uniquement aux étudiants actifs des classes P3, P4 et P5.
+                </p>
               )}
-              <Button
-                disabled={
-                  s.isError || s.isPending || (reportType === "garde" ? classe === "all" : !dossier)
-                }
-                onClick={() =>
-                  setReportOpen({
-                    type: reportType,
-                    student: reportType === "garde" ? undefined : (dossier ?? undefined),
-                    classe: reportType === "garde" ? classe : (dossier?.classe ?? ""),
-                  })
-                }
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nouveau rapport
-              </Button>
+              <div className="grid gap-3 items-end lg:grid-cols-[minmax(0,1fr)_auto]">
+                {reportType === "garde" ? (
+                  <Choice
+                    label="Classe du tour de garde"
+                    value={classe === "all" ? "" : classe}
+                    onChange={setClasse}
+                    options={options(
+                      CLASSES.filter((k) =>
+                        context.assignments.some(
+                          (a) =>
+                            a.year_id === year.id &&
+                            a.user_id === context.userId &&
+                            a.classe === k &&
+                            a.actif,
+                        ),
+                      ),
+                    )}
+                  />
+                ) : (
+                  <Choice
+                    label="Étudiant du temple"
+                    value={creationStudent?.id ?? ""}
+                    onChange={(v) => setDossier(rows.find((e) => e.id === v) ?? null)}
+                    options={creationStudents.map((e) => ({
+                      value: e.id,
+                      label: `${e.nom} ${e.prenoms} · ${e.classe}`,
+                    }))}
+                  />
+                )}
+                <Button
+                  className="h-auto min-h-10 whitespace-normal text-left"
+                  disabled={
+                    s.isError ||
+                    s.isPending ||
+                    (reportType === "garde" ? classe === "all" : !creationStudent)
+                  }
+                  onClick={() =>
+                    setReportOpen({
+                      type: reportType,
+                      student: reportType === "garde" ? undefined : creationStudent,
+                      classe: reportType === "garde" ? classe : (creationStudent?.classe ?? ""),
+                    })
+                  }
+                >
+                  {REPORT_CREATE_NAMES[reportType]}
+                </Button>
+              </div>
             </div>
           )}
           {r.isError ? (
@@ -674,10 +758,13 @@ export function SchoolPage({ view }: { view: string }) {
                           "",
                       )}{" "}
                       {String((x.identification as Record<string, unknown>).prenoms ?? "")} ·{" "}
-                      {String((x.identification as Record<string, unknown>).temple ?? "")} ·{" "}
-                      {x.submitted_at
-                        ? new Date(x.submitted_at).toLocaleDateString("fr")
-                        : "Brouillon"}
+                      {String((x.identification as Record<string, unknown>).temple ?? "")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Créé le {new Date(x.created_at).toLocaleDateString("fr")} · Période :{" "}
+                      {reportPeriod(x)}
+                      {x.submitted_at &&
+                        ` · Transmis le ${new Date(x.submitted_at).toLocaleDateString("fr")}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Auteur : {context.users.find((u) => u.id === x.auteur_id)?.nom ?? x.auteur_id}
@@ -696,7 +783,16 @@ export function SchoolPage({ view }: { view: string }) {
                         })
                       }
                     >
-                      Ouvrir
+                      {canEditReport(
+                        context.principal,
+                        x.auteur_id === context.userId,
+                        x.statut,
+                        x.type,
+                      )
+                        ? "Modifier / transmettre"
+                        : context.principal && x.statut !== "brouillon"
+                          ? "Consulter / examiner"
+                          : "Consulter"}
                     </Button>
                   </div>
                 </div>
@@ -729,6 +825,9 @@ export function SchoolPage({ view }: { view: string }) {
           students={rows}
           principal={context.principal}
           userId={context.userId}
+          authorName={
+            auth.profile?.nom ?? context.users.find((user) => user.id === context.userId)?.nom ?? ""
+          }
           onClose={() => setReportOpen(null)}
         />
       )}

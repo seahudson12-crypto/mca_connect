@@ -1,4 +1,5 @@
 # Centre de Pilotage MCA
+
 - [x] Ajouter la lecture agrégée autorisée, sans mutation ni migration.
 - [x] Enrichir le tableau de bord principal et le sélecteur existant.
 - [x] Vérifier données, filtres, refus de périmètre invalide, erreurs et affichage mobile avec le compte principal.
@@ -6,9 +7,17 @@
 - [ ] Vérifier chaque autre rôle en session réelle — nécessite une session de test autorisée pour ces comptes ; contrôles serveur examinés, droits existants inchangés.
 
 # École du Ministère
+
 - [x] Ajouter neuf rubriques EM avec années, classes, inscriptions et mentors.
 - [x] Appliquer les accès EM séparés, limités au temple ou aux classes attribuées, et historiser les changements.
 - [x] Créer les trois rapports officiels, tours de garde et validations verrouillées.
 - [x] Ajouter statistiques filtrées, archives, impression PDF et tests de sécurité et de conservation.
 - [ ] Vérifier le parcours complet dans les écrans avec des inscriptions réelles et les comptes pasteur et mentor — aucune année ni inscription EM réelle enregistrée ; les onze scénarios ont été validés en base isolée.
 - [ ] Vérifier l’impression PDF d’un rapport réel — aucun rapport EM enregistré pour vérifier ce résultat sans inventer des données.
+
+# Automatisation des rapports EM
+
+- [ ] Ajouter les accès directs de création, les listes et les préremplissages des trois rapports sans reconstruire le module.
+- [ ] Appliquer les classes autorisées et les transitions de statut dans l’interface, les fonctions et la base, avec conservation des versions.
+- [ ] Ajouter les filtres complets et le suivi des validations pour le Super Admin, sur téléphone comme sur ordinateur.
+- [ ] Tester les huit scénarios demandés et vérifier la conservation des données existantes.

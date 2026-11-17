@@ -41,18 +41,23 @@ export function Choice({
   onChange,
   options,
   disabled = false,
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
   disabled?: boolean;
+  required?: boolean;
 }) {
   return (
     <div className="space-y-1">
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
       <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger aria-label={label} className="w-full">
+        <SelectTrigger aria-label={label} aria-required={required} className="w-full">
           <SelectValue placeholder="Sélectionner" />
         </SelectTrigger>
         <SelectContent>
@@ -75,6 +80,7 @@ export function ReportEditor({
   student,
   principal,
   userId,
+  authorName,
   onClose,
 }: {
   report?: Report;
@@ -85,12 +91,17 @@ export function ReportEditor({
   student?: Student;
   principal: boolean;
   userId: string;
+  authorName: string;
   onClose: () => void;
 }) {
   const initial = (report?.contenu ?? {}) as Record<string, unknown>;
   const [values, setValues] = useState<Record<string, unknown>>({
     ...initial,
-    attestant: initial.attestant ?? student?.pasteur ?? "",
+    attestant:
+      initial.attestant ?? (type === "garde" ? authorName : student?.pasteur || authorName),
+    mentor_suivi:
+      initial.mentor_suivi ??
+      (type === "garde" ? authorName : student?.mentor || student?.pasteur || authorName),
     fonction: initial.fonction ?? (type === "garde" ? "Mentor EM" : "Pasteur Principal"),
     date_attestation: initial.date_attestation ?? new Date().toISOString().slice(0, 10),
   });
@@ -172,6 +183,9 @@ export function ReportEditor({
   const set = (key: string, value: unknown) => setValues((v) => ({ ...v, [key]: value }));
   const field = (f: Field) => {
     const val = values[f.key];
+    const required =
+      ["attestant", "fonction", "date_attestation"].includes(f.key) ||
+      (type === "garde" && (f.key === "date" || /^evaluation_[0-5]$/.test(f.key)));
     return (
       <div
         key={f.key}
@@ -186,10 +200,14 @@ export function ReportEditor({
             onChange={(v) => set(f.key, v)}
             options={(f.options ?? []).map((v) => ({ value: v, label: v }))}
             disabled={!editable}
+            required={required}
           />
         ) : (
           <>
-            <Label htmlFor={f.key}>{f.label}</Label>
+            <Label htmlFor={f.key}>
+              {f.label}
+              {required && <span className="text-destructive"> *</span>}
+            </Label>
             {f.type === "checks" ? (
               <div className="grid gap-2 sm:grid-cols-2">
                 {f.options?.map((o) => (
@@ -216,6 +234,7 @@ export function ReportEditor({
                 value={String(val ?? "")}
                 onChange={(e) => set(f.key, e.target.value)}
                 disabled={!editable}
+                required={required}
               />
             ) : (
               <Input
@@ -227,6 +246,7 @@ export function ReportEditor({
                   set(f.key, f.type === "number" ? Number(e.target.value) : e.target.value)
                 }
                 disabled={!editable}
+                required={required}
               />
             )}
           </>
@@ -250,7 +270,9 @@ export function ReportEditor({
     );
     const copy = content.cloneNode(true) as HTMLElement;
     copy.querySelectorAll("input,textarea").forEach((el) => {
-      const src = Array.from(content.querySelectorAll("input,textarea")).find(input => input.id === el.id) as HTMLInputElement | undefined;
+      const src = Array.from(content.querySelectorAll("input,textarea")).find(
+        (input) => input.id === el.id,
+      ) as HTMLInputElement | undefined;
       if (src) {
         const p = w.document.createElement("p");
         p.textContent = src.value;
@@ -270,6 +292,30 @@ export function ReportEditor({
     w.focus();
     w.print();
   };
+  const submit = () => {
+    if (
+      !String(values.attestant ?? "").trim() ||
+      !String(values.fonction ?? "").trim() ||
+      !values.date_attestation ||
+      values.attestation !== true
+    ) {
+      toast.error("Complétez l’attestation et confirmez électroniquement le rapport.");
+      return;
+    }
+    if (
+      type === "garde" &&
+      (!values.date ||
+        !values.responsable_id ||
+        !attendance.length ||
+        Array.from({ length: 6 }, (_, i) => values[`evaluation_${i}`]).some((value) => !value))
+    ) {
+      toast.error(
+        "Renseignez la date, toutes les présences, le responsable et les six critères d’évaluation.",
+      );
+      return;
+    }
+    if (window.confirm("Soumettre ce rapport à l’administration EM ?")) mutation.mutate("soumis");
+  };
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -278,6 +324,11 @@ export function ReportEditor({
             Rapport de mentorat · {report ? STATUS_NAMES[report.statut] : "Nouveau rapport"}
           </DialogTitle>
         </DialogHeader>
+        {editable && (
+          <p className="text-xs text-muted-foreground">
+            Les champs marqués * sont obligatoires pour la transmission.
+          </p>
+        )}
         <div className="flex justify-end">
           <Button variant="outline" onClick={print}>
             <Printer className="mr-2 h-4 w-4" />
@@ -292,6 +343,9 @@ export function ReportEditor({
             <h3 className="text-lg font-semibold mt-3">{REPORT_NAMES[type]}</h3>
             <p className="text-sm mt-2">
               Année académique : {year.nom} · Classe : {classe}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Créé le {(report ? new Date(report.created_at) : new Date()).toLocaleDateString("fr")}
             </p>
           </header>
           <section>
@@ -326,12 +380,18 @@ export function ReportEditor({
                   </p>
                 ))}
             </div>
-            <div className="mt-3">
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
               {field({
                 key: "mentor_suivi",
                 label: "Pasteur / Mentor chargé du suivi",
                 type: "text",
               })}
+              {type !== "garde" &&
+                field({
+                  key: "periode",
+                  label: "Période concernée",
+                  type: "text",
+                })}
             </div>
           </section>
           <section className="border-t pt-4">
@@ -429,6 +489,7 @@ export function ReportEditor({
                 onChange={(v) => set("responsable_id", v)}
                 options={attendance.map((r) => ({ value: r.id, label: r.nom }))}
                 disabled={!editable}
+                required
               />
               {field({
                 key: "conducteurs",
@@ -485,9 +546,13 @@ export function ReportEditor({
               <Checkbox
                 checked={values.attestation === true}
                 disabled={!editable}
+                required
                 onCheckedChange={(v) => set("attestation", v === true)}
               />
-              Je confirme l’exactitude des informations et valide électroniquement ce rapport.
+              <span>
+                Je confirme l’exactitude des informations et valide électroniquement ce rapport.
+                <span className="text-destructive"> *</span>
+              </span>
             </label>
           </section>
           {report && (
@@ -519,13 +584,7 @@ export function ReportEditor({
               <Save className="mr-2 h-4 w-4" />
               Enregistrer le brouillon
             </Button>
-            <Button
-              disabled={mutation.isPending}
-              onClick={() => {
-                if (window.confirm("Soumettre ce rapport à l’administration EM ?"))
-                  mutation.mutate("soumis");
-              }}
-            >
+            <Button disabled={mutation.isPending} onClick={submit}>
               <Send className="mr-2 h-4 w-4" />
               Soumettre
             </Button>
@@ -558,20 +617,40 @@ export function ReportEditor({
         )}
         {report && (
           <details className="border-t pt-4">
-            <summary>Historique des modifications</summary>
+            <summary>
+              Historique et versions conservées {h.data ? `(${h.data.length})` : ""}
+            </summary>
             {h.isError ? (
-              <p>Données indisponibles</p>
+              <div className="space-y-2 py-3">
+                <p>Historique indisponible</p>
+                <Button variant="outline" onClick={() => void h.refetch()}>
+                  Réessayer
+                </Button>
+              </div>
             ) : (
-              h.data?.map((e) => (
-                <div key={e.id} className="border-b py-2 text-xs">
-                  <p>
-                    {new Date(e.created_at).toLocaleString("fr")} · {e.action}
-                  </p>
-                  <pre className="whitespace-pre-wrap break-all">
-                    {JSON.stringify({ avant: e.avant, apres: e.apres }, null, 2)}
-                  </pre>
-                </div>
-              ))
+              h.data?.map((event, index) => {
+                const after = (event.apres ?? {}) as Record<string, unknown>;
+                const before = (event.avant ?? {}) as Record<string, unknown>;
+                return (
+                  <div key={event.id} className="border-b py-3 text-xs space-y-2">
+                    <p className="font-medium">
+                      Version {h.data.length - index} ·{" "}
+                      {new Date(event.created_at).toLocaleString("fr")} ·{" "}
+                      {event.action === "INSERT" ? "Création" : "Modification"}
+                    </p>
+                    <p>
+                      Statut : {STATUS_NAMES[String(before.statut)] ?? "Nouveau"} →{" "}
+                      {STATUS_NAMES[String(after.statut)] ?? String(after.statut ?? "")}
+                    </p>
+                    <details>
+                      <summary>Consulter les données de cette version</summary>
+                      <pre className="whitespace-pre-wrap break-all mt-2 max-h-80 overflow-auto">
+                        {JSON.stringify(after, null, 2)}
+                      </pre>
+                    </details>
+                  </div>
+                );
+              })
             )}
           </details>
         )}

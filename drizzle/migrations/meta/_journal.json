@@ -43,6 +43,13 @@
       "when": 1794841518875,
       "tag": "0005_em_eligible_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794931420819,
+      "tag": "0006_em_report_automation_rules",
+      "breakpoints": true
     }
   ]
 }
